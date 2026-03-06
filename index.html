@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦜 Parrot UI · 鹦鹉科技 · 跨终端 Vue3 组件库</title>
+  <!-- Inter 字体 & 图标库 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #fafcff;
+      color: #1a2639;
+      line-height: 1.5;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+
+    /* ===== 新版颜色规范 ===== */
+    :root {
+      --brand-blue: #3369E7;          /* 主蓝色 */
+      --brand-blue-light: #5985f0;
+      --brand-green-start: #4DB684;    /* 渐变起始绿 */
+      --brand-green-end: #69c9a0;       /* 渐变终止绿（稍亮） */
+      --gradient-bg: linear-gradient(135deg, #4DB684, #69c9a0);
+      --text-dark: #1e293b;
+      --text-soft: #475569;
+    }
+
+    /* 按钮/强调元素使用蓝色 + 绿色渐变点缀 */
+    .btn-primary {
+      background-color: var(--brand-blue);
+      border: none;
+      color: white;
+      box-shadow: 0 8px 18px rgba(51, 105, 231, 0.25);
+    }
+    .btn-primary:hover {
+      background-color: #2b56c2;
+    }
+    .gradient-text {
+      background: var(--gradient-bg);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .badge-green {
+      background: var(--gradient-bg);
+      color: white;
+    }
+    .badge-blue {
+      background: #e9efff;
+      color: var(--brand-blue);
+    }
+
+    /* 导航 */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0; flex-wrap: wrap; gap: 20px;
+    }
+    .logo-area {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-img {
+      height: 40px; width: auto; display: block;
+    }
+    .logo-fallback {
+      display: none; align-items: center; gap: 8px;
+    }
+    .logo-fallback i { font-size: 2.2rem; color: var(--brand-blue); }
+    .logo-fallback span {
+      font-weight: 700; font-size: 1.5rem; color: #1e293b;
+    }
+    /* 如果图片加载失败，显示 fallback */
+    .logo-img[src=""] + .logo-fallback,
+    .logo-img.error + .logo-fallback {
+      display: flex;
+    }
+    .logo-img:not([src=""]):not(.error) { display: block; }
+    .logo-img:not([src=""]):not(.error) + .logo-fallback { display: none; }
+
+    .nav-links { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+    .nav-links a { text-decoration: none; font-weight: 500; color: var(--text-soft); }
+    .nav-links a:hover { color: var(--brand-blue); }
+    .lang-switch {
+      display: flex; gap: 6px; background: #eef2f6; padding: 4px; border-radius: 40px;
+    }
+    .lang-switch a {
+      padding: 6px 16px; border-radius: 30px; font-size: 0.9rem; font-weight: 600;
+      background: transparent; color: #4b5565;
+    }
+    .lang-switch a.active {
+      background: white; color: var(--brand-blue); box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    /* hero 部分 */
+    .hero {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 30px 0 60px; flex-wrap: wrap; gap: 40px;
+    }
+    .hero-left { flex: 1 1 500px; }
+    .hero-left h1 {
+      font-size: 3.2rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero-left h1 .blue { color: var(--brand-blue); }
+    .hero-desc {
+      font-size: 1.2rem; color: var(--text-soft); max-width: 550px; margin: 24px 0 32px;
+    }
+    .tech-tags {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 30px;
+    }
+    .tech-tag {
+      background: #e9efff; color: var(--brand-blue); padding: 8px 18px;
+      border-radius: 40px; font-size: 0.9rem; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-right {
+      flex: 1 1 400px; background: white; border-radius: 40px; padding: 30px;
+      box-shadow: 0 30px 50px -20px rgba(51,105,231,0.2); border: 1px solid #e1eafc;
+    }
+    .code-snippet {
+      background-color: #0f1a2f; color: #e2e8f0; padding: 20px; border-radius: 24px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; overflow-x: auto;
+    }
+    .code-snippet .comment { color: #94a3b8; }
+    .code-snippet .keyword { color: #97c3fa; } 
+    .code-snippet .string { color: #b3e6b3; }
+
+    /* 公司信息条 */
+    .company-bar {
+      background: var(--gradient-bg); border-radius: 60px; padding: 16px 32px;
+      color: white; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; margin: 20px 0 40px; gap: 15px;
+    }
+    .company-bar span { font-weight: 600; display: flex; align-items: center; gap: 10px; }
+
+    /* 特性卡片 */
+    .cards-grid {
+      display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin: 50px 0;
+    }
+    .feature-card {
+      background: white; border-radius: 32px; padding: 32px 24px; flex: 1 1 250px;
+      border: 1px solid #e9efff; transition: all 0.2s;
+    }
+    .feature-card:hover { border-color: var(--brand-blue); box-shadow: 0 15px 30px -12px #3369e740; }
+    .feature-icon {
+      background: #e9efff; width: 56px; height: 56px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; color: var(--brand-blue); margin-bottom: 24px;
+    }
+
+    /* 双版本卡片 (使用蓝绿主题) */
+    .version-row {
+      display: flex; flex-wrap: wrap; gap: 30px; margin: 40px 0;
+    }
+    .version-col {
+      flex: 1 1 300px; background: white; border-radius: 40px; padding: 36px 28px;
+      border: 1px solid #e1eafc; transition: all 0.25s; position: relative;
+    }
+    .version-col.commercial {
+      background: linear-gradient(145deg, #ffffff, #f4f9ff);
+      border-color: var(--brand-blue); box-shadow: 0 15px 35px -15px #3369e7;
+    }
+    .pro-badge {
+      position: absolute; top: -12px; right: 30px;
+      background: var(--gradient-bg); color: white; font-weight: 600;
+      padding: 6px 20px; border-radius: 30px; font-size: 0.75rem;
+    }
+    .version-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .version-header i { font-size: 2rem; color: var(--brand-blue); }
+    .version-header h3 { font-size: 2rem; font-weight: 700; }
+    .version-price { font-size: 1.5rem; font-weight: 600; margin: 20px 0; color: #0f172a; }
+    .version-price small { font-size: 1rem; font-weight: 400; color: #64748b; }
+    .version-features { list-style: none; margin: 30px 0; }
+    .version-features li {
+      padding: 10px 0; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid #ecf1f6;
+    }
+    .version-features i.fa-check { color: #4DB684; width: 20px; }
+    .version-features i.fa-xmark { color: #94a3b8; width: 20px; }
+
+    /* 文档横幅 */
+    .docs-cta {
+      background: var(--brand-blue); border-radius: 60px; padding: 56px 48px;
+      color: white; display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; margin: 60px 0;
+    }
+    .docs-cta .green-accent { color: #b0e5cf; }
+
+    /* 页脚 */
+    .footer {
+      padding: 40px 0 60px; border-top: 1px solid #e2e8f0; margin-top: 40px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    }
+    .sync-info {
+      background: #e9efff; color: var(--brand-blue); padding: 4px 16px;
+      border-radius: 30px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 10px;
+    }
+    .sync-info i { color: var(--brand-blue); }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 20px; }
+      .hero-left h1 { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 导航 + 国际版/中国版切换 -->
+    <nav class="navbar">
+      <div class="logo-area">
+        <!-- 使用提供的logo链接，并准备fallback -->
+        <img src="https://www.yingwu.net/statics/logo/logomini.svg" alt="ParrotUI" class="logo-img" onerror="this.classList.add('error'); this.style.display='none';">
+        <div class="logo-fallback">
+          <i class="fa-regular fa-copyright" style="color:#3369E7;"></i>
+          <span>鹦鹉科技</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#">文档</a>
+        <a href="#">组件</a>
+        <a href="#">定价</a>
+        <!-- 版本切换 国际/中国 -->
+        <div class="lang-switch">
+          <a href="#" class="active">🌐 国际版</a>
+          <a href="#">🇨🇳 中国版</a>
+        </div>
+        <a href="#" class="badge-blue" style="padding:8px 16px; border-radius:30px;"><i class="fa-brands fa-github"></i> GitHub</a>
+        <a href="#" class="badge-blue" style="padding:8px 16px; border-radius:30px;"><i class="fa-brands fa-gitee"></i> Gitee</a>
+      </div>
+    </nav>
+
+    <!-- 公司信息横幅：鹦鹉科技有限公司 双版本支持 -->
+    <div class="company-bar">
+      <span><i class="fa-regular fa-building"></i> 鹦鹉科技有限公司 · Parrot Technology</span>
+      <span><i class="fa-regular fa-flag"></i> 国际版 · 中国版 同步服务</span>
+    </div>
+
+    <!-- Hero 区域 使用新蓝色和绿色渐变点缀 -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1><span class="blue">Vue3 跨终端</span> <br>为 <span class="gradient-text">PHP 生态</span> 打造</h1>
+        <p class="hero-desc">
+          基于蓝绿配色设计 · Laravel & ThinkPHP 友好 · 开源版+商业 Pro
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag"><i class="fa-brands fa-vuejs"></i> Vue3 + TS</span>
+          <span class="tech-tag"><i class="fa-solid fa-mobile-screen"></i> 跨终端</span>
+          <span class="tech-tag"><i class="fa-brands fa-laravel"></i> Laravel</span>
+          <span class="tech-tag"><i class="fa-brands fa-php"></i> ThinkPHP</span>
+          <span class="tech-tag" style="background: #e0f2e9; color:#1f7b4d;"><i class="fa-solid fa-leaf" style="color:#4DB684;"></i> 绿动设计</span>
+        </div>
+        <div class="hero-buttons">
+          <a href="#" class="btn-primary" style="padding:12px 28px; border-radius:40px; text-decoration:none; font-weight:600;"><i class="fa-regular fa-file-lines"></i> 阅读文档</a>
+          <a href="#" class="btn-outline" style="padding:12px 28px; border-radius:40px; border:1px solid #d0ddeb; text-decoration:none; color:#1e293b;"><i class="fa-brands fa-github"></i> GitHub</a>
+          <a href="#" class="btn-outline" style="padding:12px 28px; border-radius:40px; border:1px solid #d0ddeb; text-decoration:none; color:#1e293b;"><i class="fa-brands fa-gitee"></i> Gitee</a>
+        </div>
+        <div style="margin-top: 30px;">
+          <span class="sync-info"><i class="fa-regular fa-compass"></i> 全球加速 · 文档: doc.yingwu.net</span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="code-snippet">
+          <span class="comment">// 鹦鹉蓝 #3369E7 · 鹦鹉绿 #4DB684</span><br>
+          <span class="keyword">npm</span> install parrotui<br><br>
+          <span class="keyword">import</span> <span>{ createApp }</span> <span class="keyword">from</span> <span class="string">'vue'</span>;<br>
+          <span class="keyword">import</span> ParrotUI <span class="keyword">from</span> <span class="string">'parrotui'</span>;<br>
+          <span class="keyword">import</span> <span class="string">'parrotui/dist/style.css'</span>;<br>
+          <span class="comment">// Laravel + Vite 集成范例</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 核心项目：开源 parrotui 和商业 parrotui-pro (使用蓝绿卡片) -->
+    <section class="versions">
+      <h2 style="font-size:2.2rem; text-align:center;">开源 · 商业 · 并行发展</h2>
+      <p style="text-align:center; color:#475569; max-width:700px; margin:20px auto;">Gitee + GitHub 同步，满足不同团队需求</p>
+      <div class="version-row">
+        <!-- 开源版 -->
+        <div class="version-col">
+          <div class="version-header">
+            <i class="fa-regular fa-gem" style="color:#3369E7;"></i>
+            <h3>parrotui</h3>
+          </div>
+          <span class="badge-blue" style="padding:8px 16px; border-radius:40px;">MIT 开源</span>
+          <p style="margin: 20px 0;">基础组件库 + 简洁主题，永久免费。</p>
+          <div class="version-price"><small>免费</small></div>
+          <ul class="version-features">
+            <li><i class="fa-regular fa-circle-check"></i> 50+ 原子组件</li>
+            <li><i class="fa-regular fa-circle-check"></i> 响应式布局</li>
+            <li><i class="fa-regular fa-circle-check"></i> Laravel/ThinkPHP 示例</li>
+            <li><i class="fa-regular fa-circle-xmark"></i> 高级业务组件</li>
+          </ul>
+          <a href="#" class="btn-primary" style="display:block; text-align:center; padding:14px; border-radius:40px; text-decoration:none; font-weight:600;"><i class="fa-brands fa-gitee"></i> Gitee 仓库</a>
+        </div>
+        <!-- 商业版 Pro 使用绿色渐变点缀 -->
+        <div class="version-col commercial">
+          <div class="pro-badge">PRO</div>
+          <div class="version-header">
+            <i class="fa-regular fa-crown" style="color:#4DB684;"></i>
+            <h3>parrotui-pro</h3>
+          </div>
+          <span class="badge-green" style="padding:8px 16px; border-radius:40px;">商业授权</span>
+          <p style="margin:20px 0;">企业级中后台解决方案，包含权限、图表等。</p>
+          <div class="version-price">$99 <small>/年 起</small></div>
+          <ul class="version-features">
+            <li><i class="fa-regular fa-circle-check" style="color:#4DB684;"></i> 80+ 组件 (含高级组件)</li>
+            <li><i class="fa-regular fa-circle-check" style="color:#4DB684;"></i> 完整 RBAC 权限模板</li>
+            <li><i class="fa-regular fa-circle-check" style="color:#4DB684;"></i> 深度 Laravel/ThinkPHP 扩展包</li>
+            <li><i class="fa-regular fa-circle-check" style="color:#4DB684;"></i> 优先工单支持 & 更新</li>
+          </ul>
+          <a href="#" class="btn-primary" style="background:var(--gradient-bg); display:block; text-align:center; padding:14px; border-radius:40px; text-decoration:none; font-weight:600;"><i class="fa-brands fa-gitee"></i> 查看 Pro 仓库</a>
+        </div>
+        <!-- 第三栏：双平台同步 + 鹦鹉科技信息 -->
+        <div class="version-col" style="background:#f8fcff;">
+          <div class="version-header">
+            <i class="fa-regular fa-handshake" style="color:#3369E7;"></i>
+            <h3>鹦鹉科技</h3>
+          </div>
+          <p style="margin: 24px 0;"><i class="fa-brands fa-github" style="color:#24292f;"></i> github.com/parrotui  <br> <i class="fa-brands fa-gitee" style="color:#c71d23;"></i> gitee.com/parrotui</p>
+          <p>国际版与中国版代码同步，文档双语支持。商业授权可通过国内/国际渠道购买。</p>
+          <div style="margin-top: 30px;">
+            <span class="badge-blue" style="padding:8px 14px;"><i class="fa-regular fa-building"></i> 公司: 鹦鹉科技</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 文档 CTA 入口 doc.yingwu.net 强调双版 -->
+    <section class="docs-cta">
+      <div>
+        <h2 style="font-size:2rem;">一站式开发文档</h2>
+        <p class="green-accent">doc.yingwu.net · 国际版/中国版 文档镜像</p>
+        <div style="margin-top: 25px; display: flex; gap: 24px;">
+          <span><i class="fa-regular fa-file-lines"></i> 快速上手</span>
+          <span><i class="fa-regular fa-cubes"></i> 组件预览</span>
+          <span><i class="fa-regular fa-lock"></i> Pro 专属区</span>
+        </div>
+      </div>
+      <div style="background:white; border-radius:50px; padding:6px; display:flex; min-width:260px;">
+        <input type="text" placeholder="搜索文档..." style="border:none; padding:12px 20px; flex:1; outline:none; border-radius:50px;">
+        <button style="background:var(--gradient-bg); border:none; border-radius:50px; padding:12px 28px; color:white; font-weight:600; cursor:pointer;">跳转</button>
+      </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+      <div>
+        <span style="font-weight: 600;">🦜 Parrot UI · 鹦鹉科技</span>
+        <span style="margin-left: 24px; color: #64748b;">© 2026 鹦鹉科技有限公司</span>
+      </div>
+      <div class="footer-links" style="display:flex; gap:28px;">
+        <a href="#" style="text-decoration:none; color:#3369E7;">国际版</a>
+        <a href="#" style="text-decoration:none; color:#4DB684;">中国版</a>
+        <a href="#" style="color:#475569;">商业许可</a>
+      </div>
+      <div class="sync-info">
+        <i class="fa-regular fa-rotate"></i> GitHub ↔ Gitee 同步
+      </div>
+    </footer>
+  </div>
+
+  <!-- 处理图片 error 的小脚本 -->
+  <script>
+    (function() {
+      const img = document.querySelector('.logo-img');
+      if (img) {
+        img.onerror = function() {
+          this.classList.add('error');
+          this.style.display = 'none';
+        };
+      }
+    })();
+  </script>
+</body>
+</html>
