@@ -1,38 +1,35 @@
 name: Deploy Docs to GitHub Pages
 
 on:
-  # 推送到 main 分支时触发
   push:
-    branches:
-      - main
-  # 允许手动触发
+    branches: [main]
   workflow_dispatch:
 
-# 设置 GITHUB_TOKEN 权限，允许部署到 Pages
 permissions:
   contents: read
   pages:    write
   id-token: write
 
-# 同时只允许一个部署任务，跳过正在等待的队列
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  # ─── 构建 ─────────────────────────────────────────────────
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # 获取完整历史，用于 lastUpdated
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Show Node & npm version
+        run: node -v && npm -v
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -40,17 +37,22 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: List installed packages
+        run: ls node_modules | grep vitepress || echo "vitepress not found"
+
       - name: Build VitePress docs
-        run: npm run docs:build
+        run: npx vitepress build docs
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: List build output
+        run: ls docs/.vitepress/dist || echo "dist not found"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
 
-  # ─── 部署 ─────────────────────────────────────────────────
   deploy:
     environment:
       name: github-pages
