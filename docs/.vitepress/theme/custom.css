@@ -140,6 +140,7 @@
   font-weight: 600;
   background-color: var(--vp-c-brand-soft);
   border-radius: 6px;
+  padding-left: 12px;
 }
 
 .VPSidebarItem.is-active > .item::before {
