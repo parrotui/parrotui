@@ -7,6 +7,8 @@ Parrot UI 是一套基于 uni-app X 的跨终端组件库，支持 Android、iOS
 
 > 开源、开放、共建 —— 欢迎任何人使用、贡献和扩展 Parrot UI 生态。
 
+> 🕐 创始于 2026 年 3 月 8 日 15:00
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![uni-app X](https://img.shields.io/badge/uni--app%20X-supported-green.svg)](https://uniapp.dcloud.net.cn/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/parrotui/parrotui/pulls)
