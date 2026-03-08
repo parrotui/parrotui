@@ -1,0 +1,56 @@
+<template>
+	<view class="parrot-col" :style="colStyle">
+		<slot />
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed, inject } from 'vue'
+
+interface Props {
+	/** 栅格列数（24 列制） */
+	span ?: number
+	/** 左偏移列数 */
+	offset ?: number
+	/** 纵向对齐：flex-start / center / flex-end */
+	align ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	span: 24,
+	offset: 0,
+	align: 'flex-start',
+})
+
+// 从父 Row 获取 gutter
+const rowGutter = inject<number>('rowGutter', 0)
+
+const colStyle = computed(() : string => {
+	const span = props.span ?? 24
+	const offset = props.offset ?? 0
+	const gutter = rowGutter ?? 0
+	const half = gutter / 2
+
+	// 24列制，每列约 4.1667%
+	const width = `${(span / 24) * 100}%`
+	const marginLeft = offset > 0 ? `${(offset / 24) * 100}%` : '0'
+
+	const parts : string[] = [
+		`width:${width}`,
+		'box-sizing:border-box',
+		`align-self:${props.align ?? 'flex-start'}`,
+	]
+	if (offset > 0) parts.push(`margin-left:${marginLeft}`)
+	if (gutter > 0) {
+		parts.push(`padding-left:${half}rpx`)
+		parts.push(`padding-right:${half}rpx`)
+	}
+	return parts.join(';')
+})
+</script>
+
+<style>
+.parrot-col {
+	min-height: 1rpx;
+}
+</style>

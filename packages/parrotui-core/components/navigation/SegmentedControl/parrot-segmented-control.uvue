@@ -1,0 +1,169 @@
+<template>
+	<view
+		class="parrot-segmented"
+		:class="[glass ? 'parrot-segmented--glass' : '', block ? 'parrot-segmented--block' : '']"
+		:style="wrapStyle"
+	>
+		<view
+			v-for="(item, idx) in items"
+			:key="idx"
+			class="parrot-segmented__item"
+			:class="[
+				activeIndex === idx ? 'parrot-segmented__item--active' : '',
+				item.disabled ? 'parrot-segmented__item--disabled' : ''
+			]"
+			:style="activeIndex === idx ? activeItemStyle : ''"
+			@tap="handleSelect(idx, item)"
+		>
+			<text v-if="item.icon" class="parrot-segmented__icon">{{ item.icon }}</text>
+			<text class="parrot-segmented__label" :style="activeIndex === idx ? `color:${activeColor}` : `color:${textColor}`">
+				{{ item.label }}
+			</text>
+			<view v-if="item.badge !== undefined && item.badge !== ''" class="parrot-segmented__badge">
+				<text class="parrot-segmented__badge-text">{{ item.badge }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, watch } from 'vue'
+
+interface SegItem {
+	label : string
+	value ?: string | number
+	icon ?: string
+	badge ?: string
+	disabled ?: boolean
+}
+
+interface Props {
+	/** 数据列表 */
+	items : SegItem[]
+	/** 当前激活 value 或 index */
+	modelValue ?: string | number
+	/** 激活背景色 */
+	activeBackground ?: string
+	/** 激活文字颜色 */
+	activeColor ?: string
+	/** 默认文字颜色 */
+	textColor ?: string
+	/** 容器背景色 */
+	background ?: string
+	/** 是否撑满宽度 */
+	block ?: boolean
+	/** 圆角 rpx */
+	radius ?: number
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	items: () : SegItem[] => [],
+	modelValue: 0,
+	activeBackground: '#ffffff',
+	activeColor: '#1a7eff',
+	textColor: '#606266',
+	background: '#f5f7fa',
+	block: true,
+	radius: 12,
+	glass: false,
+})
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', val: string | number): void
+	(e: 'change', val: string | number, index: number): void
+}>()
+
+// 根据 modelValue 找 activeIndex
+const activeIndex = ref<number>(0)
+
+watch(() => props.modelValue, (v) => {
+	const idx = props.items.findIndex(it => (it.value ?? props.items.indexOf(it)) === v)
+	activeIndex.value = idx >= 0 ? idx : (typeof v === 'number' ? v : 0)
+}, { immediate: true })
+
+const wrapStyle = computed(() : string => {
+	const bg = props.glass
+		? 'rgba(255,255,255,0.18)'
+		: (props.background ?? '#f5f7fa')
+	return `background:${bg};border-radius:${(props.radius ?? 12) + 4}rpx;padding:4rpx;`
+})
+
+const activeItemStyle = computed(() : string => {
+	return `background:${props.activeBackground ?? '#ffffff'};border-radius:${props.radius ?? 12}rpx;box-shadow:0 2rpx 12rpx rgba(0,0,0,0.10);`
+})
+
+function handleSelect(idx : number, item : SegItem) {
+	if (item.disabled) return
+	activeIndex.value = idx
+	const val = item.value ?? idx
+	emit('update:modelValue', val)
+	emit('change', val, idx)
+}
+</script>
+
+<style>
+.parrot-segmented {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	overflow: hidden;
+}
+
+.parrot-segmented--block {
+	width: 100%;
+}
+
+/* 磨砂玻璃 */
+.parrot-segmented--glass {
+	border: 1.5rpx solid rgba(255, 255, 255, 0.4);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.parrot-segmented__item {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 14rpx 12rpx;
+	position: relative;
+	transition: background 0.2s, box-shadow 0.2s;
+}
+
+.parrot-segmented__item--disabled {
+	opacity: 0.4;
+}
+
+.parrot-segmented__icon {
+	font-size: 28rpx;
+	margin-right: 6rpx;
+	line-height: 1;
+}
+
+.parrot-segmented__label {
+	font-size: 26rpx;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.parrot-segmented__badge {
+	position: absolute;
+	top: 2rpx;
+	right: 8rpx;
+	min-width: 24rpx;
+	height: 24rpx;
+	border-radius: 12rpx;
+	background-color: #f56c6c;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 5rpx;
+}
+
+.parrot-segmented__badge-text {
+	font-size: 16rpx;
+	color: #ffffff;
+}
+</style>

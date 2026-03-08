@@ -1,0 +1,204 @@
+<template>
+	<view v-if="modelValue">
+		<!-- 遮罩 -->
+		<parrot-backdrop v-model="modelValue" :closeable="closeOnClickOverlay" :glass="glass" :z-index="zIndex - 1" />
+
+		<!-- 抽屉面板 -->
+		<view
+			class="parrot-drawer"
+			:class="[
+				`parrot-drawer--${position}`,
+				glass ? 'parrot-drawer--glass' : '',
+				modelValue ? 'parrot-drawer--open' : ''
+			]"
+			:style="drawerStyle"
+		>
+			<!-- 标题栏 -->
+			<view v-if="title || showClose" class="parrot-drawer__header">
+				<text class="parrot-drawer__title">{{ title }}</text>
+				<view v-if="showClose" class="parrot-drawer__close" @tap="handleClose">
+					<text class="parrot-drawer__close-icon">✕</text>
+				</view>
+			</view>
+
+			<!-- 内容区 -->
+			<view class="parrot-drawer__body" :style="bodyStyle">
+				<slot />
+			</view>
+
+			<!-- 底部操作区 -->
+			<view v-if="$slots.footer" class="parrot-drawer__footer">
+				<slot name="footer" />
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+interface Props {
+	modelValue ?: boolean
+	/** 弹出方向：left / right / top / bottom */
+	position ?: string
+	/** 标题 */
+	title ?: string
+	/** 是否显示关闭按钮 */
+	showClose ?: boolean
+	/** 是否允许点击遮罩关闭 */
+	closeOnClickOverlay ?: boolean
+	/** 抽屉宽度（left/right 时有效） */
+	width ?: string
+	/** 抽屉高度（top/bottom 时有效） */
+	height ?: string
+	/** z-index */
+	zIndex ?: number
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+	/** 是否包含安全区 */
+	safeArea ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: false,
+	position: 'right',
+	title: '',
+	showClose: true,
+	closeOnClickOverlay: true,
+	width: '560rpx',
+	height: '60vh',
+	zIndex: 1001,
+	glass: false,
+	safeArea: true,
+})
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', val: boolean): void
+	(e: 'close'): void
+}>()
+
+const drawerStyle = computed(() : string => {
+	const parts : string[] = [`z-index:${props.zIndex ?? 1001}`]
+	const pos = props.position ?? 'right'
+	if (pos === 'left' || pos === 'right') {
+		parts.push(`width:${props.width ?? '560rpx'}`)
+	} else {
+		parts.push(`height:${props.height ?? '60vh'}`)
+	}
+	return parts.join(';')
+})
+
+const bodyStyle = computed(() : string => {
+	const parts : string[] = ['flex:1;overflow-y:auto;']
+	if (props.safeArea && (props.position === 'bottom')) {
+		parts.push('padding-bottom:env(safe-area-inset-bottom)')
+	}
+	return parts.join(';')
+})
+
+function handleClose() {
+	emit('update:modelValue', false)
+	emit('close')
+}
+</script>
+
+<style>
+.parrot-drawer {
+	position: fixed;
+	background-color: #ffffff;
+	display: flex;
+	flex-direction: column;
+	transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 磨砂玻璃 */
+.parrot-drawer--glass {
+	background: rgba(255, 255, 255, 0.88);
+	border: 1.5rpx solid rgba(255, 255, 255, 0.5);
+	box-shadow: 0 0 48rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 方向 */
+.parrot-drawer--right {
+	top: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: 24rpx 0 0 24rpx;
+	transform: translateX(100%);
+}
+.parrot-drawer--right.parrot-drawer--open { transform: translateX(0); }
+
+.parrot-drawer--left {
+	top: 0;
+	left: 0;
+	bottom: 0;
+	border-radius: 0 24rpx 24rpx 0;
+	transform: translateX(-100%);
+}
+.parrot-drawer--left.parrot-drawer--open { transform: translateX(0); }
+
+.parrot-drawer--bottom {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: 24rpx 24rpx 0 0;
+	transform: translateY(100%);
+}
+.parrot-drawer--bottom.parrot-drawer--open { transform: translateY(0); }
+
+.parrot-drawer--top {
+	left: 0;
+	right: 0;
+	top: 0;
+	border-radius: 0 0 24rpx 24rpx;
+	transform: translateY(-100%);
+}
+.parrot-drawer--top.parrot-drawer--open { transform: translateY(0); }
+
+/* 标题栏 */
+.parrot-drawer__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 28rpx 32rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #f0f0f0;
+}
+
+.parrot-drawer__title {
+	font-size: 30rpx;
+	color: #303133;
+	font-weight: 600;
+	flex: 1;
+}
+
+.parrot-drawer__close {
+	width: 56rpx;
+	height: 56rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-drawer__close-icon {
+	font-size: 28rpx;
+	color: #909399;
+}
+
+/* 内容 */
+.parrot-drawer__body {
+	flex: 1;
+	padding: 24rpx 32rpx;
+	overflow-y: auto;
+}
+
+/* 底部 */
+.parrot-drawer__footer {
+	padding: 16rpx 32rpx;
+	border-top-width: 1rpx;
+	border-top-style: solid;
+	border-top-color: #f0f0f0;
+}
+</style>

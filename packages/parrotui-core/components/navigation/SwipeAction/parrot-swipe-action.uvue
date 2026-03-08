@@ -1,0 +1,176 @@
+<template>
+	<view class="parrot-swipe-action" :style="`height:${height}rpx;`">
+		<!-- 内容层（可滑动） -->
+		<view
+			class="parrot-swipe-action__content"
+			:style="contentStyle"
+			@touchstart="handleTouchStart"
+			@touchmove="handleTouchMove"
+			@touchend="handleTouchEnd"
+		>
+			<slot />
+		</view>
+
+		<!-- 右侧操作区 -->
+		<view v-if="rightActions.length > 0" class="parrot-swipe-action__right" :style="rightStyle">
+			<view
+				v-for="(action, idx) in rightActions"
+				:key="idx"
+				class="parrot-swipe-action__action"
+				:style="`background:${action.background ?? '#ee0a24'};width:${action.width ?? 160}rpx;`"
+				@tap="handleAction(action, idx, 'right')"
+			>
+				<text v-if="action.icon" class="parrot-swipe-action__action-icon">{{ action.icon }}</text>
+				<text class="parrot-swipe-action__action-text" :style="`color:${action.color ?? '#ffffff'};`">{{ action.name }}</text>
+			</view>
+		</view>
+
+		<!-- 左侧操作区 -->
+		<view v-if="leftActions.length > 0" class="parrot-swipe-action__left" :style="leftStyle">
+			<view
+				v-for="(action, idx) in leftActions"
+				:key="idx"
+				class="parrot-swipe-action__action"
+				:style="`background:${action.background ?? '#1a7eff'};width:${action.width ?? 160}rpx;`"
+				@tap="handleAction(action, idx, 'left')"
+			>
+				<text v-if="action.icon" class="parrot-swipe-action__action-icon">{{ action.icon }}</text>
+				<text class="parrot-swipe-action__action-text" :style="`color:${action.color ?? '#ffffff'};`">{{ action.name }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+interface SwipeActionItem {
+	name : string
+	icon ?: string
+	color ?: string
+	background ?: string
+	/** 按钮宽度 rpx */
+	width ?: number
+}
+
+interface Props {
+	/** 右侧操作按钮 */
+	rightActions ?: SwipeActionItem[]
+	/** 左侧操作按钮 */
+	leftActions ?: SwipeActionItem[]
+	/** 行高 rpx */
+	height ?: number
+	/** 是否禁用滑动 */
+	disabled ?: boolean
+	/** 是否自动关闭其他已打开的 */
+	autoClose ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	rightActions: () : SwipeActionItem[] => [],
+	leftActions: () : SwipeActionItem[] => [],
+	height: 120,
+	disabled: false,
+	autoClose: true,
+})
+
+const emit = defineEmits<{
+	(e: 'action', item: SwipeActionItem, index: number, side: string): void
+}>()
+
+// 当前偏移量
+const offsetX = ref<number>(0)
+let startX = 0
+let startOffset = 0
+
+// 计算右侧总宽度
+const rightWidth = computed(() : number => {
+	return props.rightActions.reduce((sum, a) => sum + (a.width ?? 160), 0)
+})
+
+const leftWidth = computed(() : number => {
+	return props.leftActions.reduce((sum, a) => sum + (a.width ?? 160), 0)
+})
+
+const contentStyle = computed(() : string => {
+	return `transform:translateX(${offsetX.value}rpx);transition:transform 0.25s ease;background:#fff;z-index:1;position:relative;width:100%;height:100%;`
+})
+
+const rightStyle = computed(() : string => {
+	return `position:absolute;right:0;top:0;bottom:0;display:flex;flex-direction:row;width:${rightWidth.value}rpx;`
+})
+
+const leftStyle = computed(() : string => {
+	return `position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:row;width:${leftWidth.value}rpx;`
+})
+
+function handleTouchStart(e : TouchEvent) {
+	if (props.disabled) return
+	const t = e.touches[0]
+	startX = t != null ? t.clientX : 0
+	startOffset = offsetX.value
+}
+
+function handleTouchMove(e : TouchEvent) {
+	if (props.disabled) return
+	const t = e.touches[0]
+	const curX = t != null ? t.clientX : 0
+	// clientX 单位是 px，rpx 换算 750/屏宽（简化处理）
+	const delta = (curX - startX) * 2  // 粗略 px→rpx
+	const newOffset = startOffset + delta
+
+	// 限制范围
+	const maxLeft = leftWidth.value
+	const maxRight = -rightWidth.value
+	offsetX.value = Math.min(maxLeft, Math.max(maxRight, newOffset))
+}
+
+function handleTouchEnd() {
+	if (props.disabled) return
+	// 吸附逻辑：超过阈值则完全展开
+	const threshold = 40
+	if (offsetX.value < -threshold && rightWidth.value > 0) {
+		offsetX.value = -rightWidth.value
+	} else if (offsetX.value > threshold && leftWidth.value > 0) {
+		offsetX.value = leftWidth.value
+	} else {
+		offsetX.value = 0
+	}
+}
+
+function handleAction(action : SwipeActionItem, idx : number, side : string) {
+	offsetX.value = 0
+	emit('action', action, idx, side)
+}
+</script>
+
+<style>
+.parrot-swipe-action {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+}
+
+.parrot-swipe-action__content {
+	display: flex;
+	align-items: center;
+}
+
+.parrot-swipe-action__action {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	gap: 8rpx;
+}
+
+.parrot-swipe-action__action-icon {
+	font-size: 36rpx;
+	line-height: 1;
+}
+
+.parrot-swipe-action__action-text {
+	font-size: 24rpx;
+}
+</style>

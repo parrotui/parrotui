@@ -1,0 +1,184 @@
+<template>
+	<view class="parrot-skeleton" :class="animate ? 'parrot-skeleton--animate' : ''">
+		<!-- 头部：头像 + 标题行 -->
+		<view v-if="showHeader" class="parrot-skeleton__header">
+			<view
+				v-if="showAvatar"
+				class="parrot-skeleton__avatar"
+				:class="`parrot-skeleton__avatar--${avatarShape}`"
+				:style="`width:${avatarSize}rpx;height:${avatarSize}rpx;`"
+			/>
+			<view class="parrot-skeleton__header-content">
+				<view class="parrot-skeleton__title" :style="`width:${titleWidth};`" />
+				<view
+					v-for="i in headerRows"
+					:key="i"
+					class="parrot-skeleton__row"
+					:style="rowStyle(i, headerRows)"
+				/>
+			</view>
+		</view>
+
+		<!-- 内容段落行 -->
+		<view v-if="rows > 0" class="parrot-skeleton__body">
+			<view
+				v-for="i in rows"
+				:key="i"
+				class="parrot-skeleton__row"
+				:style="rowStyle(i, rows)"
+			/>
+		</view>
+
+		<!-- 图片占位块 -->
+		<view
+			v-if="showImage"
+			class="parrot-skeleton__image"
+			:style="`width:${imageWidth};height:${imageHeight};border-radius:${imageRadius};`"
+		/>
+
+		<!-- 操作按钮占位 -->
+		<view v-if="showActions" class="parrot-skeleton__actions">
+			<view
+				v-for="i in actionCount"
+				:key="i"
+				class="parrot-skeleton__action"
+			/>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+interface Props {
+	/** 是否显示头部（头像 + 标题） */
+	showHeader ?: boolean
+	/** 是否显示头像 */
+	showAvatar ?: boolean
+	/** 头像形状：circle / square */
+	avatarShape ?: string
+	/** 头像尺寸 rpx */
+	avatarSize ?: number
+	/** 标题宽度 */
+	titleWidth ?: string
+	/** 头部右侧行数 */
+	headerRows ?: number
+	/** 段落行数 */
+	rows ?: number
+	/** 是否显示图片占位 */
+	showImage ?: boolean
+	/** 图片占位宽度 */
+	imageWidth ?: string
+	/** 图片占位高度 */
+	imageHeight ?: string
+	/** 图片圆角 */
+	imageRadius ?: string
+	/** 是否显示操作按钮占位 */
+	showActions ?: boolean
+	/** 操作按钮数量 */
+	actionCount ?: number
+	/** 是否开启闪烁动画 */
+	animate ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	showHeader: true,
+	showAvatar: true,
+	avatarShape: 'circle',
+	avatarSize: 88,
+	titleWidth: '60%',
+	headerRows: 2,
+	rows: 3,
+	showImage: false,
+	imageWidth: '100%',
+	imageHeight: '320rpx',
+	imageRadius: '12rpx',
+	showActions: false,
+	actionCount: 2,
+	animate: true,
+})
+
+// 行宽度：最后一行 60%，其他 100%
+function rowStyle(i : number, total : number) : string {
+	const width = i === total ? '60%' : '100%'
+	return `width:${width}`
+}
+</script>
+
+<style>
+.parrot-skeleton {
+	padding: 24rpx;
+}
+
+/* ── 头部 ── */
+.parrot-skeleton__header {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	margin-bottom: 24rpx;
+}
+
+.parrot-skeleton__avatar {
+	background-color: #e8eaed;
+	flex-shrink: 0;
+	margin-right: 20rpx;
+}
+.parrot-skeleton__avatar--circle  { border-radius: 50%; }
+.parrot-skeleton__avatar--square  { border-radius: 8rpx; }
+
+.parrot-skeleton__header-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+
+/* ── 标题 & 行 ── */
+.parrot-skeleton__title {
+	height: 28rpx;
+	border-radius: 6rpx;
+	background-color: #e8eaed;
+	margin-bottom: 12rpx;
+}
+
+.parrot-skeleton__row {
+	height: 22rpx;
+	border-radius: 6rpx;
+	background-color: #e8eaed;
+	margin-bottom: 10rpx;
+}
+
+/* ── 图片占位 ── */
+.parrot-skeleton__image {
+	background-color: #e8eaed;
+	margin-bottom: 16rpx;
+}
+
+/* ── 操作按钮占位 ── */
+.parrot-skeleton__actions {
+	display: flex;
+	flex-direction: row;
+	gap: 16rpx;
+	margin-top: 8rpx;
+}
+
+.parrot-skeleton__action {
+	flex: 1;
+	height: 64rpx;
+	border-radius: 8rpx;
+	background-color: #e8eaed;
+}
+
+/* ── 闪烁动画 ── */
+@keyframes parrot-skeleton-shine {
+	0%   { opacity: 1; }
+	50%  { opacity: 0.4; }
+	100% { opacity: 1; }
+}
+
+.parrot-skeleton--animate .parrot-skeleton__avatar,
+.parrot-skeleton--animate .parrot-skeleton__title,
+.parrot-skeleton--animate .parrot-skeleton__row,
+.parrot-skeleton--animate .parrot-skeleton__image,
+.parrot-skeleton--animate .parrot-skeleton__action {
+	animation: parrot-skeleton-shine 1.4s ease-in-out infinite;
+}
+</style>

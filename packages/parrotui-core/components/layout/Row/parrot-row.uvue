@@ -1,0 +1,53 @@
+<template>
+	<view class="parrot-row" :style="rowStyle">
+		<slot />
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed, provide } from 'vue'
+
+interface Props {
+	/** 列间距 rpx */
+	gutter ?: number
+	/** 纵向对齐：flex-start / center / flex-end / stretch */
+	align ?: string
+	/** 横向排列：flex-start / center / flex-end / space-between / space-around */
+	justify ?: string
+	/** 是否换行 */
+	wrap ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	gutter: 0,
+	align: 'stretch',
+	justify: 'flex-start',
+	wrap: true,
+})
+
+// 向子 Col 注入 gutter
+provide('rowGutter', props.gutter ?? 0)
+
+const rowStyle = computed(() : string => {
+	const parts : string[] = [
+		'display:flex',
+		'flex-direction:row',
+		`align-items:${props.align ?? 'stretch'}`,
+		`justify-content:${props.justify ?? 'flex-start'}`,
+	]
+	if (props.wrap) parts.push('flex-wrap:wrap')
+	if (props.gutter && props.gutter > 0) {
+		const half = (props.gutter) / 2
+		parts.push(`margin-left:-${half}rpx`)
+		parts.push(`margin-right:-${half}rpx`)
+	}
+	return parts.join(';')
+})
+</script>
+
+<style>
+.parrot-row {
+	width: 100%;
+	box-sizing: border-box;
+}
+</style>

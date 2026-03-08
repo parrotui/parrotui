@@ -1,0 +1,122 @@
+<template>
+	<view
+		class="parrot-divider"
+		:class="[
+			`parrot-divider--${direction}`,
+			dashed ? 'parrot-divider--dashed' : '',
+			$slots.default ? 'parrot-divider--has-text' : ''
+		]"
+		:style="dividerStyle"
+	>
+		<!-- 横向有文字时 -->
+		<view v-if="direction === 'horizontal' && $slots.default" class="parrot-divider__line parrot-divider__line--left" />
+		<view v-if="$slots.default" class="parrot-divider__content" :style="contentStyle">
+			<slot />
+		</view>
+		<view v-if="direction === 'horizontal' && $slots.default" class="parrot-divider__line parrot-divider__line--right" />
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+interface Props {
+	/** 方向：horizontal / vertical */
+	direction ?: string
+	/** 文字位置：left / center / right（horizontal 时有效） */
+	align ?: string
+	/** 是否虚线 */
+	dashed ?: boolean
+	/** 线条颜色 */
+	color ?: string
+	/** 线条粗细 rpx */
+	lineWidth ?: number
+	/** 上下外边距 rpx（horizontal 时） */
+	margin ?: number
+	/** 左右内边距 rpx（vertical 时） */
+	padding ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	direction: 'horizontal',
+	align: 'center',
+	dashed: false,
+	color: '#dcdfe6',
+	lineWidth: 1,
+	margin: 24,
+	padding: 16,
+})
+
+const dividerStyle = computed(() : string => {
+	const parts : string[] = []
+	if (props.direction === 'horizontal') {
+		parts.push(`margin:${props.margin ?? 24}rpx 0`)
+		parts.push(`border-color:${props.color ?? '#dcdfe6'}`)
+		parts.push(`border-top-width:${props.lineWidth ?? 1}rpx`)
+	} else {
+		parts.push(`padding:0 ${props.padding ?? 16}rpx`)
+		parts.push(`border-color:${props.color ?? '#dcdfe6'}`)
+		parts.push(`border-left-width:${props.lineWidth ?? 1}rpx`)
+	}
+	return parts.join(';')
+})
+
+const contentStyle = computed(() : string => {
+	const align = props.align ?? 'center'
+	if (align === 'left') return 'padding-right:24rpx;padding-left:0'
+	if (align === 'right') return 'padding-left:24rpx;padding-right:0'
+	return 'padding:0 24rpx'
+})
+</script>
+
+<style>
+/* ── 横向分割线 ── */
+.parrot-divider--horizontal {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	border-top-style: solid;
+}
+
+/* 有文字时转为 flex 布局，线条用伪元素 */
+.parrot-divider--horizontal.parrot-divider--has-text {
+	border-top-width: 0;
+	border-top-style: none;
+}
+
+.parrot-divider__line {
+	flex: 1;
+	height: 1rpx;
+	background-color: #dcdfe6;
+}
+
+.parrot-divider__content {
+	font-size: 24rpx;
+	color: #909399;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* ── 纵向分割线 ── */
+.parrot-divider--vertical {
+	display: inline-flex;
+	align-self: stretch;
+	border-left-style: solid;
+	border-top-width: 0;
+}
+
+/* ── 虚线 ── */
+.parrot-divider--dashed {
+	border-style: dashed;
+}
+.parrot-divider--dashed .parrot-divider__line {
+	background: repeating-linear-gradient(
+		90deg,
+		#dcdfe6 0,
+		#dcdfe6 6rpx,
+		transparent 6rpx,
+		transparent 12rpx
+	);
+	height: 1rpx;
+}
+</style>

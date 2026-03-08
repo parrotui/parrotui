@@ -1,0 +1,127 @@
+<template>
+	<view class="parrot-collapse-item" :class="disabled ? 'parrot-collapse-item--disabled' : ''">
+		<!-- 标题行 -->
+		<view class="parrot-collapse-item__header" @tap="handleToggle">
+			<view class="parrot-collapse-item__header-left">
+				<parrot-icon v-if="icon" :name="icon" size="32" color="#606266" class="parrot-collapse-item__icon" />
+				<text class="parrot-collapse-item__title">{{ title }}</text>
+			</view>
+			<view class="parrot-collapse-item__arrow" :class="opened ? 'parrot-collapse-item__arrow--open' : ''">
+				<text class="parrot-collapse-item__arrow-icon">›</text>
+			</view>
+		</view>
+
+		<!-- 内容区：展开/收起动画 -->
+		<view
+			v-if="opened"
+			class="parrot-collapse-item__body"
+			:class="opened ? 'parrot-collapse-item__body--open' : ''"
+		>
+			<view class="parrot-collapse-item__content">
+				<slot />
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { inject, computed } from 'vue'
+
+interface Props {
+	/** 唯一标识 */
+	name : string
+	/** 标题文字 */
+	title ?: string
+	/** 左侧图标 */
+	icon ?: string
+	/** 是否禁用 */
+	disabled ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	name: '',
+	title: '',
+	icon: '',
+	disabled: false,
+})
+
+// 从 Collapse 注入方法
+const collapseToggle = inject<(name: string) => void>('collapseToggle', () => {})
+const collapseIsOpen = inject<(name: string) => boolean>('collapseIsOpen', () => false)
+
+const opened = computed(() : boolean => {
+	return collapseIsOpen(props.name ?? '')
+})
+
+function handleToggle() {
+	if (props.disabled) return
+	collapseToggle(props.name ?? '')
+}
+</script>
+
+<style>
+.parrot-collapse-item {
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #ebeef5;
+}
+
+.parrot-collapse-item--disabled {
+	opacity: 0.5;
+}
+
+.parrot-collapse-item__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 28rpx 24rpx;
+	background-color: #ffffff;
+}
+
+.parrot-collapse-item__header-left {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 1;
+}
+
+.parrot-collapse-item__icon {
+	margin-right: 12rpx;
+}
+
+.parrot-collapse-item__title {
+	font-size: 28rpx;
+	color: #303133;
+	flex: 1;
+	font-weight: 500;
+}
+
+/* 箭头旋转动画 */
+.parrot-collapse-item__arrow {
+	transition: transform 0.25s ease;
+}
+.parrot-collapse-item__arrow--open {
+	transform: rotate(90deg);
+}
+.parrot-collapse-item__arrow-icon {
+	font-size: 36rpx;
+	color: #909399;
+	line-height: 1;
+}
+
+/* 内容区 */
+.parrot-collapse-item__body {
+	overflow: hidden;
+}
+.parrot-collapse-item__body--open {
+	/* 展开动画通过 v-if 配合 transition 实现 */
+}
+.parrot-collapse-item__content {
+	padding: 20rpx 24rpx;
+	font-size: 26rpx;
+	color: #606266;
+	line-height: 1.6;
+	background-color: #fafafa;
+}
+</style>

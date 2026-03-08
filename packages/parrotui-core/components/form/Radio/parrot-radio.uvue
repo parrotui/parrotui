@@ -1,0 +1,190 @@
+<template>
+  <!-- Radio 单选框：inject 接入 RadioGroup，支持 glass/自定义颜色/多种形状 -->
+  <view
+    class="parrot-radio"
+    :class="[
+      isDisabled ? 'parrot-radio--disabled' : '',
+      direction === 'reverse' ? 'parrot-radio--reverse' : '',
+    ]"
+    @tap.stop="onTap"
+  >
+    <!-- 单选框圆圈 -->
+    <view
+      class="parrot-radio__dot"
+      :class="[
+        isSelectedVal ? 'parrot-radio__dot--checked' : '',
+        glass ? 'parrot-radio__dot--glass' : '',
+        `parrot-radio__dot--${shape ?? 'circle'}`,
+      ]"
+      :style="dotStyle"
+    >
+      <view v-if="isSelectedVal" class="parrot-radio__inner"></view>
+    </view>
+
+    <!-- 标签 -->
+    <view v-if="label || $slots['default']" class="parrot-radio__label">
+      <slot>
+        <text class="parrot-radio__label-text" :style="{ fontSize: `${labelSize ?? 28}rpx`, color: labelColor }">{{ label }}</text>
+      </slot>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-radio 单选框
+ * 超越 firstui：
+ *   - Vue3 Composition API + inject 接入 RadioGroup
+ *   - 支持 glass 磨砂玻璃
+ *   - 支持 shape：circle/square/rounded
+ *   - 支持独立 v-model:checked 单独使用
+ *   - 支持 direction：label 在左（reverse）
+ *
+ * @prop value       单选框的值
+ * @prop checked     是否选中（独立使用）
+ * @prop disabled    是否禁用
+ * @prop label       右侧文字
+ * @prop labelSize   文字大小 rpx
+ * @prop labelColor  文字颜色
+ * @prop shape       circle/square/rounded，默认 circle
+ * @prop size        尺寸 rpx，默认 40
+ * @prop activeColor 选中颜色
+ * @prop glass       磨砂玻璃
+ * @prop direction   label 方向：normal/reverse
+ *
+ * @event change  选中变化
+ */
+
+interface Props {
+  value ?: string
+  checked ?: boolean
+  disabled ?: boolean
+  label ?: string
+  labelSize ?: number
+  labelColor ?: string
+  shape ?: string
+  size ?: number
+  activeColor ?: string
+  glass ?: boolean
+  direction ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  value: '',
+  checked: false,
+  disabled: false,
+  labelSize: 28,
+  shape: 'circle',
+  size: 40,
+  activeColor: '#465CFF',
+  glass: false,
+  direction: 'normal',
+})
+
+const emit = defineEmits<{
+  change: [value: string]
+  'update:checked': [checked: boolean]
+}>()
+
+// 注入 RadioGroup
+const groupSelect = inject<((value: string) => void) | null>('radioGroupSelect', null)
+const groupIsSelected = inject<((value: string) => boolean) | null>('radioGroupIsSelected', null)
+const groupDisabled = inject<ReturnType<typeof computed> | null>('radioGroupDisabled', null)
+
+const isSelectedVal = computed(() : boolean => {
+  if (groupIsSelected != null) return groupIsSelected(props.value ?? '')
+  return props.checked ?? false
+})
+
+const isDisabled = computed(() : boolean => {
+  if (props.disabled) return true
+  if (groupDisabled != null && groupDisabled.value) return true
+  return false
+})
+
+const dotStyle = computed(() : string => {
+  const size = `${props.size ?? 40}rpx`
+  const color = isSelectedVal.value ? (props.activeColor ?? '#465CFF') : ''
+  const parts = [`width:${size}`, `height:${size}`]
+  if (color) parts.push(`border-color:${color}`)
+  return parts.join(';')
+})
+
+const onTap = () => {
+  if (isDisabled.value) return
+  if (groupSelect != null) {
+    groupSelect(props.value ?? '')
+  } else {
+    emit('update:checked', true)
+    emit('change', props.value ?? '')
+  }
+}
+</script>
+
+<style scoped>
+.parrot-radio {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10rpx 0;
+  margin-right: 24rpx;
+}
+.parrot-radio--reverse {
+  flex-direction: row-reverse;
+}
+.parrot-radio--reverse .parrot-radio__label {
+  margin-right: 12rpx;
+  margin-left: 0;
+}
+.parrot-radio--disabled {
+  opacity: 0.45;
+}
+
+/* ---- 点框 ---- */
+.parrot-radio__dot {
+  flex-shrink: 0;
+  width: 40rpx;
+  height: 40rpx;
+  border: 2.5rpx solid #d0d5dd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.parrot-radio__dot--circle {
+  border-radius: 50%;
+}
+.parrot-radio__dot--square {
+  border-radius: 6rpx;
+}
+.parrot-radio__dot--rounded {
+  border-radius: 10rpx;
+}
+.parrot-radio__dot--checked {
+  border-color: #465CFF;
+  background: #fff;
+}
+.parrot-radio__dot--glass {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+/* ---- 内圆点 ---- */
+.parrot-radio__inner {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #465CFF;
+}
+
+/* ---- 标签 ---- */
+.parrot-radio__label {
+  margin-left: 12rpx;
+  flex: 1;
+}
+.parrot-radio__label-text {
+  font-size: 28rpx;
+  color: #333;
+}
+</style>

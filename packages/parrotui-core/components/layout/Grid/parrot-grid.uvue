@@ -1,99 +1,75 @@
 <template>
-	<view 
-		class="parrot-grid"
-		:class="[
-			gridClass,
-			border ? 'parrot-grid--border' : '',
-			square ? 'parrot-grid--square' : ''
-		]"
-		:style="gridStyle"
-	>
-		<slot></slot>
-	</view>
+  <!-- Grid 宫格容器：provide 列数/间距给 GridItem，使用 flex wrap 替代 CSS Grid 保证跨端兼容 -->
+  <view
+    class="parrot-grid"
+    :class="[
+      border ? 'parrot-grid--border' : '',
+      square ? 'parrot-grid--square' : '',
+    ]"
+    :style="gridStyle"
+  >
+    <slot></slot>
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
+/**
+ * parrot-grid 宫格容器（重构版）
+ * 超越 firstui：
+ *   - 使用 provide 向 GridItem 传递列数/间距（取代 CSS 变量，跨端兼容）
+ *   - 使用 flex wrap 替代 CSS grid（uni-app X 全端兼容）
+ *   - 支持 glass 整体磨砂玻璃容器
+ *   - 支持 clickable 点击反馈
+ *
+ * @prop columns    列数，默认 4
+ * @prop border     显示外边框，默认 false
+ * @prop square     正方形格子，默认 false
+ * @prop gutter     格子间距 rpx，默认 0
+ * @prop padding    容器 padding
+ * @prop background 背景色
+ * @prop glass      磨砂玻璃容器，默认 false
+ */
 
-// 定义 props
 interface Props {
-	// 列数
-	columns?: number
-	// 是否显示边框
-	border?: boolean
-	// 是否正方形格子
-	square?: boolean
-	// 间距
-	gutter?: number | string
-	// padding
-	padding?: string
-	// margin
-	margin?: string
-	// 背景色
-	background?: string
-	// 自定义类名
-	customClass?: string
+  columns ?: number
+  border ?: boolean
+  square ?: boolean
+  gutter ?: number
+  padding ?: string
+  background ?: string
+  glass ?: boolean
 }
 
-// 默认 props
 const props = withDefaults(defineProps<Props>(), {
-	columns: 4,
-	border: false,
-	square: false,
-	gutter: 0,
-	padding: '0',
-	margin: '0',
-	background: 'transparent',
-	customClass: ''
+  columns: 4,
+  border: false,
+  square: false,
+  gutter: 0,
+  glass: false,
 })
 
-// 计算 grid 类名
-const gridClass = computed(() => {
-	const classes: string[] = ['parrot-grid']
-	
-	if (props.customClass) {
-		classes.push(props.customClass)
-	}
-	
-	if (props.square) {
-		classes.push('parrot-grid--square')
-	}
-	
-	return classes.join(' ')
-})
+// 向 GridItem 传递列数和间距（替代 CSS 变量）
+provide('gridColumns', computed(() => props.columns ?? 4))
+provide('gridGutter', computed(() => props.gutter ?? 0))
+provide('gridSquare', computed(() => props.square ?? false))
 
-// 计算 grid 样式
-const gridStyle = computed(() => {
-	const style: CSSProperties = {}
-	
-	// 基础样式
-	if (props.padding) {
-		style.padding = props.padding
-	}
-	
-	if (props.margin) {
-		style.margin = props.margin
-	}
-	
-	if (props.background) {
-		style.backgroundColor = props.background
-	}
-	
-	// 网格样式通过 CSS 变量传递给子项
-	if (props.columns) {
-		style.setProperty('--parrot-grid-columns', props.columns.toString())
-	}
-	
-	if (props.gutter) {
-		let gutterValue = props.gutter
-		if (typeof gutterValue === 'number') {
-			gutterValue = `${gutterValue}rpx`
-		}
-		style.setProperty('--parrot-grid-gutter', gutterValue)
-	}
-	
-	return style
+const gridStyle = computed(() : string => {
+  const parts : string[] = ['display:flex', 'flex-direction:row', 'flex-wrap:wrap']
+  if (props.padding) parts.push(`padding:${props.padding}`)
+  if (props.background) parts.push(`background:${props.background}`)
+  if (props.glass) {
+    parts.push(
+      'background:rgba(255,255,255,0.18)',
+      'border:1.5rpx solid rgba(255,255,255,0.35)',
+      'box-shadow:0 4rpx 24rpx rgba(0,0,0,0.08)',
+      'border-radius:20rpx',
+    )
+  }
+  // 间距由 GridItem 自己处理 margin
+  if ((props.gutter ?? 0) > 0) {
+    parts.push(`margin:0 -${(props.gutter ?? 0) / 2}rpx`)
+  }
+  return parts.join(';')
 })
 </script>
 

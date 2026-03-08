@@ -1,0 +1,100 @@
+<template>
+	<view class="parrot-loadmore" :style="`padding:${padding}rpx 0;`">
+		<!-- 加载中 -->
+		<view v-if="status === 'loading'" class="parrot-loadmore__inner">
+			<view class="parrot-loadmore__spin" :style="`border-top-color:${color};border-color:${color}22;`" />
+			<text class="parrot-loadmore__text" :style="`color:${color};`">{{ loadingText }}</text>
+		</view>
+
+		<!-- 没有更多 -->
+		<view v-else-if="status === 'nomore'" class="parrot-loadmore__inner">
+			<view v-if="showLine" class="parrot-loadmore__line" />
+			<text class="parrot-loadmore__text parrot-loadmore__text--nomore">{{ nomoreText }}</text>
+			<view v-if="showLine" class="parrot-loadmore__line" />
+		</view>
+
+		<!-- 上拉加载更多 -->
+		<view v-else class="parrot-loadmore__inner">
+			<text class="parrot-loadmore__text parrot-loadmore__text--more">{{ moreText }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+interface Props {
+	/** 状态：more / loading / nomore */
+	status ?: string
+	/** 加载中文字 */
+	loadingText ?: string
+	/** 没有更多文字 */
+	nomoreText ?: string
+	/** 上拉加载更多文字 */
+	moreText ?: string
+	/** 主题色 */
+	color ?: string
+	/** 上下内边距 rpx */
+	padding ?: number
+	/** 没有更多时是否显示两侧线条 */
+	showLine ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	status: 'more',
+	loadingText: '加载中...',
+	nomoreText: '没有更多了',
+	moreText: '上拉加载更多',
+	color: '#1a7eff',
+	padding: 24,
+	showLine: true,
+})
+</script>
+
+<style>
+.parrot-loadmore {
+	width: 100%;
+}
+
+.parrot-loadmore__inner {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+}
+
+/* 旋转圈 */
+@keyframes parrot-loadmore-spin {
+	from { transform: rotate(0deg); }
+	to   { transform: rotate(360deg); }
+}
+
+.parrot-loadmore__spin {
+	width: 32rpx;
+	height: 32rpx;
+	border-radius: 50%;
+	border: 4rpx solid #1a7eff22;
+	border-top-color: #1a7eff;
+	animation: parrot-loadmore-spin 0.7s linear infinite;
+	flex-shrink: 0;
+}
+
+.parrot-loadmore__text {
+	font-size: 24rpx;
+	color: #1a7eff;
+}
+
+.parrot-loadmore__text--nomore {
+	color: #c0c4cc;
+	padding: 0 16rpx;
+}
+
+.parrot-loadmore__text--more {
+	color: #909399;
+}
+
+.parrot-loadmore__line {
+	flex: 1;
+	height: 1rpx;
+	background-color: #ebeef5;
+}
+</style>

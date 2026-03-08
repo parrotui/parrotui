@@ -1,0 +1,110 @@
+<template>
+  <!-- CheckboxGroup 多选框组：provide/inject 管理子项，支持最大选择数限制 -->
+  <view class="parrot-checkbox-group" :class="[`parrot-checkbox-group--${direction}`]">
+    <slot></slot>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-checkbox-group 多选框组
+ * 超越 firstui：
+ *   - 使用 Vue3 provide/inject 替代 $parent 遍历
+ *   - 支持 v-model 双向绑定
+ *   - 支持 max 最大可选数量限制
+ *   - 支持 direction 水平/垂直布局
+ *   - 支持 disabled 全局禁用
+ *   - 支持 min 最小选择数量（防止全部取消）
+ *
+ * @prop modelValue  当前选中值数组
+ * @prop max         最大可选数量，0=不限制
+ * @prop min         最小选中数量，0=不限制
+ * @prop disabled    全局禁用
+ * @prop direction   排列方向：row/column，默认 row
+ *
+ * @event update:modelValue  选中值变化
+ * @event change             选中值变化，携带完整数组
+ */
+
+interface Props {
+  modelValue ?: string[]
+  max ?: number
+  min ?: number
+  disabled ?: boolean
+  direction ?: string   // row / column
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: () => [] as string[],
+  max: 0,
+  min: 0,
+  disabled: false,
+  direction: 'row',
+})
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string[]]
+  change: [value: string[]]
+}>()
+
+// 当前选中值（内部维护）
+const selected = ref<string[]>([...(props.modelValue ?? [])])
+
+// 监听外部 v-model 变化
+watch(() => props.modelValue, (val) => {
+  selected.value = [...(val ?? [])]
+})
+
+// 子 Checkbox 调用：切换某个值
+const toggle = (value: string, checked: boolean) => {
+  const arr = [...selected.value]
+  if (checked) {
+    // 检查最大数量
+    const max = props.max ?? 0
+    if (max > 0 && arr.length >= max) return
+    if (!arr.includes(value)) arr.push(value)
+  } else {
+    // 检查最小数量
+    const min = props.min ?? 0
+    if (min > 0 && arr.length <= min) return
+    const idx = arr.indexOf(value)
+    if (idx > -1) arr.splice(idx, 1)
+  }
+  selected.value = arr
+  emit('update:modelValue', arr)
+  emit('change', arr)
+}
+
+// 子组件查询自己是否被选中
+const isChecked = (value: string) : boolean => {
+  return selected.value.includes(value)
+}
+
+// 全局禁用状态
+const groupDisabled = computed(() => props.disabled ?? false)
+
+// 最大已满
+const isFull = computed(() => {
+  const max = props.max ?? 0
+  return max > 0 && selected.value.length >= max
+})
+
+// provide 给子 Checkbox
+provide('checkboxGroupToggle', toggle)
+provide('checkboxGroupIsChecked', isChecked)
+provide('checkboxGroupDisabled', groupDisabled)
+provide('checkboxGroupIsFull', isFull)
+</script>
+
+<style scoped>
+.parrot-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+.parrot-checkbox-group--row {
+  flex-direction: row;
+}
+.parrot-checkbox-group--column {
+  flex-direction: column;
+}
+</style>

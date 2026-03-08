@@ -1,0 +1,211 @@
+<template>
+	<view class="parrot-input-number" :class="[disabled ? 'parrot-input-number--disabled' : '', glass ? 'parrot-input-number--glass' : '']">
+		<!-- 减少按钮 -->
+		<view
+			class="parrot-input-number__btn parrot-input-number__btn--minus"
+			:class="minusDisabled ? 'parrot-input-number__btn--off' : ''"
+			@tap="handleMinus"
+		>
+			<text class="parrot-input-number__btn-text">－</text>
+		</view>
+
+		<!-- 数值输入框 -->
+		<view class="parrot-input-number__input-wrap">
+			<input
+				v-if="editable"
+				class="parrot-input-number__input"
+				type="digit"
+				:value="String(displayValue)"
+				:disabled="disabled"
+				@blur="handleInputBlur"
+				@input="handleInputChange"
+			/>
+			<text v-else class="parrot-input-number__value">{{ displayValue }}</text>
+		</view>
+
+		<!-- 增加按钮 -->
+		<view
+			class="parrot-input-number__btn parrot-input-number__btn--plus"
+			:class="plusDisabled ? 'parrot-input-number__btn--off' : ''"
+			@tap="handlePlus"
+		>
+			<text class="parrot-input-number__btn-text">＋</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, watch } from 'vue'
+
+interface Props {
+	/** 当前值 */
+	modelValue ?: number
+	/** 最小值 */
+	min ?: number
+	/** 最大值 */
+	max ?: number
+	/** 步长 */
+	step ?: number
+	/** 小数精度 */
+	precision ?: number
+	/** 是否禁用 */
+	disabled ?: boolean
+	/** 是否允许手动输入 */
+	editable ?: boolean
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: 0,
+	min: 0,
+	max: 9999,
+	step: 1,
+	precision: 0,
+	disabled: false,
+	editable: true,
+	glass: false,
+})
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', val: number): void
+	(e: 'change', val: number): void
+	(e: 'minus', val: number): void
+	(e: 'plus', val: number): void
+}>()
+
+const innerValue = ref<number>(props.modelValue ?? 0)
+
+watch(() => props.modelValue, (v) => {
+	innerValue.value = v ?? 0
+})
+
+// 格式化显示值
+const displayValue = computed(() : string => {
+	const p = props.precision ?? 0
+	return p > 0 ? innerValue.value.toFixed(p) : String(innerValue.value)
+})
+
+const minusDisabled = computed(() : boolean => {
+	return (props.disabled ?? false) || innerValue.value <= (props.min ?? 0)
+})
+
+const plusDisabled = computed(() : boolean => {
+	return (props.disabled ?? false) || innerValue.value >= (props.max ?? 9999)
+})
+
+function clamp(val : number) : number {
+	const min = props.min ?? 0
+	const max = props.max ?? 9999
+	return Math.min(Math.max(val, min), max)
+}
+
+function format(val : number) : number {
+	const p = props.precision ?? 0
+	const factor = Math.pow(10, p)
+	return Math.round(val * factor) / factor
+}
+
+function handleMinus() {
+	if (minusDisabled.value) return
+	const val = format(clamp(innerValue.value - (props.step ?? 1)))
+	innerValue.value = val
+	emit('update:modelValue', val)
+	emit('change', val)
+	emit('minus', val)
+}
+
+function handlePlus() {
+	if (plusDisabled.value) return
+	const val = format(clamp(innerValue.value + (props.step ?? 1)))
+	innerValue.value = val
+	emit('update:modelValue', val)
+	emit('change', val)
+	emit('plus', val)
+}
+
+function handleInputBlur(e : InputEvent) {
+	const raw = (e.target as HTMLInputElement).value
+	const num = parseFloat(raw)
+	if (isNaN(num)) {
+		innerValue.value = props.min ?? 0
+	} else {
+		innerValue.value = format(clamp(num))
+	}
+	emit('update:modelValue', innerValue.value)
+	emit('change', innerValue.value)
+}
+
+function handleInputChange(e : InputEvent) {
+	// 实时更新仅做字面量，blur 时才 clamp
+}
+</script>
+
+<style>
+.parrot-input-number {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	border-radius: 12rpx;
+	overflow: hidden;
+	border: 1.5rpx solid #dcdfe6;
+	background-color: #ffffff;
+	height: 64rpx;
+}
+
+/* 磨砂玻璃 */
+.parrot-input-number--glass {
+	background: rgba(255, 255, 255, 0.20);
+	border-color: rgba(255, 255, 255, 0.40);
+	box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+.parrot-input-number--disabled {
+	opacity: 0.5;
+}
+
+.parrot-input-number__btn {
+	width: 64rpx;
+	height: 64rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: #f5f7fa;
+	cursor: pointer;
+}
+
+.parrot-input-number__btn--off {
+	opacity: 0.4;
+}
+
+.parrot-input-number__btn-text {
+	font-size: 32rpx;
+	color: #303133;
+	line-height: 1;
+	font-weight: 400;
+}
+
+.parrot-input-number__input-wrap {
+	flex: 1;
+	min-width: 80rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 8rpx;
+}
+
+.parrot-input-number__input {
+	width: 100%;
+	text-align: center;
+	font-size: 28rpx;
+	color: #303133;
+	border-width: 0;
+	background-color: transparent;
+}
+
+.parrot-input-number__value {
+	font-size: 28rpx;
+	color: #303133;
+	text-align: center;
+}
+</style>

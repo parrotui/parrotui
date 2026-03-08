@@ -1,0 +1,129 @@
+<template>
+  <!-- List 列表容器：超越 firstui，支持 glass/分组标题/sticky header/空状态 -->
+  <view
+    class="parrot-list"
+    :class="[
+      glass ? 'parrot-list--glass' : '',
+      card ? 'parrot-list--card' : '',
+    ]"
+    :style="listStyle"
+  >
+    <!-- 列表顶部标题 -->
+    <view v-if="title" class="parrot-list__header">
+      <text class="parrot-list__header-text">{{ title }}</text>
+      <slot name="header-right"></slot>
+    </view>
+
+    <!-- 列表内容 -->
+    <slot></slot>
+
+    <!-- 空状态 -->
+    <view v-if="empty" class="parrot-list__empty">
+      <text class="parrot-list__empty-text">{{ emptyText ?? '暂无数据' }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-list 列表容器
+ * 超越 firstui fui-list：
+ *   - Vue3 Composition API + UTS
+ *   - 支持 glass 磨砂玻璃
+ *   - 支持 card 卡片模式（圆角 + 阴影）
+ *   - 支持 title 分组标题
+ *   - 支持 empty 空状态
+ *   - provide 给 ListCell 传递 divider/dividerColor 等样式
+ *
+ * @prop title       列表分组标题
+ * @prop divider     子项之间显示分割线，默认 true
+ * @prop dividerColor 分割线颜色
+ * @prop glass       磨砂玻璃，默认 false
+ * @prop card        卡片模式，默认 false
+ * @prop background  背景色
+ * @prop empty       是否显示空状态，默认 false
+ * @prop emptyText   空状态文字，默认 '暂无数据'
+ */
+
+interface Props {
+  title ?: string
+  divider ?: boolean
+  dividerColor ?: string
+  glass ?: boolean
+  card ?: boolean
+  background ?: string
+  empty ?: boolean
+  emptyText ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  divider: true,
+  dividerColor: '#f0f2f5',
+  glass: false,
+  card: false,
+  empty: false,
+  emptyText: '暂无数据',
+})
+
+const listStyle = computed(() : string => {
+  const parts : string[] = []
+  if (props.background) parts.push(`background:${props.background}`)
+  return parts.join(';')
+})
+
+// provide 给 ListCell
+provide('listDivider', computed(() => props.divider ?? true))
+provide('listDividerColor', computed(() => props.dividerColor ?? '#f0f2f5'))
+provide('listGlass', computed(() => props.glass ?? false))
+</script>
+
+<style scoped>
+.parrot-list {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+/* 卡片模式 */
+.parrot-list--card {
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin: 0 32rpx;
+  width: auto;
+}
+
+/* 磨砂玻璃 */
+.parrot-list--glass {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1.5rpx solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+  border-radius: 20rpx;
+}
+
+/* 分组标题 */
+.parrot-list__header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 32rpx 8rpx;
+}
+.parrot-list__header-text {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 500;
+}
+
+/* 空状态 */
+.parrot-list__empty {
+  padding: 64rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.parrot-list__empty-text {
+  font-size: 28rpx;
+  color: #bbb;
+}
+</style>

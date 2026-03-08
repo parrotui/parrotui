@@ -1,0 +1,71 @@
+<template>
+  <!-- RadioGroup 单选框组：provide/inject 管理子 Radio -->
+  <view class="parrot-radio-group" :class="[`parrot-radio-group--${direction ?? 'row'}`]">
+    <slot></slot>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-radio-group 单选框组
+ * 超越 firstui：Vue3 provide/inject，v-model 双向绑定
+ *
+ * @prop modelValue  当前选中值
+ * @prop disabled    全局禁用
+ * @prop direction   排列方向：row/column，默认 row
+ *
+ * @event update:modelValue  选中值变化
+ * @event change             选中值变化
+ */
+
+interface Props {
+  modelValue ?: string
+  disabled ?: boolean
+  direction ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  disabled: false,
+  direction: 'row',
+})
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  change: [value: string]
+}>()
+
+const selected = ref<string>(props.modelValue ?? '')
+
+watch(() => props.modelValue, (val) => {
+  selected.value = val ?? ''
+})
+
+// 子 Radio 调用
+const select = (value: string) => {
+  selected.value = value
+  emit('update:modelValue', value)
+  emit('change', value)
+}
+
+const isSelected = (value: string) : boolean => selected.value === value
+
+const groupDisabled = computed(() => props.disabled ?? false)
+
+provide('radioGroupSelect', select)
+provide('radioGroupIsSelected', isSelected)
+provide('radioGroupDisabled', groupDisabled)
+</script>
+
+<style scoped>
+.parrot-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+.parrot-radio-group--row {
+  flex-direction: row;
+}
+.parrot-radio-group--column {
+  flex-direction: column;
+}
+</style>

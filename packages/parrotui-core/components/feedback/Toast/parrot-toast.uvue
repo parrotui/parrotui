@@ -1,0 +1,168 @@
+<template>
+	<view
+		v-if="visible"
+		class="parrot-toast"
+		:class="[
+			`parrot-toast--${position}`,
+			`parrot-toast--${type}`,
+			glass ? 'parrot-toast--glass' : ''
+		]"
+		:style="toastStyle"
+	>
+		<!-- 图标 -->
+		<view v-if="type !== 'text' && icon" class="parrot-toast__icon">
+			<text class="parrot-toast__icon-emoji">{{ iconEmoji }}</text>
+		</view>
+
+		<!-- 加载圈 -->
+		<view v-if="type === 'loading'" class="parrot-toast__spin" />
+
+		<!-- 文字 -->
+		<text class="parrot-toast__text">{{ message }}</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, watch, onUnmounted } from 'vue'
+
+interface Props {
+	/** 是否显示 */
+	modelValue ?: boolean
+	/** 提示消息 */
+	message ?: string
+	/** 类型：text / success / error / warning / loading */
+	type ?: string
+	/** 位置：top / center / bottom */
+	position ?: string
+	/** 持续时间 ms，0=不自动关闭 */
+	duration ?: number
+	/** 是否遮罩（防穿透点击） */
+	mask ?: boolean
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+	/** 自定义图标 emoji */
+	icon ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: false,
+	message: '',
+	type: 'text',
+	position: 'center',
+	duration: 2000,
+	mask: false,
+	glass: false,
+	icon: '',
+})
+
+const emit = defineEmits<{
+	(e: 'update:modelValue', val: boolean): void
+	(e: 'close'): void
+}>()
+
+const visible = ref(props.modelValue ?? false)
+let timer : number | null = null
+
+watch(() => props.modelValue, v => {
+	visible.value = v ?? false
+	if (v && (props.duration ?? 2000) > 0) {
+		clearTimer()
+		timer = setTimeout(() => {
+			close()
+		}, props.duration ?? 2000) as unknown as number
+	}
+})
+
+function clearTimer() {
+	if (timer !== null) {
+		clearTimeout(timer)
+		timer = null
+	}
+}
+
+function close() {
+	visible.value = false
+	emit('update:modelValue', false)
+	emit('close')
+}
+
+onUnmounted(() => { clearTimer() })
+
+// 类型对应 emoji
+const iconEmojiMap : Record<string, string> = {
+	success: '✅',
+	error: '❌',
+	warning: '⚠️',
+	loading: '',
+}
+
+const iconEmoji = computed(() : string => {
+	if (props.icon) return props.icon
+	return iconEmojiMap[props.type ?? 'text'] ?? ''
+})
+
+const toastStyle = computed(() : string => {
+	return 'pointer-events: none;'
+})
+</script>
+
+<style>
+.parrot-toast {
+	position: fixed;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 9999;
+	padding: 20rpx 40rpx;
+	border-radius: 16rpx;
+	background-color: rgba(0, 0, 0, 0.75);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 480rpx;
+	min-width: 200rpx;
+}
+
+/* 位置 */
+.parrot-toast--top    { top: 160rpx; }
+.parrot-toast--center { top: 50%; transform: translate(-50%, -50%); }
+.parrot-toast--bottom { bottom: 160rpx; }
+
+/* 磨砂玻璃 */
+.parrot-toast--glass {
+	background: rgba(30, 30, 40, 0.55);
+	border: 1rpx solid rgba(255, 255, 255, 0.18);
+	box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.3);
+}
+
+.parrot-toast__icon {
+	margin-bottom: 12rpx;
+}
+
+.parrot-toast__icon-emoji {
+	font-size: 64rpx;
+	line-height: 1;
+}
+
+.parrot-toast__text {
+	font-size: 28rpx;
+	color: #ffffff;
+	text-align: center;
+	line-height: 1.5;
+}
+
+/* 加载旋转 */
+@keyframes parrot-spin {
+	from { transform: rotate(0deg); }
+	to   { transform: rotate(360deg); }
+}
+
+.parrot-toast__spin {
+	width: 56rpx;
+	height: 56rpx;
+	border-radius: 50%;
+	border: 5rpx solid rgba(255,255,255,0.3);
+	border-top-color: #ffffff;
+	animation: parrot-spin 0.8s linear infinite;
+	margin-bottom: 12rpx;
+}
+</style>

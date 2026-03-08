@@ -1,0 +1,295 @@
+<template>
+	<view
+		class="parrot-avatar"
+		:class="[
+			`parrot-avatar--${shape}`,
+			`parrot-avatar--${size}`,
+			glass ? 'parrot-avatar--glass' : ''
+		]"
+		:style="avatarStyle"
+		@tap="handleClick"
+	>
+		<!-- 图片头像 -->
+		<image
+			v-if="src && !imgError"
+			class="parrot-avatar__img"
+			:class="[`parrot-avatar--${shape}`]"
+			:src="src"
+			:mode="mode"
+			@error="handleError"
+			@load="handleLoad"
+		/>
+
+		<!-- 文字头像 -->
+		<text
+			v-else-if="text"
+			class="parrot-avatar__text"
+			:style="textStyle"
+		>{{ displayText }}</text>
+
+		<!-- 图标头像 -->
+		<parrot-icon
+			v-else-if="icon"
+			:name="icon"
+			:size="iconSize"
+			:color="iconColor || color"
+		/>
+
+		<!-- 默认插槽 -->
+		<slot />
+
+		<!-- 徽标 -->
+		<view v-if="badge !== ''" class="parrot-avatar__badge">
+			<text class="parrot-avatar__badge-text">{{ badge }}</text>
+		</view>
+
+		<!-- 在线状态指示点 -->
+		<view
+			v-if="showDot"
+			class="parrot-avatar__dot"
+			:class="`parrot-avatar__dot--${dotStatus}`"
+		/>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed, ref } from 'vue'
+
+// ---- Props ----
+interface Props {
+	/** 头像图片地址 */
+	src ?: string
+	/** 图片加载失败时的备用图片 */
+	errorSrc ?: string
+	/** 图片裁剪模式 */
+	mode ?: string
+	/** 文字头像内容 */
+	text ?: string
+	/** 头像背景色 */
+	background ?: string
+	/** 文字/图标颜色 */
+	color ?: string
+	/** 尺寸：mini / small / normal / large / xlarge */
+	size ?: string
+	/** 形状：circle / square / rounded */
+	shape ?: string
+	/** 圆角值（shape=square 时生效），rpx */
+	radius ?: string
+	/** 自定义宽度 rpx，设置后 size 失效 */
+	width ?: number
+	/** 自定义高度 rpx */
+	height ?: number
+	/** 图标名称（src 和 text 均未设置时显示） */
+	icon ?: string
+	/** 图标颜色 */
+	iconColor ?: string
+	/** 徽标内容，传空字符串不显示 */
+	badge ?: string
+	/** 显示在线状态圆点 */
+	showDot ?: boolean
+	/** 在线状态：online / offline / busy */
+	dotStatus ?: string
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+	/** 点击时传递的索引 */
+	index ?: number
+	/** margin-right rpx */
+	marginRight ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	src: '',
+	errorSrc: '',
+	mode: 'aspectFill',
+	text: '',
+	background: '',
+	color: '#ffffff',
+	size: 'normal',
+	shape: 'circle',
+	radius: '',
+	width: 0,
+	height: 0,
+	icon: '',
+	iconColor: '',
+	badge: '',
+	showDot: false,
+	dotStatus: 'online',
+	glass: false,
+	index: 0,
+	marginRight: 0,
+})
+
+const emit = defineEmits<{
+	(e: 'click', index: number): void
+	(e: 'error', index: number): void
+	(e: 'load'): void
+}>()
+
+// 图片加载失败标志
+const imgError = ref(false)
+
+// 尺寸映射（单位 rpx）
+const sizeMap : Record<string, string> = {
+	mini: '48rpx',
+	small: '64rpx',
+	normal: '88rpx',
+	large: '112rpx',
+	xlarge: '144rpx',
+}
+
+// 字体尺寸映射
+const fontSizeMap : Record<string, string> = {
+	mini: '20rpx',
+	small: '24rpx',
+	normal: '32rpx',
+	large: '40rpx',
+	xlarge: '52rpx',
+}
+
+// 图标尺寸映射（rpx 数值）
+const iconSizeMap : Record<string, number> = {
+	mini: 24,
+	small: 32,
+	normal: 44,
+	large: 56,
+	xlarge: 72,
+}
+
+// 显示文字（最多取前 2 字）
+const displayText = computed(() : string => {
+	const t = props.text ?? ''
+	return t.length > 2 ? t.slice(0, 2) : t
+})
+
+const iconSize = computed(() : number => {
+	return iconSizeMap[props.size ?? 'normal'] ?? 44
+})
+
+// 容器样式
+const avatarStyle = computed(() : string => {
+	const parts : string[] = []
+	const sz = props.width && props.width > 0
+		? `${props.width}rpx`
+		: (sizeMap[props.size ?? 'normal'] ?? '88rpx')
+	const ht = props.height && props.height > 0 ? `${props.height}rpx` : sz
+
+	parts.push(`width:${sz}`)
+	parts.push(`height:${ht}`)
+
+	if (props.background) parts.push(`background:${props.background}`)
+	if (props.radius) parts.push(`border-radius:${props.radius}`)
+	if (props.marginRight && props.marginRight > 0) parts.push(`margin-right:${props.marginRight}rpx`)
+
+	return parts.join(';')
+})
+
+// 文字样式
+const textStyle = computed(() : string => {
+	const fs = fontSizeMap[props.size ?? 'normal'] ?? '32rpx'
+	return `font-size:${fs};color:${props.color ?? '#ffffff'}`
+})
+
+function handleClick() {
+	emit('click', props.index ?? 0)
+}
+
+function handleError() {
+	if (props.errorSrc) {
+		// 使用备用图片，不设置 imgError
+	} else {
+		imgError.value = true
+	}
+	emit('error', props.index ?? 0)
+}
+
+function handleLoad() {
+	emit('load')
+}
+</script>
+
+<style>
+/* ── 容器基础 ── */
+.parrot-avatar {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	background-color: #c8c9cc;
+	flex-shrink: 0;
+}
+
+/* ── 形状 ── */
+.parrot-avatar--circle {
+	border-radius: 50%;
+}
+.parrot-avatar--square {
+	border-radius: 8rpx;
+}
+.parrot-avatar--rounded {
+	border-radius: 16rpx;
+}
+
+/* ── 图片充满容器 ── */
+.parrot-avatar__img {
+	width: 100%;
+	height: 100%;
+}
+.parrot-avatar__img.parrot-avatar--circle {
+	border-radius: 50%;
+}
+.parrot-avatar__img.parrot-avatar--square {
+	border-radius: 8rpx;
+}
+.parrot-avatar__img.parrot-avatar--rounded {
+	border-radius: 16rpx;
+}
+
+/* ── 文字 ── */
+.parrot-avatar__text {
+	font-weight: 600;
+	line-height: 1;
+}
+
+/* ── 徽标 ── */
+.parrot-avatar__badge {
+	position: absolute;
+	top: 0;
+	right: 0;
+	min-width: 28rpx;
+	height: 28rpx;
+	padding: 0 6rpx;
+	border-radius: 14rpx;
+	background-color: #f56c6c;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-avatar__badge-text {
+	font-size: 18rpx;
+	color: #ffffff;
+	line-height: 1;
+}
+
+/* ── 在线状态圆点 ── */
+.parrot-avatar__dot {
+	position: absolute;
+	bottom: 4rpx;
+	right: 4rpx;
+	width: 18rpx;
+	height: 18rpx;
+	border-radius: 50%;
+	border: 3rpx solid #ffffff;
+}
+.parrot-avatar__dot--online  { background-color: #67c23a; }
+.parrot-avatar__dot--offline { background-color: #909399; }
+.parrot-avatar__dot--busy    { background-color: #f56c6c; }
+
+/* ── 磨砂玻璃效果 ── */
+.parrot-avatar--glass {
+	background: rgba(255, 255, 255, 0.18);
+	border: 1.5rpx solid rgba(255, 255, 255, 0.35);
+	/* backdrop-filter 在部分原生端通过 shadow 模拟 */
+	box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.10);
+}
+</style>

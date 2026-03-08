@@ -1,0 +1,332 @@
+<template>
+  <!-- Tabs 标签栏：超越 firstui，支持 scroll/fixed/glass/badge/dot/图标/禁用/下划线动画 -->
+  <scroll-view
+    class="parrot-tabs"
+    :class="[
+      glass ? 'parrot-tabs--glass' : '',
+      fixed ? 'parrot-tabs--fixed' : '',
+      `parrot-tabs--${type ?? 'line'}`,
+    ]"
+    :style="tabsStyle"
+    :direction="scroll ? 'horizontal' : 'none'"
+    :show-scrollbar="false"
+    :scroll-with-animation="true"
+    :scroll-into-view="scrollIntoId"
+  >
+    <view class="parrot-tabs__inner" :class="{ 'parrot-tabs__inner--full': !scroll }">
+      <view
+        v-for="(tab, index) in tabs"
+        :key="index"
+        class="parrot-tabs__item"
+        :class="[
+          `parrot-tabs__item--${type ?? 'line'}`,
+          !scroll ? 'parrot-tabs__item--full' : '',
+          tab.disabled ? 'parrot-tabs__item--disabled' : '',
+          currentIndex === index ? 'parrot-tabs__item--active' : '',
+        ]"
+        :id="`parrot-tab-${index}`"
+        :style="{ height: `${height ?? 88}rpx` }"
+        @tap="onTabTap(index, tab)"
+      >
+        <!-- 图标 -->
+        <image
+          v-if="tab.icon"
+          class="parrot-tabs__icon"
+          :class="{ 'parrot-tabs__icon--column': tab.icon && tab.name }"
+          :src="currentIndex === index && tab.selectedIcon ? tab.selectedIcon : tab.icon"
+          mode="aspectFit"
+        />
+
+        <!-- 文字 + 角标 -->
+        <view class="parrot-tabs__text-wrap">
+          <text
+            class="parrot-tabs__text"
+            :style="getTextStyle(index)"
+          >{{ tab.name }}</text>
+
+          <!-- badge 数字角标 -->
+          <text
+            v-if="tab.badge && tab.badge > 0 && !tab.dot"
+            class="parrot-tabs__badge"
+            :style="{ background: badgeColor }"
+          >{{ tab.badge > 99 ? '99+' : tab.badge }}</text>
+
+          <!-- dot 小红点 -->
+          <view
+            v-if="tab.dot"
+            class="parrot-tabs__dot"
+            :style="{ background: badgeColor }"
+          ></view>
+        </view>
+
+        <!-- line 类型：下划线滑块 -->
+        <view
+          v-if="type === 'line' && currentIndex === index"
+          class="parrot-tabs__underline"
+          :style="underlineStyle"
+        ></view>
+      </view>
+    </view>
+  </scroll-view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-tabs 标签栏
+ * 超越 firstui fui-tabs：
+ *   - Vue3 Composition API + UTS
+ *   - 支持 type：line（下划线）/ card（胶囊卡片）/ button（按钮组）
+ *   - 支持 glass 磨砂玻璃
+ *   - 支持 fixed 吸顶
+ *   - 支持 badge 数字角标 + dot 小红点
+ *   - 下划线宽度、颜色、圆角全部可配
+ *   - 自动 scroll-into-view 居中当前 tab
+ *
+ * @prop tabs           标签数据，{ name, icon?, selectedIcon?, badge?, dot?, disabled? }[]
+ * @prop modelValue     当前选中 index，默认 0
+ * @prop type           类型：line/card/button，默认 line
+ * @prop scroll         是否可横向滚动，默认 true
+ * @prop height         高度 rpx，默认 88
+ * @prop activeColor    选中颜色
+ * @prop inactiveColor  未选中颜色
+ * @prop background     背景色
+ * @prop glass          磨砂玻璃，默认 false
+ * @prop fixed          吸顶，默认 false
+ * @prop fixedTop       吸顶距离 px，默认 0
+ * @prop underlineWidth 下划线宽度 rpx，0=跟随文字，默认 48
+ * @prop underlineHeight 下划线高度 rpx，默认 6
+ * @prop underlineRadius 下划线圆角 rpx，默认 6
+ * @prop underlineColor  下划线颜色
+ * @prop badgeColor     角标背景色
+ * @prop boldActive     选中文字加粗，默认 true
+ * @prop activeSize     选中文字大小 rpx，默认 30
+ * @prop inactiveSize   未选中文字大小 rpx，默认 28
+ *
+ * @event change  切换时触发，{ index, item }
+ * @event update:modelValue
+ */
+
+interface TabItem {
+  name : string
+  icon ?: string
+  selectedIcon ?: string
+  badge ?: number
+  dot ?: boolean
+  disabled ?: boolean
+}
+
+interface Props {
+  tabs : TabItem[]
+  modelValue ?: number
+  type ?: string        // line / card / button
+  scroll ?: boolean
+  height ?: number
+  activeColor ?: string
+  inactiveColor ?: string
+  background ?: string
+  glass ?: boolean
+  fixed ?: boolean
+  fixedTop ?: number
+  underlineWidth ?: number
+  underlineHeight ?: number
+  underlineRadius ?: number
+  underlineColor ?: string
+  badgeColor ?: string
+  boldActive ?: boolean
+  activeSize ?: number
+  inactiveSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 0,
+  type: 'line',
+  scroll: true,
+  height: 88,
+  activeColor: '#465CFF',
+  inactiveColor: '#666',
+  glass: false,
+  fixed: false,
+  fixedTop: 0,
+  underlineWidth: 48,
+  underlineHeight: 6,
+  underlineRadius: 6,
+  badgeColor: '#FF2B2B',
+  boldActive: true,
+  activeSize: 30,
+  inactiveSize: 28,
+})
+
+const emit = defineEmits<{
+  change: [event: { index: number, item: TabItem }]
+  'update:modelValue': [index: number]
+}>()
+
+const currentIndex = ref<number>(props.modelValue ?? 0)
+const scrollIntoId = ref<string>('')
+
+watch(() => props.modelValue, (val) => {
+  currentIndex.value = val ?? 0
+  updateScroll(val ?? 0)
+})
+
+const updateScroll = (index: number) => {
+  const prev = index - 2 < 0 ? 0 : index - 2
+  scrollIntoId.value = `parrot-tab-${prev}`
+}
+
+const tabsStyle = computed(() : string => {
+  const parts : string[] = []
+  if (props.background) parts.push(`background:${props.background}`)
+  if (props.fixed) parts.push(`top:${props.fixedTop ?? 0}px`)
+  return parts.join(';')
+})
+
+const getTextStyle = (index: number) : string => {
+  const active = index === currentIndex.value
+  const parts : string[] = [
+    `color:${active ? (props.activeColor ?? '#465CFF') : (props.inactiveColor ?? '#666')}`,
+    `font-size:${active ? (props.activeSize ?? 30) : (props.inactiveSize ?? 28)}rpx`,
+  ]
+  if (active && (props.boldActive ?? true)) parts.push('font-weight:700')
+  return parts.join(';')
+}
+
+const underlineStyle = computed(() : string => {
+  const w = props.underlineWidth ?? 48
+  const h = props.underlineHeight ?? 6
+  const r = props.underlineRadius ?? 6
+  const color = props.underlineColor ?? (props.activeColor ?? '#465CFF')
+  return `width:${w}rpx;height:${h}rpx;border-radius:${r}rpx;background:${color}`
+})
+
+const onTabTap = (index: number, tab: TabItem) => {
+  if (tab.disabled) return
+  if (currentIndex.value === index) return
+  currentIndex.value = index
+  updateScroll(index)
+  emit('update:modelValue', index)
+  emit('change', { index, item: tab })
+}
+</script>
+
+<style scoped>
+.parrot-tabs {
+  width: 100%;
+  flex-direction: row;
+  background: #fff;
+}
+
+/* 吸顶 */
+.parrot-tabs--fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* 磨砂玻璃 */
+.parrot-tabs--glass {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-bottom: 1.5rpx solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+/* card 类型背景 */
+.parrot-tabs--card {
+  background: #F3F4F8;
+  border-radius: 16rpx;
+  padding: 6rpx;
+}
+
+/* ---- 内部滚动容器 ---- */
+.parrot-tabs__inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.parrot-tabs__inner--full {
+  flex: 1;
+}
+
+/* ---- 单个 Tab ---- */
+.parrot-tabs__item {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32rpx;
+  position: relative;
+}
+.parrot-tabs__item--full {
+  flex: 1;
+  padding: 0 12rpx;
+}
+.parrot-tabs__item--disabled {
+  opacity: 0.4;
+}
+
+/* card 类型激活态 */
+.parrot-tabs--card .parrot-tabs__item--active {
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+/* button 类型激活态 */
+.parrot-tabs--button .parrot-tabs__item--active {
+  background: #465CFF;
+  border-radius: 8rpx;
+}
+.parrot-tabs--button .parrot-tabs__item--active .parrot-tabs__text {
+  color: #fff !important;
+}
+
+/* ---- 图标 ---- */
+.parrot-tabs__icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-bottom: 4rpx;
+}
+
+/* ---- 文字 + 角标 ---- */
+.parrot-tabs__text-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.parrot-tabs__text {
+  font-size: 28rpx;
+  color: #666;
+  transition: color 0.2s, font-size 0.2s;
+}
+.parrot-tabs__badge {
+  position: absolute;
+  right: -36rpx;
+  top: -18rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: 100px;
+  font-size: 22rpx;
+  color: #fff;
+  text-align: center;
+  line-height: 36rpx;
+  box-sizing: border-box;
+}
+.parrot-tabs__dot {
+  position: absolute;
+  right: -14rpx;
+  top: -6rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+}
+
+/* ---- 下划线 ---- */
+.parrot-tabs__underline {
+  position: absolute;
+  bottom: 0;
+}
+</style>
