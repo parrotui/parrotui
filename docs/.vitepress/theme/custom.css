@@ -395,3 +395,37 @@ div[class*='language-'] {
     font-size: 22px;
   }
 }
+
+/* ─── 语言切换按钮国旗图标 ───────────────────────────────── */
+
+/* 导航栏当前语言按钮前国旗（通过图片覆盖在 emoji 之外的部分） */
+.VPNavBarTranslations .title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 语言菜单列表项国旗深化样式 */
+.VPMenu .item.language {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 语言菜单弹出框中的中文/英文选项进行国旗图解 */
+.VPMenu .VPMenuLink a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 对语言菜单弹出框做轻度宽度优化 */
+.VPFlyout.VPNavBarTranslations .menu {
+  min-width: 160px;
+}
+
+/* 国旗 emoji 统一尺寸 */
+.VPNavBarTranslations,
+.VPMenu {
+  font-variant-emoji: text;
+}

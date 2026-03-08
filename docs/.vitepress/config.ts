@@ -231,7 +231,7 @@ export default defineConfig({
   // 多语言配置
   locales: {
     root: {
-      label: '简体中文',
+      label: '🇨🇳 简体中文',
       lang: 'zh-CN',
       title: 'Parrot UI',
       description: '基于 uni-app X 的跨终端组件库，支持 Android / iOS / 鸿蒙 / 微信小程序 / Web',
@@ -268,7 +268,7 @@ export default defineConfig({
     },
 
     'zh-HK': {
-      label: '繁體中文',
+      label: '🇭🇰 繁體中文',
       lang: 'zh-HK',
       title: 'Parrot UI',
       description: '基於 uni-app X 的跨終端元件庫',
@@ -296,7 +296,7 @@ export default defineConfig({
     },
 
     en: {
-      label: 'English',
+      label: '🇺🇸 English',
       lang: 'en-US',
       title: 'Parrot UI',
       description: 'Cross-platform component library based on uni-app X',
