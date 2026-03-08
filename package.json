@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "基于 uni-app X 的跨终端组件库",
   "private": true,
+  "type": "module",
   "scripts": {
     "docs:dev":   "vitepress dev docs",
     "docs:build": "vitepress build docs",
