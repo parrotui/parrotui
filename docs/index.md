@@ -7,7 +7,7 @@ hero:
   tagline: "基于 uni-app X · Vue3 + UTS · 支持 Android / iOS / 鸿蒙 / 小程序 / Web"
   image:
     src: /logo.svg
-    alt: Parrot UI
+    alt: Parrot UI Logo
   actions:
     - theme: brand
       text: 快速上手

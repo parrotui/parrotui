@@ -11,7 +11,7 @@ export default defineConfig({
 
   // 主题配置
   themeConfig: {
-    logo: '/logo.svg',
+    logo: '/icon.svg',
     siteTitle: 'Parrot UI',
 
     // ─── 右侧 TOC 目录（上下滚动跟踪） ────────────────────────
@@ -170,6 +170,6 @@ export default defineConfig({
     ['meta', { property: 'og:title',       content: 'Parrot UI' }],
     ['meta', { property: 'og:description', content: '基于 uni-app X 的跨终端组件库' }],
     ['meta', { property: 'og:url',         content: 'https://doc.parrotui.com' }],
-    ['meta', { property: 'og:image',       content: 'https://doc.parrotui.com/logo.svg' }],
+    ['meta', { property: 'og:image',       content: 'https://doc.parrotui.com/android-chrome-512x512.png' }],
   ],
 })
