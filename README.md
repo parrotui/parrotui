@@ -1,8 +1,15 @@
-# Parrot UI Component Library 使用指南
+# Parrot UI
 
-## 简介
+**基于 uni-app X 的跨端移动端组件库 · MIT 开源 · 欢迎共建**
 
-Parrot UI 是一套基于 uni-app X 的移动端组件库，专为鹦鹉知产网项目设计，支持 Android、iOS、鸿蒙、小程序等多端统一。
+Parrot UI 是一套基于 uni-app X 的移动端组件库，支持 Android、iOS、鸿蒙、微信小程序、H5 等多端统一运行。
+采用 Vue3 + Composition API + UTS 构建，提供完整的设计 Token 系统、亮暗主题切换、国际化支持。
+
+> 开源、开放、共建 —— 欢迎任何人使用、贡献和扩展 Parrot UI 生态。
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![uni-app X](https://img.shields.io/badge/uni--app%20X-supported-green.svg)](https://uniapp.dcloud.net.cn/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/parrotui/parrotui/pulls)
 
 ## 快速开始
 
@@ -238,8 +245,21 @@ const componentStyle = computed(() => {
 
 ## 贡献指南
 
-欢迎提交 Issue 和 Pull Request 来改进 Parrot UI 组件库。
+Parrot UI 是一个完全开放的社区项目，欢迎所有人参与共建！
+
+- 🐛 **提交 Bug**：[Issues](https://github.com/parrotui/parrotui/issues)
+- 💡 **功能建议**：欢迎在 Issues 中提出想法
+- 🔧 **提交代码**：Fork → 开发 → Pull Request
+- 📖 **完善文档**：文档同样欢迎 PR
+- 🌍 **国际化**：欢迎贡献更多语言包
+
+提交 PR 前请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+
+## 社区
+
+- GitHub：[github.com/parrotui/parrotui](https://github.com/parrotui/parrotui)
+- Issues：[提交问题或建议](https://github.com/parrotui/parrotui/issues)
 
 ## License
 
-MIT License
+[MIT](./LICENSE) © Parrot UI Contributors
