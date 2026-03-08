@@ -1,8 +1,8 @@
 # Parrot UI
 
-**基于 uni-app X 的跨端移动端组件库 · MIT 开源 · 欢迎共建**
+**基于 uni-app X 的跨终端组件库 · MIT 开源 · 欢迎共建**
 
-Parrot UI 是一套基于 uni-app X 的移动端组件库，支持 Android、iOS、鸿蒙、微信小程序、H5 等多端统一运行。
+Parrot UI 是一套基于 uni-app X 的跨终端组件库，支持 Android、iOS、鸿蒙、微信小程序、Web 等多端统一运行。
 采用 Vue3 + Composition API + UTS 构建，提供完整的设计 Token 系统、亮暗主题切换、国际化支持。
 
 > 开源、开放、共建 —— 欢迎任何人使用、贡献和扩展 Parrot UI 生态。
