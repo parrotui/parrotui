@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -28,25 +28,16 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Show Node & npm version
-        run: node -v && npm -v
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: List installed packages
-        run: ls node_modules | grep vitepress || echo "vitepress not found"
-
       - name: Build VitePress docs
         run: npx vitepress build docs
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-
-      - name: List build output
-        run: ls docs/.vitepress/dist || echo "dist not found"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

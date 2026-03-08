@@ -16,5 +16,6 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install --legacy-peer-deps
-      - name: Type check
-        run: npx tsc --noEmit --skipLibCheck || true
+      # 仅检查 docs 和 ts 配置文件，排除 packages（含 .uvue / uni 语法）
+      - name: Type check docs only
+        run: npx tsc --noEmit --skipLibCheck -p tsconfig.docs.json || true
