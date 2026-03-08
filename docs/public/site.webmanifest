@@ -1,0 +1,1 @@
+{"name":"Parrot UI","short_name":"ParrotUI","description":"基于 uni-app X 的跨终端组件库","background_color":"#ffffff","theme_color":"#1a7eff","display":"standalone","start_url":"/","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}]}

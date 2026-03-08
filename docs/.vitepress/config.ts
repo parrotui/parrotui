@@ -160,11 +160,16 @@ export default defineConfig({
 
   // Head 注入
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
-    ['meta', { name: 'theme-color', content: '#1a7eff' }],
-    ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'Parrot UI' }],
+    ['link', { rel: 'icon',             href: '/favicon.ico' }],
+    ['link', { rel: 'icon',             href: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' }],
+    ['link', { rel: 'icon',             href: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' }],
+    ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+    ['link', { rel: 'manifest',         href: '/site.webmanifest' }],
+    ['meta', { name: 'theme-color',     content: '#1a7eff' }],
+    ['meta', { property: 'og:type',        content: 'website' }],
+    ['meta', { property: 'og:title',       content: 'Parrot UI' }],
     ['meta', { property: 'og:description', content: '基于 uni-app X 的跨终端组件库' }],
-    ['meta', { property: 'og:url', content: 'https://doc.parrotui.com' }],
+    ['meta', { property: 'og:url',         content: 'https://doc.parrotui.com' }],
+    ['meta', { property: 'og:image',       content: 'https://doc.parrotui.com/logo.svg' }],
   ],
 })
