@@ -1,0 +1,239 @@
+<template>
+	<view class="parrot-trade-item" :style="customStyle" @click="onClick">
+		<!-- 图样 -->
+		<view class="parrot-trade-item__image-wrap">
+			<image 
+				class="parrot-trade-item__image" 
+				:src="image" 
+				mode="aspectFit" 
+				@show-error="onImageError"
+			/>
+		</view>
+		
+		<!-- 信息 -->
+		<view class="parrot-trade-item__info">
+			<!-- 名称 -->
+			<text class="parrot-trade-item__name">{{ name }}</text>
+			
+			<!-- 分类 -->
+			<view class="parrot-trade-item__class">
+				<text class="parrot-trade-item__class-id">{{ classId }}</text>
+				<text class="parrot-trade-item__class-name">{{ className }}</text>
+			</view>
+			
+			<!-- 价格 -->
+			<view class="parrot-trade-item__price-wrap">
+				<text v-if="isPriceText" class="parrot-trade-item__price-text">{{ price }}</text>
+				<view v-else class="parrot-trade-item__price">
+					<text class="parrot-trade-item__price-symbol">¥</text>
+					<text class="parrot-trade-item__price-num">{{ price }}</text>
+				</view>
+			</view>
+		</view>
+		
+		<!-- 标签（可选） -->
+		<view v-if="tags && tags.length > 0" class="parrot-trade-item__tags">
+			<text 
+				v-for="(tag, index) in tags" 
+				:key="index"
+				class="parrot-trade-item__tag"
+				:style="{ backgroundColor: tag.color || '#F85252', color: tag.textColor || '#FFFFFF' }"
+			>
+				{{ tag.text }}
+			</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * 标签
+	 */
+	type Tag = {
+		text: string
+		color?: string
+		textColor?: string
+	}
+	
+	/**
+	 * Props 定义
+	 */
+	interface Props {
+		/** 商标名称 */
+		name?: string
+		/** 分类 ID（如 '01'） */
+		classId?: string
+		/** 分类名称（如 '化学原料'） */
+		className?: string
+		/** 价格（数字或"议价"文本） */
+		price?: number | string
+		/** 图样 URL */
+		image?: string
+		/** 占位图 URL */
+		placeholder?: string
+		/** 标签列表 */
+		tags?: Tag[]
+		/** 自定义样式 */
+		customStyle?: string
+		/** 数据 ID（用于回调） */
+		id?: string
+		/** 数据标识 */
+		identity?: string
+	}
+	
+	const props = withDefaults(defineProps<Props>(), {
+		name: '',
+		classId: '',
+		className: '',
+		price: 0,
+		image: '',
+		placeholder: '/static/images/empty-data.png',
+		tags: () => [],
+		customStyle: '',
+		id: '',
+		identity: ''
+	})
+	
+	/**
+	 * Emits 定义
+	 */
+	const emit = defineEmits<{
+		/** 点击事件 */
+		(event: 'click', id: string, identity: string): void
+	}>()
+	
+	/**
+	 * 是否为文本价格（如"议价"）
+	 */
+	const isPriceText = computed(() => {
+		return typeof props.price === 'string' && props.price !== '0'
+	})
+	
+	/**
+	 * 实际显示的图样
+	 */
+	const displayImage = ref(props.image || props.placeholder)
+	
+	/**
+	 * 图片加载失败
+	 */
+	function onImageError() {
+		displayImage.value = props.placeholder
+	}
+	
+	/**
+	 * 点击事件
+	 */
+	function onClick() {
+		emit('click', props.id, props.identity)
+	}
+</script>
+
+<style scoped lang="scss">
+	.parrot-trade-item {
+		display: flex;
+		flex-direction: column;
+		padding: 20rpx;
+		background-color: #FFFFFF;
+		border-radius: 12rpx;
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+		transition: all 0.2s ease;
+		
+		&:active {
+			box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+		}
+		
+		&__image-wrap {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 240rpx;
+			margin-bottom: 16rpx;
+			background-color: #f5f5f5;
+			border-radius: 8rpx;
+			overflow: hidden;
+		}
+		
+		&__image {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+		
+		&__info {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		&__name {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: #333333;
+			margin-bottom: 8rpx;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		
+		&__class {
+			display: flex;
+			align-items: center;
+			margin-bottom: 12rpx;
+		}
+		
+		&__class-id {
+			font-size: 22rpx;
+			color: #FFFFFF;
+			background-color: #F85252;
+			padding: 4rpx 12rpx;
+			border-radius: 20rpx;
+			margin-right: 8rpx;
+		}
+		
+		&__class-name {
+			font-size: 22rpx;
+			color: #999999;
+		}
+		
+		&__price-wrap {
+			display: flex;
+			align-items: baseline;
+		}
+		
+		&__price-text {
+			font-size: 28rpx;
+			color: #F85252;
+			font-weight: bold;
+		}
+		
+		&__price {
+			display: flex;
+			align-items: baseline;
+		}
+		
+		&__price-symbol {
+			font-size: 24rpx;
+			color: #F85252;
+			margin-right: 4rpx;
+		}
+		
+		&__price-num {
+			font-size: 32rpx;
+			color: #F85252;
+			font-weight: bold;
+		}
+		
+		&__tags {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8rpx;
+			margin-top: 12rpx;
+		}
+		
+		&__tag {
+			font-size: 20rpx;
+			padding: 4rpx 12rpx;
+			border-radius: 20rpx;
+		}
+	}
+</style>

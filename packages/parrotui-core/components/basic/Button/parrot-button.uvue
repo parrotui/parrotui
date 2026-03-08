@@ -1,0 +1,402 @@
+<template>
+	<view 
+		class="parrot-button"
+		:class="[
+			buttonClass,
+			disabled ? 'parrot-button--disabled' : '',
+			loading ? 'parrot-button--loading' : '',
+			`parrot-button--${type}`,
+			`parrot-button--${size}`,
+			plain ? 'parrot-button--plain' : '',
+			round ? 'parrot-button--round' : '',
+			block ? 'parrot-button--block' : ''
+		]"
+		:style="buttonStyle"
+		@click="handleClick"
+	>
+		<!-- 加载图标 -->
+		<view v-if="loading" class="parrot-button__loading">
+			<parrot-icon name="loading" :size="loadingSize" :color="loadingColor" />
+		</view>
+		
+		<!-- 按钮文字 -->
+		<text 
+			v-if="text" 
+			class="parrot-button__text"
+			:class="[
+				`parrot-button__text--${type}`,
+				`parrot-button__text--${size}`
+			]"
+			:style="textStyle"
+		>
+			{{ text }}
+		</text>
+		
+		<!-- 插槽内容 -->
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 按钮类型
+	type?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'default'
+	// 按钮尺寸
+	size?: 'large' | 'normal' | 'small' | 'mini'
+	// 按钮文字
+	text?: string
+	// 是否禁用
+	disabled?: boolean
+	// 是否加载中
+	loading?: boolean
+	// 是否镂空
+	plain?: boolean
+	// 是否圆角
+	round?: boolean
+	// 是否块级元素
+	block?: boolean
+	// 自定义背景色
+	background?: string
+	// 自定义文字颜色
+	color?: string
+	// 自定义边框颜色
+	borderColor?: string
+	// 宽度
+	width?: string
+	// 高度
+	height?: string
+	// 边框宽度
+	borderWidth?: string
+	// 圆角大小
+	borderRadius?: string
+	// margin
+	margin?: string
+	// padding
+	padding?: string
+	// 字体大小
+	fontSize?: string
+	// 字体粗细
+	fontWeight?: string | number
+	// 加载图标大小
+	loadingSize?: number
+	// 加载图标颜色
+	loadingColor?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	type: 'default',
+	size: 'normal',
+	text: '',
+	disabled: false,
+	loading: false,
+	plain: false,
+	round: false,
+	block: false,
+	background: '',
+	color: '',
+	borderColor: '',
+	width: '',
+	height: '',
+	borderWidth: '1px',
+	borderRadius: '',
+	margin: '0',
+	padding: '',
+	fontSize: '',
+	fontWeight: 'normal',
+	loadingSize: 16,
+	loadingColor: ''
+})
+
+// 定义 emits
+const emit = defineEmits<{
+	click: [event: Event]
+}>()
+
+// 计算按钮类名
+const buttonClass = computed(() => {
+	const classes: string[] = ['parrot-button']
+	
+	if (props.plain) {
+		classes.push('parrot-button--plain')
+	}
+	
+	if (props.round) {
+		classes.push('parrot-button--round')
+	}
+	
+	if (props.block) {
+		classes.push('parrot-button--block')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算按钮样式
+const buttonStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 自定义样式
+	if (props.width) {
+		style.width = props.width
+	}
+	
+	if (props.height) {
+		style.height = props.height
+	}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	if (props.borderRadius) {
+		style.borderRadius = props.borderRadius
+	}
+	
+	if (props.background && !props.plain) {
+		style.backgroundColor = props.background
+	}
+	
+	if (props.borderColor) {
+		style.borderColor = props.borderColor
+		style.borderWidth = props.borderWidth
+	}
+	
+	// 禁用状态样式
+	if (props.disabled) {
+		style.opacity = '0.6'
+		style.cursor = 'not-allowed'
+	}
+	
+	return style
+})
+
+// 计算文字样式
+const textStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	if (props.fontSize) {
+		style.fontSize = props.fontSize
+	}
+	
+	if (props.fontWeight) {
+		style.fontWeight = props.fontWeight.toString()
+	}
+	
+	return style
+})
+
+// 计算加载图标颜色
+const loadingColor = computed(() => {
+	if (props.loadingColor) {
+		return props.loadingColor
+	}
+	
+	// 根据按钮类型返回默认颜色
+	const colorMap: Record<string, string> = {
+		primary: '#ffffff',
+		success: '#ffffff',
+		warning: '#ffffff',
+		danger: '#ffffff',
+		info: '#ffffff',
+		default: '#333333'
+	}
+	
+	return colorMap[props.type] || '#333333'
+})
+
+// 点击事件处理
+const handleClick = (event: Event) => {
+	if (props.disabled || props.loading) {
+		return
+	}
+	
+	emit('click', event)
+}
+</script>
+
+<style lang="scss">
+.parrot-button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid transparent;
+	cursor: pointer;
+	user-select: none;
+	transition: all 0.3s;
+	box-sizing: border-box;
+	
+	// 基础尺寸
+	&--large {
+		height: 88rpx;
+		padding: 0 40rpx;
+		font-size: 32rpx;
+		min-width: 200rpx;
+	}
+	
+	&--normal {
+		height: 72rpx;
+		padding: 0 32rpx;
+		font-size: 28rpx;
+		min-width: 160rpx;
+	}
+	
+	&--small {
+		height: 56rpx;
+		padding: 0 24rpx;
+		font-size: 24rpx;
+		min-width: 120rpx;
+	}
+	
+	&--mini {
+		height: 44rpx;
+		padding: 0 16rpx;
+		font-size: 20rpx;
+		min-width: 80rpx;
+	}
+	
+	// 块级元素
+	&--block {
+		width: 100%;
+		display: flex;
+	}
+	
+	// 圆角
+	&--round {
+		border-radius: 999px;
+	}
+	
+	// 默认圆角
+	&:not(.parrot-button--round) {
+		border-radius: 8rpx;
+	}
+	
+	// 类型样式
+	&--primary {
+		background-color: #007aff;
+		border-color: #007aff;
+		color: #ffffff;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #007aff;
+			color: #007aff;
+		}
+	}
+	
+	&--success {
+		background-color: #4cd964;
+		border-color: #4cd964;
+		color: #ffffff;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #4cd964;
+			color: #4cd964;
+		}
+	}
+	
+	&--warning {
+		background-color: #ffcc00;
+		border-color: #ffcc00;
+		color: #ffffff;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #ffcc00;
+			color: #ffcc00;
+		}
+	}
+	
+	&--danger {
+		background-color: #ff3b30;
+		border-color: #ff3b30;
+		color: #ffffff;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #ff3b30;
+			color: #ff3b30;
+		}
+	}
+	
+	&--info {
+		background-color: #5ac8fa;
+		border-color: #5ac8fa;
+		color: #ffffff;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #5ac8fa;
+			color: #5ac8fa;
+		}
+	}
+	
+	&--default {
+		background-color: #f8f8f8;
+		border-color: #e5e5e5;
+		color: #333333;
+		
+		&.parrot-button--plain {
+			background-color: transparent;
+			border-color: #e5e5e5;
+			color: #666666;
+		}
+	}
+	
+	// 禁用状态
+	&--disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+	
+	// 加载状态
+	&--loading {
+		cursor: default;
+	}
+	
+	// 悬停效果（仅在支持的平台上）
+	&:not(.parrot-button--disabled):not(.parrot-button--loading):hover {
+		opacity: 0.8;
+		transform: scale(0.98);
+	}
+	
+	// 激活效果
+	&:not(.parrot-button--disabled):not(.parrot-button--loading):active {
+		transform: scale(0.95);
+	}
+}
+
+.parrot-button__loading {
+	margin-right: 12rpx;
+	animation: parrot-rotate 1s linear infinite;
+}
+
+.parrot-button__text {
+	line-height: 1;
+	white-space: nowrap;
+}
+
+// 旋转动画
+@keyframes parrot-rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+</style>

@@ -1,0 +1,243 @@
+<template>
+	<view class="parrot-footer-links" :style="customStyle">
+		<!-- 站点名称 -->
+		<text v-if="siteName" class="parrot-footer-links__site">{{ siteName }}</text>
+		
+		<!-- 链接列表 -->
+		<view class="parrot-footer-links__list">
+			<template v-for="(link, index) in links" :key="index">
+				<!-- 链接 -->
+				<text 
+					v-if="link.type !== 'separator'" 
+					class="parrot-footer-links__link"
+					:style="{ color: linkColor, fontSize: linkFontSize + 'rpx' }"
+					@click="onLinkClick(link)"
+				>
+					{{ link.text }}
+				</text>
+				
+				<!-- 分隔符 -->
+				<text 
+					v-else 
+					class="parrot-footer-links__separator"
+					:style="{ color: separatorColor }"
+				>
+					{{ link.text || '|' }}
+				</text>
+			</template>
+		</view>
+		
+		<!-- 版权信息 -->
+		<text v-if="copyright" class="parrot-footer-links__copyright" :style="{ color: copyrightColor, fontSize: copyrightFontSize + 'rpx' }">
+			{{ copyright }}
+		</text>
+		
+		<!-- ICP 备案号 -->
+		<text 
+			v-if="icp" 
+			class="parrot-footer-links__icp"
+			:style="{ color: icpColor, fontSize: icpFontSize + 'rpx' }"
+			@click="onIcpClick"
+		>
+			{{ icp }}
+		</text>
+		
+		<!-- 公安备案号 -->
+		<text 
+			v-if="policeCode" 
+			class="parrot-footer-links__police"
+			:style="{ color: policeColor, fontSize: policeFontSize + 'rpx' }"
+			@click="onPoliceClick"
+		>
+			{{ policeCode }}
+		</text>
+		
+		<!-- 自定义底部文本 -->
+		<text 
+			v-if="bottomText" 
+			class="parrot-footer-links__bottom"
+			:style="{ color: bottomTextColor, fontSize: bottomTextFontSize + 'rpx' }"
+		>
+			{{ bottomText }}
+		</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { openUrl } from '@/utils/link.uts'
+	
+	/**
+	 * 链接项
+	 */
+	type FooterLink = {
+		text: string
+		url?: string          // 内部链接
+		href?: string         // 外部链接
+		path?: string         // 文章路径
+		type?: 'link' | 'separator'  // 类型：链接/分隔符
+	}
+	
+	/**
+	 * Props 定义
+	 */
+	interface Props {
+		/** 站点名称 */
+		siteName?: string
+		/** 链接列表 */
+		links?: FooterLink[]
+		/** 版权信息 */
+		copyright?: string
+		/** ICP 备案号 */
+		icp?: string
+		/** 公安备案号 */
+		policeCode?: string
+		/** 底部文本 */
+		bottomText?: string
+		/** 自定义样式 */
+		customStyle?: string
+		/** 背景颜色 */
+		backgroundColor?: string
+		/** 内边距 */
+		padding?: string
+		/** 链接颜色 */
+		linkColor?: string
+		/** 链接字体大小 */
+		linkFontSize?: number
+		/** 分隔符颜色 */
+		separatorColor?: string
+		/** 版权颜色 */
+		copyrightColor?: string
+		/** 版权字体大小 */
+		copyrightFontSize?: number
+		/** ICP 颜色 */
+		icpColor?: string
+		/** ICP 字体大小 */
+		icpFontSize?: number
+		/** 公安颜色 */
+		policeColor?: string
+		/** 公安字体大小 */
+		policeFontSize?: number
+		/** 底部文本颜色 */
+		bottomTextColor?: string
+		/** 底部文本字体大小 */
+		bottomTextFontSize?: number
+		/** 行间距 */
+		lineHeight?: number
+	}
+	
+	const props = withDefaults(defineProps<Props>(), {
+		siteName: '',
+		links: () => [],
+		copyright: '',
+		icp: '',
+		policeCode: '',
+		bottomText: '',
+		customStyle: '',
+		backgroundColor: 'transparent',
+		padding: '20rpx',
+		linkColor: '#999999',
+		linkFontSize: 24,
+		separatorColor: '#CCCCCC',
+		copyrightColor: '#999999',
+		copyrightFontSize: 22,
+		icpColor: '#999999',
+		icpFontSize: 22,
+		policeColor: '#999999',
+		policeFontSize: 22,
+		bottomTextColor: '#999999',
+		bottomTextFontSize: 22,
+		lineHeight: 1.8
+	})
+	
+	/**
+	 * 链接点击
+	 */
+	function onLinkClick(link: FooterLink) {
+		if (link.href) {
+			// 外部链接
+			openUrl(link.href)
+		} else if (link.url) {
+			// 内部链接
+			uni.navigateTo({ url: link.url })
+		} else if (link.path) {
+			// 文章路径
+			uni.navigateTo({ url: '/pages/common/article?path=' + encodeURIComponent(link.path) })
+		}
+	}
+	
+	/**
+	 * ICP 点击
+	 */
+	function onIcpClick() {
+		openUrl('https://beian.miit.gov.cn/')
+	}
+	
+	/**
+	 * 公安备案点击
+	 */
+	function onPoliceClick() {
+		if (props.policeCode) {
+			const code = props.policeCode.replace(/\D/g, '')
+			openUrl('http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=' + code)
+		}
+	}
+</script>
+
+<style scoped lang="scss">
+	.parrot-footer-links {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 20rpx;
+		background-color: transparent;
+		text-align: center;
+		
+		&__site {
+			font-size: 28rpx;
+			color: #333333;
+			font-weight: bold;
+			margin-bottom: 16rpx;
+		}
+		
+		&__list {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+			gap: 12rpx;
+			margin-bottom: 16rpx;
+		}
+		
+		&__link {
+			cursor: pointer;
+			transition: opacity 0.2s ease;
+			
+			&:active {
+				opacity: 0.7;
+			}
+		}
+		
+		&__separator {
+			font-size: 24rpx;
+			color: #CCCCCC;
+		}
+		
+		&__copyright,
+		&__icp,
+		&__police,
+		&__bottom {
+			display: block;
+			margin: 8rpx 0;
+		}
+		
+		&__icp,
+		&__police {
+			cursor: pointer;
+			text-decoration: underline;
+			
+			&:active {
+				opacity: 0.7;
+			}
+		}
+	}
+</style>

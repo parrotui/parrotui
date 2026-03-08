@@ -1,0 +1,28 @@
+# 忽略文件
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# 编译产物
+unpkg/
+dist/
+build/
+
+# 编辑器
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# HBuilderX
+.hbuilderx/
+
+# 节点模块（如果使用 npm）
+node_modules/
+
+# 环境变量
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,354 @@
+<template>
+	<view class="parrot-footer" :style="containerStyle">
+		<!-- Logo -->
+		<view v-if="showLogo" class="parrot-footer__logo" :style="logoStyle">
+			<image v-if="logoUrl" :src="logoUrl" mode="heightFix" :style="logoImageStyle" />
+			<text v-else :style="logoTextStyle">{{ siteName }}</text>
+		</view>
+
+		<!-- 描述 -->
+		<text v-if="description" class="parrot-footer__desc" :style="descStyle">{{ description }}</text>
+
+		<!-- 导航 -->
+		<view v-if="navigate && navigate.length > 0" class="parrot-footer__nav" :style="navStyle">
+			<template v-for="(item, index) in navigate" :key="index">
+				<text 
+					class="parrot-footer__nav-item" 
+					:style="getNavStyle(item)"
+					@click="handleClick(item)"
+				>{{ item.text }}</text>
+				<text v-if="showSeparator && index < navigate.length - 1" class="parrot-footer__separator" :style="separatorStyle">|</text>
+			</template>
+		</view>
+
+		<!-- 版权 -->
+		<text v-if="copyrightText" class="parrot-footer__copyright" :style="copyrightStyle">{{ copyrightText }}</text>
+
+		<!-- ICP -->
+		<text v-if="icp" class="parrot-footer__icp" :style="icpStyle" @click="handleIcp">{{ icp }}</text>
+
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+
+interface NavItem {
+	text: string
+	url?: string
+	href?: string
+	openType?: string
+	color?: string
+	fontSize?: number
+	fontWeight?: string | number
+	isExternal?: boolean
+}
+
+interface StyleProps {
+	-- 容器样式
+	margin?: string
+	padding?: string
+	backgroundColor?: string
+	borderRadius?: string
+	boxShadow?: string
+	
+	-- 布局样式
+	direction?: 'row' | 'column'
+	justifyContent?: string
+	alignItems?: string
+	gap?: string
+	
+	-- 全局字体
+	color?: string
+	fontSize?: number
+	fontWeight?: string | number
+	fontFamily?: string
+	lineHeight?: number
+	textAlign?: 'left' | 'center' | 'right'
+	
+	-- Logo
+	logoWidth?: number
+	logoHeight?: number
+	logoColor?: string
+	logoFontSize?: number
+	logoMargin?: string
+	
+	-- 描述
+	descriptionColor?: string
+	descriptionFontSize?: number
+	descriptionMargin?: string
+	
+	-- 导航
+	navColor?: string
+	navFontSize?: number
+	navGap?: string
+	separatorColor?: string
+	
+	-- 版权
+	copyrightColor?: string
+	copyrightFontSize?: number
+	copyrightMargin?: string
+	
+	-- ICP
+	icpColor?: string
+	icpFontSize?: number
+	icpMargin?: string
+	
+	-- 定位
+	isFixed?: boolean
+	bottom?: number
+	zIndex?: number
+}
+
+const props = withDefaults(defineProps<{
+	-- 数据
+	navigate?: NavItem[]
+	text?: string
+	copyright?: string
+	icp?: string
+	siteName?: string
+	logoUrl?: string
+	description?: string
+	
+	-- 显示控制
+	showLogo?: boolean
+	showSeparator?: boolean
+	
+	-- 容器样式
+	margin?: string
+	padding?: string
+	backgroundColor?: string
+	borderRadius?: string
+	boxShadow?: string
+	
+	-- 布局
+	direction?: string
+	justifyContent?: string
+	alignItems?: string
+	gap?: string
+	
+	-- 全局字体
+	color?: string
+	fontSize?: number
+	fontWeight?: string | number
+	fontFamily?: string
+	lineHeight?: number
+	textAlign?: string
+	
+	-- Logo 样式
+	logoWidth?: number
+	logoHeight?: number
+	logoColor?: string
+	logoFontSize?: number
+	logoMargin?: string
+	
+	-- 描述样式
+	descriptionColor?: string
+	descriptionFontSize?: number
+	descriptionMargin?: string
+	
+	-- 导航样式
+	navColor?: string
+	navFontSize?: number
+	navGap?: string
+	separatorColor?: string
+	
+	-- 版权样式
+	copyrightColor?: string
+	copyrightFontSize?: number
+	copyrightMargin?: string
+	
+	-- ICP 样式
+	icpColor?: string
+	icpFontSize?: number
+	icpMargin?: string
+	
+	-- 定位
+	isFixed?: boolean
+	bottom?: number
+	zIndex?: number
+}>(), {
+	navigate: () => [],
+	text: '',
+	copyright: '',
+	icp: '',
+	siteName: '',
+	logoUrl: '',
+	description: '',
+	showLogo: false,
+	showSeparator: true,
+	margin: '',
+	padding: '24rpx 30rpx',
+	backgroundColor: 'transparent',
+	borderRadius: '',
+	boxShadow: '',
+	direction: 'column',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: '16rpx',
+	color: '#999999',
+	fontSize: 24,
+	fontWeight: 'normal',
+	fontFamily: '',
+	lineHeight: 1.6,
+	textAlign: 'center',
+	logoWidth: 180,
+	logoHeight: 50,
+	logoColor: '#333333',
+	logoFontSize: 28,
+	logoMargin: '0 0 16rpx 0',
+	descriptionColor: '#666666',
+	descriptionFontSize: 24,
+	descriptionMargin: '0 0 20rpx 0',
+	navColor: '#999999',
+	navFontSize: 24,
+	navGap: '24rpx',
+	separatorColor: '#CCCCCC',
+	copyrightColor: '#999999',
+	copyrightFontSize: 22,
+	copyrightMargin: '8rpx 0',
+	icpColor: '#999999',
+	icpFontSize: 22,
+	icpMargin: '8rpx 0',
+	isFixed: false,
+	bottom: 0,
+	zIndex: 100
+})
+
+const copyrightText = computed(() => props.copyright || props.text)
+
+const containerStyle = computed(() => {
+	const styles: string[] = [
+		`display: flex`,
+		`flex-direction: ${props.direction}`,
+		`justify-content: ${props.justifyContent}`,
+		`align-items: ${props.alignItems}`,
+		`text-align: ${props.textAlign}`,
+		`background-color: ${props.backgroundColor}`,
+	]
+	
+	if (props.margin) styles.push(`margin: ${props.margin}`)
+	if (props.padding) styles.push(`padding: ${props.padding}`)
+	if (props.gap) styles.push(`gap: ${props.gap}`)
+	if (props.borderRadius) styles.push(`border-radius: ${props.borderRadius}`)
+	if (props.boxShadow) styles.push(`box-shadow: ${props.boxShadow}`)
+	if (props.fontFamily) styles.push(`font-family: ${props.fontFamily}`)
+	
+	if (props.isFixed) {
+		styles.push(`position: fixed`)
+		styles.push(`left: 0`)
+		styles.push(`right: 0`)
+		styles.push(`bottom: ${props.bottom}rpx`)
+		styles.push(`z-index: ${props.zIndex}`)
+	}
+	
+	return styles.join('; ')
+})
+
+const logoStyle = computed(() => `margin: ${props.logoMargin}`)
+
+const logoImageStyle = computed(() => `width: ${props.logoWidth}rpx; height: ${props.logoHeight}rpx`)
+
+const logoTextStyle = computed(() => 
+	`color: ${props.logoColor}; font-size: ${props.logoFontSize}rpx; font-weight: ${props.logoFontWeight || '600'}`
+)
+
+const descStyle = computed(() => {
+	const styles: string[] = [
+		`color: ${props.descriptionColor}`,
+		`font-size: ${props.descriptionFontSize}rpx`,
+		`line-height: ${props.lineHeight}`,
+	]
+	if (props.descriptionMargin) styles.push(`margin: ${props.descriptionMargin}`)
+	return styles.join('; ')
+})
+
+const navStyle = computed(() => 
+	`display: flex; flex-direction: row; flex-wrap: wrap; justify-content: ${props.justifyContent}; gap: ${props.navGap}`
+)
+
+const separatorStyle = computed(() => `color: ${props.separatorColor}; margin: 0 8rpx`)
+
+const copyrightStyle = computed(() => {
+	const styles: string[] = [
+		`color: ${props.copyrightColor}`,
+		`font-size: ${props.copyrightFontSize}rpx`,
+	]
+	if (props.copyrightMargin) styles.push(`margin: ${props.copyrightMargin}`)
+	return styles.join('; ')
+})
+
+const icpStyle = computed(() => {
+	const styles: string[] = [
+		`color: ${props.icpColor}`,
+		`font-size: ${props.icpFontSize}rpx`,
+	]
+	if (props.icpMargin) styles.push(`margin: ${props.icpMargin}`)
+	return styles.join('; ')
+})
+
+function getNavStyle(item: NavItem) {
+	const styles: string[] = [
+		`color: ${item.color || props.navColor}`,
+		`font-size: ${(item.fontSize || props.navFontSize)}rpx`,
+		`cursor: pointer`,
+	]
+	if (item.fontWeight) styles.push(`font-weight: ${item.fontWeight}`)
+	return styles.join('; ')
+}
+
+function handleClick(item: NavItem) {
+	if (item.isExternal || (item.href && /^https?:\/\//.test(item.href))) {
+		const url = item.href || item.url
+		if (url) plus.runtime.openURL(url)
+		return
+	}
+	if (item.url) {
+		if (item.openType === 'switchTab') {
+			uni.switchTab({ url: item.url })
+		} else {
+			uni.navigateTo({ url: item.url })
+		}
+	}
+}
+
+function handleIcp() {
+	plus.runtime.openURL('https://beian.miit.gov.cn/')
+}
+</script>
+
+<style scoped>
+.parrot-footer {
+	display: flex;
+	flex-direction: column;
+}
+.parrot-footer__logo {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.parrot-footer__desc {
+	text-align: center;
+}
+.parrot-footer__nav {
+	width: 100%;
+}
+.parrot-footer__nav-item {
+	white-space: nowrap;
+	transition: opacity 0.2s;
+}
+.parrot-footer__nav-item:active {
+	opacity: 0.6;
+}
+.parrot-footer__copyright {
+	text-align: center;
+}
+.parrot-footer__icp {
+	text-align: center;
+	transition: opacity 0.2s;
+}
+.parrot-footer__icp:active {
+	opacity: 0.6;
+}
+</style>

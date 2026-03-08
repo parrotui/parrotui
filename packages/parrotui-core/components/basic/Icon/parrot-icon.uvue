@@ -1,0 +1,209 @@
+<template>
+	<view 
+		class="parrot-icon"
+		:class="[
+			customClass,
+			spin ? 'parrot-icon--spin' : ''
+		]"
+		:style="iconStyle"
+		@click="handleClick"
+	>
+		<!-- Unicode 图标 -->
+		<text 
+			v-if="isUnicode"
+			class="parrot-icon__unicode"
+			:style="unicodeStyle"
+		>{{ unicodeValue }}</text>
+		
+		<!-- 字体图标 -->
+		<text 
+			v-else-if="fontFamily"
+			class="parrot-icon__font"
+			:style="fontStyle"
+		>{{ name }}</text>
+		
+		<!-- 插槽内容 -->
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 图标名称
+	name?: string
+	// 图标大小
+	size?: number | string
+	// 图标颜色
+	color?: string
+	// 是否旋转
+	spin?: boolean
+	// 自定义类名
+	customClass?: string
+	// 字体族
+	fontFamily?: string
+	// Unicode 值
+	unicode?: string
+	// margin
+	margin?: string
+	// padding
+	padding?: string
+	// 行高
+	lineHeight?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	name: '',
+	size: 24,
+	color: '',
+	spin: false,
+	customClass: '',
+	fontFamily: 'parrot-icon',
+	unicode: '',
+	margin: '0',
+	padding: '0',
+	lineHeight: '1'
+})
+
+// 定义 emits
+const emit = defineEmits<{
+	click: [event: Event]
+}>()
+
+// 判断是否为 Unicode 图标
+const isUnicode = computed(() => {
+	return !!props.unicode || /^\\u[0-9a-fA-F]{4}$/.test(props.name)
+})
+
+// 获取 Unicode 值
+const unicodeValue = computed(() => {
+	if (props.unicode) {
+		return props.unicode
+	}
+	
+	if (/^\\u[0-9a-fA-F]{4}$/.test(props.name)) {
+		// 将 \uXXXX 转换为实际字符
+		try {
+			const codePoint = parseInt(props.name.slice(2), 16)
+			return String.fromCodePoint(codePoint)
+		} catch (e) {
+			return props.name
+		}
+	}
+	
+	return props.name
+})
+
+// 计算图标样式
+const iconStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	if (props.lineHeight) {
+		style.lineHeight = props.lineHeight
+	}
+	
+	return style
+})
+
+// 计算 Unicode 图标样式
+const unicodeStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 处理大小
+	let sizeValue = props.size
+	if (typeof sizeValue === 'number') {
+		sizeValue = `${sizeValue}rpx`
+	}
+	style.fontSize = sizeValue
+	
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	style.fontFamily = props.fontFamily
+	
+	return style
+})
+
+// 计算字体图标样式
+const fontStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 处理大小
+	let sizeValue = props.size
+	if (typeof sizeValue === 'number') {
+		sizeValue = `${sizeValue}rpx`
+	}
+	style.fontSize = sizeValue
+	
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	style.fontFamily = props.fontFamily
+	
+	return style
+})
+
+// 点击事件处理
+const handleClick = (event: Event) => {
+	emit('click', event)
+}
+</script>
+
+<style lang="scss">
+.parrot-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	
+	// 旋转动画
+	&--spin {
+		animation: parrot-icon-spin 1s linear infinite;
+	}
+}
+
+.parrot-icon__unicode,
+.parrot-icon__font {
+	display: block;
+}
+
+// 旋转动画
+@keyframes parrot-icon-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+// 常用图标字体定义
+.parrot-icon {
+	font-family: "parrot-icon" !important;
+	font-size: 24rpx;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+// 如果使用阿里巴巴图标库或其他图标字体，可以在这里定义
+// @font-face {
+//   font-family: "parrot-icon";
+//   src: url('~@/static/fonts/iconfont.woff2?t=1678901234') format('woff2'),
+//        url('~@/static/fonts/iconfont.woff?t=1678901234') format('woff'),
+//        url('~@/static/fonts/iconfont.ttf?t=1678901234') format('truetype');
+// }
+</style>

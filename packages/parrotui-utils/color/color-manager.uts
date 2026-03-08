@@ -1,0 +1,350 @@
+// Parrot UI Color Management System
+// 动态颜色管理，支持主题联动
+
+// 颜色主题配置
+export interface ColorTheme {
+  // 主色调
+  primary: string
+  // 成功色
+  success: string
+  // 警告色
+  warning: string
+  // 危险色
+  danger: string
+  // 信息色
+  info: string
+  // 默认文本色
+  text: string
+  // 次要文本色
+  textSecondary: string
+  // 禁用文本色
+  textDisabled: string
+  // 背景色
+  background: string
+  // 卡片背景色
+  cardBackground: string
+  // 边框色
+  border: string
+  // 分割线色
+  divider: string
+  // 遮罩色
+  mask: string
+  // 白色
+  white: string
+  // 黑色
+  black: string
+}
+
+// 颜色模式类型
+export type ColorMode = 'light' | 'dark'
+
+// 颜色系统配置
+export interface ColorConfig {
+  // 当前模式
+  mode: ColorMode
+  // 浅色主题
+  light: ColorTheme
+  // 深色主题
+  dark: ColorTheme
+  // 自定义主题
+  custom?: Record<string, ColorTheme>
+}
+
+// 默认浅色主题
+const defaultLightTheme: ColorTheme = {
+  primary: '#007AFF',
+  success: '#34C759',
+  warning: '#FF9500',
+  danger: '#FF3B30',
+  info: '#5AC8FA',
+  text: '#333333',
+  textSecondary: '#666666',
+  textDisabled: '#999999',
+  background: '#F8F8F8',
+  cardBackground: '#FFFFFF',
+  border: '#E5E5E5',
+  divider: '#EEEEEE',
+  mask: 'rgba(0, 0, 0, 0.6)',
+  white: '#FFFFFF',
+  black: '#000000'
+}
+
+// 默认深色主题
+const defaultDarkTheme: ColorTheme = {
+  primary: '#0A84FF',
+  success: '#30D158',
+  warning: '#FF9F0A',
+  danger: '#FF453A',
+  info: '#5E5CE6',
+  text: '#FFFFFF',
+  textSecondary: '#CCCCCC',
+  textDisabled: '#888888',
+  background: '#1C1C1E',
+  cardBackground: '#2C2C2E',
+  border: '#3A3A3C',
+  divider: '#38383A',
+  mask: 'rgba(0, 0, 0, 0.8)',
+  white: '#FFFFFF',
+  black: '#000000'
+}
+
+// 颜色系统类
+class ParrotColor {
+  private config: ColorConfig
+  private listeners: Array<(theme: ColorTheme, mode: ColorMode) => void> = []
+
+  constructor() {
+    this.config = {
+      mode: 'light',
+      light: defaultLightTheme,
+      dark: defaultDarkTheme
+    }
+    
+    // 初始化主题
+    this.initTheme()
+  }
+
+  // 初始化主题
+  private initTheme(): void {
+    // 从本地存储获取主题设置
+    try {
+      const savedMode = uni.getStorageSync('parrot-color-mode') as ColorMode
+      if (savedMode === 'light' || savedMode === 'dark') {
+        this.config.mode = savedMode
+      }
+    } catch (e) {
+      console.warn('Failed to get color mode from storage:', e)
+    }
+    
+    // 应用初始主题
+    this.applyTheme()
+  }
+
+  // 获取当前主题
+  getCurrentTheme(): ColorTheme {
+    return this.config[this.config.mode]
+  }
+
+  // 获取当前模式
+  getCurrentMode(): ColorMode {
+    return this.config.mode
+  }
+
+  // 切换主题模式
+  toggleMode(): void {
+    this.config.mode = this.config.mode === 'light' ? 'dark' : 'light'
+    this.saveMode()
+    this.applyTheme()
+    this.notifyListeners()
+  }
+
+  // 设置主题模式
+  setMode(mode: ColorMode): void {
+    if (mode !== this.config.mode) {
+      this.config.mode = mode
+      this.saveMode()
+      this.applyTheme()
+      this.notifyListeners()
+    }
+  }
+
+  // 保存模式到本地存储
+  private saveMode(): void {
+    try {
+      uni.setStorageSync('parrot-color-mode', this.config.mode)
+    } catch (e) {
+      console.warn('Failed to save color mode to storage:', e)
+    }
+  }
+
+  // 应用主题到页面
+  private applyTheme(): void {
+    const theme = this.getCurrentTheme()
+    
+    // 设置 CSS 变量
+    const root = document.documentElement || (uni as any).createSelectorQuery?.().select('page') || {}
+    
+    // 在 uni-app 中设置全局样式变量
+    if (typeof document !== 'undefined') {
+      Object.entries(theme).forEach(([key, value]) => {
+        root.style.setProperty(`--parrot-${this.kebabCase(key)}`, value)
+      })
+    }
+    
+    // 触发主题变更事件
+    uni.$emit('parrot-theme-change', {
+      mode: this.config.mode,
+      theme: theme
+    })
+  }
+
+  // 通知监听器
+  private notifyListeners(): void {
+    const theme = this.getCurrentTheme()
+    this.listeners.forEach(listener => listener(theme, this.config.mode))
+  }
+
+  // 添加主题变更监听器
+  onThemeChange(callback: (theme: ColorTheme, mode: ColorMode) => void): () => void {
+    this.listeners.push(callback)
+    
+    // 返回移除监听器的函数
+    return () => {
+      const index = this.listeners.indexOf(callback)
+      if (index > -1) {
+        this.listeners.splice(index, 1)
+      }
+    }
+  }
+
+  // 移除所有监听器
+  removeAllListeners(): void {
+    this.listeners = []
+  }
+
+  // 获取颜色值
+  getColor(key: keyof ColorTheme): string {
+    const theme = this.getCurrentTheme()
+    return theme[key] || ''
+  }
+
+  // 获取带透明度的颜色
+  getColorWithOpacity(key: keyof ColorTheme, opacity: number): string {
+    const color = this.getColor(key)
+    if (!color) return ''
+    
+    // 解析颜色值
+    let rgb: number[] = []
+    
+    if (color.startsWith('#')) {
+      // HEX 格式
+      const hex = color.replace('#', '')
+      if (hex.length === 3) {
+        rgb = [
+          parseInt(hex[0] + hex[0], 16),
+          parseInt(hex[1] + hex[1], 16),
+          parseInt(hex[2] + hex[2], 16)
+        ]
+      } else if (hex.length === 6) {
+        rgb = [
+          parseInt(hex.substr(0, 2), 16),
+          parseInt(hex.substr(2, 2), 16),
+          parseInt(hex.substr(4, 2), 16)
+        ]
+      }
+    } else if (color.startsWith('rgb')) {
+      // RGB 格式
+      const match = color.match(/[\d.]+/g)
+      if (match) {
+        rgb = match.slice(0, 3).map(Number)
+      }
+    }
+    
+    if (rgb.length === 3) {
+      return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`
+    }
+    
+    return color
+  }
+
+  // 颜色混合
+  mixColors(color1: string, color2: string, ratio: number = 0.5): string {
+    const rgb1 = this.parseColor(color1)
+    const rgb2 = this.parseColor(color2)
+    
+    if (!rgb1 || !rgb2) return color1
+    
+    const mixed = [
+      Math.round(rgb1[0] * (1 - ratio) + rgb2[0] * ratio),
+      Math.round(rgb1[1] * (1 - ratio) + rgb2[1] * ratio),
+      Math.round(rgb1[2] * (1 - ratio) + rgb2[2] * ratio)
+    ]
+    
+    return `rgb(${mixed[0]}, ${mixed[1]}, ${mixed[2]})`
+  }
+
+  // 解析颜色值为 RGB 数组
+  private parseColor(color: string): number[] | null {
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '')
+      if (hex.length === 3) {
+        return [
+          parseInt(hex[0] + hex[0], 16),
+          parseInt(hex[1] + hex[1], 16),
+          parseInt(hex[2] + hex[2], 16)
+        ]
+      } else if (hex.length === 6) {
+        return [
+          parseInt(hex.substr(0, 2), 16),
+          parseInt(hex.substr(2, 2), 16),
+          parseInt(hex.substr(4, 2), 16)
+        ]
+      }
+    } else if (color.startsWith('rgb')) {
+      const match = color.match(/[\d.]+/g)
+      if (match) {
+        return match.slice(0, 3).map(Number)
+      }
+    }
+    return null
+  }
+
+  // 驼峰转短横线
+  private kebabCase(str: string): string {
+    return str.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`)
+  }
+
+  // 重置为主题默认值
+  resetToDefault(): void {
+    this.config.light = { ...defaultLightTheme }
+    this.config.dark = { ...defaultDarkTheme }
+    this.applyTheme()
+    this.notifyListeners()
+  }
+
+  // 更新主题配置
+  updateTheme(updates: Partial<ColorTheme>, mode?: ColorMode): void {
+    const targetMode = mode || this.config.mode
+    this.config[targetMode] = { ...this.config[targetMode], ...updates }
+    this.applyTheme()
+    this.notifyListeners()
+  }
+
+  // 设置自定义主题
+  setCustomTheme(name: string, theme: ColorTheme): void {
+    if (!this.config.custom) {
+      this.config.custom = {}
+    }
+    this.config.custom[name] = theme
+  }
+
+  // 使用自定义主题
+  useCustomTheme(name: string): boolean {
+    if (this.config.custom && this.config.custom[name]) {
+      this.config[this.config.mode] = { ...this.config.custom[name] }
+      this.applyTheme()
+      this.notifyListeners()
+      return true
+    }
+    return false
+  }
+}
+
+// 创建颜色管理实例
+const parrotColor = new ParrotColor()
+
+// 导出颜色管理器
+export default parrotColor
+
+// 导出类型
+export { ColorTheme, ColorMode, ColorConfig }
+
+// 导出便捷函数
+export const useParrotColor = () => parrotColor
+
+// 导出颜色获取函数
+export const getColor = (key: keyof ColorTheme) => parrotColor.getColor(key)
+export const getColorWithOpacity = (key: keyof ColorTheme, opacity: number) => 
+  parrotColor.getColorWithOpacity(key, opacity)
+export const mixColors = (color1: string, color2: string, ratio?: number) => 
+  parrotColor.mixColors(color1, color2, ratio)

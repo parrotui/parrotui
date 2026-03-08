@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "@parrotui/core": ["packages/parrotui-core/index.ts"],
+      "@parrotui/icons": ["packages/parrotui-icons/index.ts"],
+      "@parrotui/utils": ["packages/parrotui-utils/index.ts"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["packages/**/*", "playground/**/*", "examples/**/*"]
+}

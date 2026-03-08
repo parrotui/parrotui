@@ -1,0 +1,180 @@
+<template>
+	<view 
+		class="parrot-grid"
+		:class="[
+			gridClass,
+			border ? 'parrot-grid--border' : '',
+			square ? 'parrot-grid--square' : ''
+		]"
+		:style="gridStyle"
+	>
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 列数
+	columns?: number
+	// 是否显示边框
+	border?: boolean
+	// 是否正方形格子
+	square?: boolean
+	// 间距
+	gutter?: number | string
+	// padding
+	padding?: string
+	// margin
+	margin?: string
+	// 背景色
+	background?: string
+	// 自定义类名
+	customClass?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	columns: 4,
+	border: false,
+	square: false,
+	gutter: 0,
+	padding: '0',
+	margin: '0',
+	background: 'transparent',
+	customClass: ''
+})
+
+// 计算 grid 类名
+const gridClass = computed(() => {
+	const classes: string[] = ['parrot-grid']
+	
+	if (props.customClass) {
+		classes.push(props.customClass)
+	}
+	
+	if (props.square) {
+		classes.push('parrot-grid--square')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算 grid 样式
+const gridStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 基础样式
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.background) {
+		style.backgroundColor = props.background
+	}
+	
+	// 网格样式通过 CSS 变量传递给子项
+	if (props.columns) {
+		style.setProperty('--parrot-grid-columns', props.columns.toString())
+	}
+	
+	if (props.gutter) {
+		let gutterValue = props.gutter
+		if (typeof gutterValue === 'number') {
+			gutterValue = `${gutterValue}rpx`
+		}
+		style.setProperty('--parrot-grid-gutter', gutterValue)
+	}
+	
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-grid {
+	display: grid;
+	width: 100%;
+	box-sizing: border-box;
+	
+	// 通过 CSS 变量设置列数和间距
+	grid-template-columns: repeat(var(--parrot-grid-columns, 4), 1fr);
+	gap: var(--parrot-grid-gutter, 0rpx);
+	
+	// 边框样式
+	&--border {
+		.parrot-grid-item {
+			position: relative;
+			
+			&::after {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				border: 1px solid #e5e5e5;
+				pointer-events: none;
+				box-sizing: border-box;
+			}
+			
+			// 隐藏右边和下边的重复边框
+			&:nth-child(var(--parrot-grid-columns)) {
+				&::after {
+					border-right: none;
+				}
+			}
+			
+			&:nth-last-child(-n+var(--parrot-grid-columns)) {
+				&::after {
+					border-bottom: none;
+				}
+			}
+		}
+	}
+	
+	// 正方形格子
+	&--square {
+		.parrot-grid-item {
+			aspect-ratio: 1;
+		}
+	}
+	
+	// 常用列数预设
+	&--cols-2 {
+		--parrot-grid-columns: 2;
+	}
+	
+	&--cols-3 {
+		--parrot-grid-columns: 3;
+	}
+	
+	&--cols-4 {
+		--parrot-grid-columns: 4;
+	}
+	
+	&--cols-5 {
+		--parrot-grid-columns: 5;
+	}
+	
+	&--cols-6 {
+		--parrot-grid-columns: 6;
+	}
+}
+
+// Grid Item 组件样式
+.parrot-grid-item {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	box-sizing: border-box;
+}
+</style>

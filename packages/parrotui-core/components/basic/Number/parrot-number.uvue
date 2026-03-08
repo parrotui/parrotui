@@ -1,0 +1,249 @@
+<template>
+	<text 
+		class="parrot-number"
+		:class="[
+			numberClass,
+			type ? `parrot-number--${type}` : '',
+			size ? `parrot-number--${size}` : '',
+			bold ? 'parrot-number--bold' : ''
+		]"
+		:style="numberStyle"
+		@click="handleClick"
+	>
+		{{ formattedValue }}
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 数字值
+	value?: number | string
+	// 数字类型
+	type?: 'integer' | 'decimal' | 'percent' | 'currency' | 'phone' | 'idcard'
+	// 数字尺寸
+	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+	// 是否加粗
+	bold?: boolean
+	// 小数位数
+	decimalPlaces?: number
+	// 是否千分位分隔
+	thousandsSeparator?: boolean
+	// 货币符号
+	currencySymbol?: string
+	// 自定义颜色
+	color?: string
+	// 自定义字体大小
+	fontSize?: number | string
+	// margin
+	margin?: string
+	// padding
+	padding?: string
+	// 自定义类名
+	customClass?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	value: 0,
+	type: 'integer',
+	size: 'md',
+	bold: false,
+	decimalPlaces: 2,
+	thousandsSeparator: false,
+	currencySymbol: '¥',
+	color: '',
+	fontSize: '',
+	margin: '0',
+	padding: '0',
+	customClass: ''
+})
+
+// 定义 emits
+const emit = defineEmits<{
+	click: [event: Event]
+}>()
+
+// 计算格式化后的数值
+const formattedValue = computed(() => {
+	let numValue: number
+	
+	// 转换为数字
+	if (typeof props.value === 'string') {
+		numValue = parseFloat(props.value) || 0
+	} else {
+		numValue = props.value as number
+	}
+	
+	// 根据类型格式化
+	switch (props.type) {
+		case 'integer':
+			return formatInteger(numValue)
+		case 'decimal':
+			return formatDecimal(numValue)
+		case 'percent':
+			return formatPercent(numValue)
+		case 'currency':
+			return formatCurrency(numValue)
+		case 'phone':
+			return formatPhone(props.value.toString())
+		case 'idcard':
+			return formatIdCard(props.value.toString())
+		default:
+			return numValue.toString()
+	}
+})
+
+// 格式化整数
+function formatInteger(value: number): string {
+	if (props.thousandsSeparator) {
+		return Math.floor(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+	}
+	return Math.floor(value).toString()
+}
+
+// 格式化小数
+function formatDecimal(value: number): string {
+	const fixedValue = value.toFixed(props.decimalPlaces)
+	if (props.thousandsSeparator) {
+		const parts = fixedValue.split('.')
+		parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+		return parts.join('.')
+	}
+	return fixedValue
+}
+
+// 格式化百分比
+function formatPercent(value: number): string {
+	return formatDecimal(value * 100) + '%'
+}
+
+// 格式化货币
+function formatCurrency(value: number): string {
+	const formattedNum = formatDecimal(Math.abs(value))
+	const sign = value < 0 ? '-' : ''
+	return `${sign}${props.currencySymbol}${formattedNum}`
+}
+
+// 格式化手机号
+function formatPhone(phone: string): string {
+	const cleanPhone = phone.replace(/\D/g, '')
+	if (cleanPhone.length === 11) {
+		return cleanPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1 $2 $3')
+	}
+	return phone
+}
+
+// 格式化身份证号
+function formatIdCard(idcard: string): string {
+	const cleanId = idcard.replace(/\s/g, '')
+	if (cleanId.length === 18) {
+		return cleanId.replace(/(\d{6})(\d{8})(\d{3})(\w)/, '$1********$3$4')
+	}
+	return idcard
+}
+
+// 计算数字类名
+const numberClass = computed(() => {
+	const classes: string[] = ['parrot-number']
+	
+	if (props.customClass) {
+		classes.push(props.customClass)
+	}
+	
+	if (props.bold) {
+		classes.push('parrot-number--bold')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算数字样式
+const numberStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	if (props.fontSize) {
+		let fontSize = props.fontSize
+		if (typeof fontSize === 'number') {
+			fontSize = `${fontSize}rpx`
+		}
+		style.fontSize = fontSize
+	}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	return style
+})
+
+// 点击事件处理
+const handleClick = (event: Event) => {
+	emit('click', event)
+}
+</script>
+
+<style lang="scss">
+.parrot-number {
+	display: inline-block;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	
+	// 基础尺寸
+	&--xs {
+		font-size: 20rpx;
+	}
+	
+	&--sm {
+		font-size: 24rpx;
+	}
+	
+	&--md {
+		font-size: 28rpx;
+	}
+	
+	&--lg {
+		font-size: 32rpx;
+	}
+	
+	&--xl {
+		font-size: 36rpx;
+	}
+	
+	// 加粗
+	&--bold {
+		font-weight: bold;
+	}
+	
+	// 颜色类型
+	&--primary {
+		color: #007aff;
+	}
+	
+	&--success {
+		color: #4cd964;
+	}
+	
+	&--warning {
+		color: #ffcc00;
+	}
+	
+	&--danger {
+		color: #ff3b30;
+	}
+	
+	&--info {
+		color: #5ac8fa;
+	}
+}
+</style>

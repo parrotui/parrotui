@@ -1,0 +1,200 @@
+<template>
+	<view class="parrot-notice-bar" :style="customStyle">
+		<!-- 左侧图标 -->
+		<view v-if="showIcon" class="parrot-notice-bar__icon">
+			<image v-if="iconUrl" :src="iconUrl" mode="aspectFit" :style="iconStyle" />
+			<text v-else class="parrot-notice-bar__icon-text">📢</text>
+		</view>
+		
+		<!-- 公告内容 -->
+		<view class="parrot-notice-bar__body">
+			<!-- 轮播模式 -->
+			<swiper 
+				v-if="mode === 'swiper'" 
+				class="parrot-notice-bar__swiper" 
+				:vertical="vertical" 
+				:autoplay="autoplay" 
+				:circular="circular"
+				:show-indicators="showIndicators"
+			>
+				<swiper-item v-for="(item, index) in data" :key="index">
+					<view class="parrot-notice-bar__content" @click="onItemClick(item, index)">
+						<text class="parrot-notice-bar__text">{{ getText(item) }}</text>
+					</view>
+				</swiper-item>
+			</swiper>
+			
+			<!-- 单条模式 -->
+			<view v-else class="parrot-notice-bar__content" @click="onItemClick(data, 0)">
+				<text class="parrot-notice-bar__text">{{ getText(data) }}</text>
+			</view>
+		</view>
+		
+		<!-- 关闭按钮 -->
+		<view v-if="closable" class="parrot-notice-bar__close" @click="onClose">
+			<text class="parrot-notice-bar__close-icon">✕</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * 公告项
+	 */
+	type NoticeItem = string | {
+		id?: string | number
+		title?: string
+		content?: string
+		url?: string
+	}
+	
+	/**
+	 * Props 定义
+	 */
+	interface Props {
+		/** 公告数据（字符串或对象数组） */
+		data?: NoticeItem | NoticeItem[]
+		/** 显示模式：swiper（轮播）/ single（单条） */
+		mode?: 'swiper' | 'single'
+		/** 是否垂直滚动 */
+		vertical?: boolean
+		/** 是否自动播放 */
+		autoplay?: boolean
+		/** 自动播放间隔（ms） */
+		interval?: number
+		/** 是否循环播放 */
+		circular?: boolean
+		/** 是否显示指示器 */
+		showIndicators?: boolean
+		/** 是否显示左侧图标 */
+		showIcon?: boolean
+		/** 图标 URL */
+		iconUrl?: string
+		/** 图标样式 */
+		iconStyle?: string
+		/** 是否可关闭 */
+		closable?: boolean
+		/** 自定义样式 */
+		customStyle?: string
+		/** 文本颜色 */
+		color?: string
+		/** 字体大小 */
+		fontSize?: number
+		/** 背景颜色 */
+		backgroundColor?: string
+	}
+	
+	const props = withDefaults(defineProps<Props>(), {
+		data: () => [],
+		mode: 'single',
+		vertical: true,
+		autoplay: true,
+		interval: 3000,
+		circular: true,
+		showIndicators: false,
+		showIcon: true,
+		iconUrl: '',
+		iconStyle: '',
+		closable: false,
+		customStyle: '',
+		color: '#333333',
+		fontSize: 24,
+		backgroundColor: '#FFF9F9'
+	})
+	
+	/**
+	 * Emits 定义
+	 */
+	const emit = defineEmits<{
+		/** 点击公告项 */
+		(event: 'click', item: NoticeItem, index: number): void
+		/** 关闭事件 */
+		(event: 'close'): void
+	}>()
+	
+	/**
+	 * 获取显示文本
+	 */
+	function getText(item: NoticeItem): string {
+		if (typeof item === 'string') {
+			return item
+		}
+		return (item as any).title || (item as any).content || ''
+	}
+	
+	/**
+	 * 点击公告项
+	 */
+	function onItemClick(item: NoticeItem, index: number) {
+		emit('click', item, index)
+	}
+	
+	/**
+	 * 关闭
+	 */
+	function onClose() {
+		emit('close')
+	}
+</script>
+
+<style scoped lang="scss">
+	.parrot-notice-bar {
+		display: flex;
+		align-items: center;
+		padding: 20rpx 24rpx;
+		background-color: #FFF9F9;
+		border-radius: 12rpx;
+		margin: 20rpx;
+		
+		&__icon {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 16rpx;
+			
+			&-text {
+				font-size: 32rpx;
+			}
+		}
+		
+		&__body {
+			flex: 1;
+			overflow: hidden;
+		}
+		
+		&__swiper {
+			height: 48rpx;
+		}
+		
+		&__content {
+			display: flex;
+			align-items: center;
+			height: 48rpx;
+			overflow: hidden;
+		}
+		
+		&__text {
+			font-size: 24rpx;
+			color: #333333;
+			line-height: 1.5;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		
+		&__close {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 40rpx;
+			height: 40rpx;
+			margin-left: 16rpx;
+			cursor: pointer;
+			
+			&-icon {
+				font-size: 28rpx;
+				color: #999999;
+			}
+		}
+	}
+</style>

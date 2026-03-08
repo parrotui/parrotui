@@ -1,0 +1,38 @@
+/**
+ * ParrotUI 组件库入口文件
+ * 
+ * 使用方式：
+ * 1. 按需引入（推荐）
+ *    import ParrotSearchBar from '@/components/parrotui/parrot-search-bar/parrot-search-bar.uvue'
+ * 
+ * 2. 全局注册（在 App.uvue 中）
+ *    import { ParrotSearchBar, ParrotTab, ParrotProductCard } from '@/components/parrotui'
+ */
+
+// 导航组件
+export { default as ParrotNavBar } from './parrot-nav-bar/parrot-nav-bar.uvue'
+export { default as ParrotTab } from './parrot-tab/parrot-tab.uvue'
+export { default as ParrotFooter } from './parrot-footer/parrot-footer.uvue'
+export { default as ParrotFooterLinks } from './parrot-footer-links/parrot-footer-links.uvue'
+
+// 表单组件
+export { default as ParrotSearchBar } from './parrot-search-bar/parrot-search-bar.uvue'
+export { default as ParrotSelector } from './parrot-selector/parrot-selector.uvue'
+export { default as ParrotFilterDrawer } from './parrot-filter-drawer/parrot-filter-drawer.uvue'
+
+// 展示组件
+export { default as ParrotNoticeBar } from './parrot-notice-bar/parrot-notice-bar.uvue'
+export { default as ParrotIndexCard } from './parrot-index-card/parrot-index-card.uvue'
+export { default as ParrotProductCard } from './parrot-product-card/parrot-product-card.uvue'
+export { default as ParrotTradeItem } from './parrot-trade-item/parrot-trade-item.uvue'
+export { default as ParrotTimeline } from './parrot-timeline/parrot-timeline.uvue'
+
+// 业务组件
+export { default as ParrotTmClassSelector } from './parrot-tm-class-selector/parrot-tm-class-selector.uvue'
+export { default as ParrotTmStatusTag } from './parrot-tm-status-tag/parrot-tm-status-tag.uvue'
+export { default as ParrotApplicantCard } from './parrot-applicant-card/parrot-applicant-card.uvue'
+
+// 基础组件
+export { default as ParrotIcon } from './parrot-icon/parrot-icon.uvue'
+export { default as ParrotButton } from './parrot-button/parrot-button.uvue'
+export { default as ParrotPrice } from './parrot-price/parrot-price.uvue'

@@ -1,0 +1,264 @@
+<template>
+	<text 
+		class="parrot-text"
+		:class="[
+			textClass,
+			type ? `parrot-text--${type}` : '',
+			size ? `parrot-text--${size}` : '',
+			align ? `parrot-text--${align}` : '',
+			ellipsis ? 'parrot-text--ellipsis' : '',
+			block ? 'parrot-text--block' : '',
+			underline ? 'parrot-text--underline' : '',
+			strikethrough ? 'parrot-text--strikethrough' : ''
+		]"
+		:style="textStyle"
+		@click="handleClick"
+	>
+		<slot>{{ text }}</slot>
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 文本内容
+	text?: string
+	// 文本类型
+	type?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'secondary' | 'muted'
+	// 文本尺寸
+	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
+	// 文本对齐方式
+	align?: 'left' | 'center' | 'right' | 'justify'
+	// 是否省略
+	ellipsis?: boolean | number
+	// 是否块级元素
+	block?: boolean
+	// 是否下划线
+	underline?: boolean
+	// 是否删除线
+	strikethrough?: boolean
+	// 自定义颜色
+	color?: string
+	// 自定义字体大小
+	fontSize?: number | string
+	// 字体粗细
+	fontWeight?: string | number
+	// 行高
+	lineHeight?: string
+	// margin
+	margin?: string
+	// padding
+	padding?: string
+	// 自定义类名
+	customClass?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	text: '',
+	type: 'default',
+	size: 'md',
+	align: 'left',
+	ellipsis: false,
+	block: false,
+	underline: false,
+	strikethrough: false,
+	color: '',
+	fontSize: '',
+	fontWeight: 'normal',
+	lineHeight: '1.5',
+	margin: '0',
+	padding: '0',
+	customClass: ''
+})
+
+// 定义 emits
+const emit = defineEmits<{
+	click: [event: Event]
+}>()
+
+// 计算文本类名
+const textClass = computed(() => {
+	const classes: string[] = ['parrot-text']
+	
+	if (props.customClass) {
+		classes.push(props.customClass)
+	}
+	
+	if (props.block) {
+		classes.push('parrot-text--block')
+	}
+	
+	if (props.underline) {
+		classes.push('parrot-text--underline')
+	}
+	
+	if (props.strikethrough) {
+		classes.push('parrot-text--strikethrough')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算文本样式
+const textStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 自定义样式
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	if (props.fontSize) {
+		let fontSize = props.fontSize
+		if (typeof fontSize === 'number') {
+			fontSize = `${fontSize}rpx`
+		}
+		style.fontSize = fontSize
+	}
+	
+	if (props.fontWeight) {
+		style.fontWeight = props.fontWeight.toString()
+	}
+	
+	if (props.lineHeight) {
+		style.lineHeight = props.lineHeight
+	}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	// 处理省略
+	if (props.ellipsis === true) {
+		style.overflow = 'hidden'
+		style.textOverflow = 'ellipsis'
+		style.whiteSpace = 'nowrap'
+	} else if (typeof props.ellipsis === 'number' && props.ellipsis > 0) {
+		style.overflow = 'hidden'
+		style.display = '-webkit-box'
+		style.webkitLineClamp = props.ellipsis.toString()
+		style.webkitBoxOrient = 'vertical'
+		style.whiteSpace = 'normal'
+	}
+	
+	return style
+})
+
+// 点击事件处理
+const handleClick = (event: Event) => {
+	emit('click', event)
+}
+</script>
+
+<style lang="scss">
+.parrot-text {
+	word-wrap: break-word;
+	word-break: break-all;
+	
+	// 基础尺寸
+	&--xs {
+		font-size: 20rpx;
+	}
+	
+	&--sm {
+		font-size: 24rpx;
+	}
+	
+	&--md {
+		font-size: 28rpx;
+	}
+	
+	&--lg {
+		font-size: 32rpx;
+	}
+	
+	&--xl {
+		font-size: 36rpx;
+	}
+	
+	&--xxl {
+		font-size: 40rpx;
+	}
+	
+	// 文本类型颜色
+	&--default {
+		color: #333333;
+	}
+	
+	&--primary {
+		color: #007aff;
+	}
+	
+	&--success {
+		color: #4cd964;
+	}
+	
+	&--warning {
+		color: #ffcc00;
+	}
+	
+	&--danger {
+		color: #ff3b30;
+	}
+	
+	&--info {
+		color: #5ac8fa;
+	}
+	
+	&--secondary {
+		color: #888888;
+	}
+	
+	&--muted {
+		color: #bbbbbb;
+	}
+	
+	// 对齐方式
+	&--left {
+		text-align: left;
+	}
+	
+	&--center {
+		text-align: center;
+	}
+	
+	&--right {
+		text-align: right;
+	}
+	
+	&--justify {
+		text-align: justify;
+	}
+	
+	// 块级元素
+	&--block {
+		display: block;
+		width: 100%;
+	}
+	
+	// 下划线
+	&--underline {
+		text-decoration: underline;
+	}
+	
+	// 删除线
+	&--strikethrough {
+		text-decoration: line-through;
+	}
+	
+	// 省略号
+	&--ellipsis {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+</style>

@@ -1,0 +1,223 @@
+<template>
+	<view 
+		class="parrot-layout"
+		:class="[
+			layoutClass,
+			direction ? `parrot-layout--${direction}` : '',
+			justify ? `parrot-layout--justify-${justify}` : '',
+			align ? `parrot-layout--align-${align}` : '',
+			wrap ? 'parrot-layout--wrap' : ''
+		]"
+		:style="layoutStyle"
+	>
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 布局方向
+	direction?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
+	// 主轴对齐方式
+	justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly'
+	// 交叉轴对齐方式
+	align?: 'start' | 'end' | 'center' | 'stretch' | 'baseline'
+	// 是否换行
+	wrap?: boolean
+	// 间距
+	gap?: number | string
+	// padding
+	padding?: string
+	// margin
+	margin?: string
+	// 背景色
+	background?: string
+	// 自定义类名
+	customClass?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	direction: 'row',
+	justify: 'start',
+	align: 'stretch',
+	wrap: false,
+	gap: 0,
+	padding: '0',
+	margin: '0',
+	background: 'transparent',
+	customClass: ''
+})
+
+// 计算 layout 类名
+const layoutClass = computed(() => {
+	const classes: string[] = ['parrot-layout']
+	
+	if (props.customClass) {
+		classes.push(props.customClass)
+	}
+	
+	if (props.wrap) {
+		classes.push('parrot-layout--wrap')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算 layout 样式
+const layoutStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 基础布局样式
+	if (props.direction) {
+		style.flexDirection = props.direction
+	}
+	
+	if (props.justify) {
+		const justifyContentMap: Record<string, string> = {
+			start: 'flex-start',
+			end: 'flex-end',
+			center: 'center',
+			between: 'space-between',
+			around: 'space-around',
+			evenly: 'space-evenly'
+		}
+		style.justifyContent = justifyContentMap[props.justify] || 'flex-start'
+	}
+	
+	if (props.align) {
+		const alignItemsMap: Record<string, string> = {
+			start: 'flex-start',
+			end: 'flex-end',
+			center: 'center',
+			stretch: 'stretch',
+			baseline: 'baseline'
+		}
+		style.alignItems = alignItemsMap[props.align] || 'stretch'
+	}
+	
+	// 间距
+	if (props.gap) {
+		let gapValue = props.gap
+		if (typeof gapValue === 'number') {
+			gapValue = `${gapValue}rpx`
+		}
+		style.gap = gapValue
+	}
+	
+	// 其他样式
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.background) {
+		style.backgroundColor = props.background
+	}
+	
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-layout {
+	display: flex;
+	width: 100%;
+	box-sizing: border-box;
+	
+	// 方向变体
+	&--row {
+		flex-direction: row;
+	}
+	
+	&--column {
+		flex-direction: column;
+	}
+	
+	&--row-reverse {
+		flex-direction: row-reverse;
+	}
+	
+	&--column-reverse {
+		flex-direction: column-reverse;
+	}
+	
+	// 主轴对齐变体
+	&--justify-start {
+		justify-content: flex-start;
+	}
+	
+	&--justify-end {
+		justify-content: flex-end;
+	}
+	
+	&--justify-center {
+		justify-content: center;
+	}
+	
+	&--justify-between {
+		justify-content: space-between;
+	}
+	
+	&--justify-around {
+		justify-content: space-around;
+	}
+	
+	&--justify-evenly {
+		justify-content: space-evenly;
+	}
+	
+	// 交叉轴对齐变体
+	&--align-start {
+		align-items: flex-start;
+	}
+	
+	&--align-end {
+		align-items: flex-end;
+	}
+	
+	&--align-center {
+		align-items: center;
+	}
+	
+	&--align-stretch {
+		align-items: stretch;
+	}
+	
+	&--align-baseline {
+		align-items: baseline;
+	}
+	
+	// 换行
+	&--wrap {
+		flex-wrap: wrap;
+	}
+	
+	// 常用布局模式
+	&--horizontal {
+		flex-direction: row;
+		align-items: center;
+	}
+	
+	&--vertical {
+		flex-direction: column;
+	}
+	
+	&--center {
+		justify-content: center;
+		align-items: center;
+	}
+	
+	&--space-between {
+		justify-content: space-between;
+		align-items: center;
+	}
+}
+</style>

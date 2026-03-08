@@ -1,0 +1,194 @@
+<template>
+	<view 
+		class="parrot-color"
+		:class="[
+			colorClass,
+			block ? 'parrot-color--block' : ''
+		]"
+		:style="colorStyle"
+		@click="handleClick"
+	>
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+// 定义 props
+interface Props {
+	// 颜色值
+	color?: string
+	// 背景色
+	background?: string
+	// 是否块级元素
+	block?: boolean
+	// 宽度
+	width?: string
+	// 高度
+	height?: string
+	// 圆角
+	borderRadius?: string
+	// margin
+	margin?: string
+	// padding
+	padding?: string
+	// 自定义类名
+	customClass?: string
+}
+
+// 默认 props
+const props = withDefaults(defineProps<Props>(), {
+	color: '',
+	background: '',
+	block: false,
+	width: '',
+	height: '',
+	borderRadius: '',
+	margin: '0',
+	padding: '0',
+	customClass: ''
+})
+
+// 定义 emits
+const emit = defineEmits<{
+	click: [event: Event]
+}>()
+
+// 计算颜色类名
+const colorClass = computed(() => {
+	const classes: string[] = ['parrot-color']
+	
+	if (props.customClass) {
+		classes.push(props.customClass)
+	}
+	
+	if (props.block) {
+		classes.push('parrot-color--block')
+	}
+	
+	return classes.join(' ')
+})
+
+// 计算颜色样式
+const colorStyle = computed(() => {
+	const style: CSSProperties = {}
+	
+	// 颜色相关样式
+	if (props.color) {
+		style.color = props.color
+	}
+	
+	if (props.background) {
+		style.backgroundColor = props.background
+	}
+	
+	// 尺寸样式
+	if (props.width) {
+		style.width = props.width
+	}
+	
+	if (props.height) {
+		style.height = props.height
+	}
+	
+	if (props.borderRadius) {
+		style.borderRadius = props.borderRadius
+	}
+	
+	// 间距样式
+	if (props.margin) {
+		style.margin = props.margin
+	}
+	
+	if (props.padding) {
+		style.padding = props.padding
+	}
+	
+	return style
+})
+
+// 点击事件处理
+const handleClick = (event: Event) => {
+	emit('click', event)
+}
+</script>
+
+<style lang="scss">
+.parrot-color {
+	display: inline-block;
+	
+	// 块级元素
+	&--block {
+		display: block;
+		width: 100%;
+	}
+	
+	// 常用颜色变量
+	&--primary {
+		color: #007aff;
+	}
+	
+	&--success {
+		color: #4cd964;
+	}
+	
+	&--warning {
+		color: #ffcc00;
+	}
+	
+	&--danger {
+		color: #ff3b30;
+	}
+	
+	&--info {
+		color: #5ac8fa;
+	}
+	
+	&--default {
+		color: #333333;
+	}
+	
+	&--secondary {
+		color: #888888;
+	}
+	
+	&--muted {
+		color: #bbbbbb;
+	}
+	
+	// 背景色变量
+	&--bg-primary {
+		background-color: #007aff;
+	}
+	
+	&--bg-success {
+		background-color: #4cd964;
+	}
+	
+	&--bg-warning {
+		background-color: #ffcc00;
+	}
+	
+	&--bg-danger {
+		background-color: #ff3b30;
+	}
+	
+	&--bg-info {
+		background-color: #5ac8fa;
+	}
+	
+	&--bg-default {
+		background-color: #f8f8f8;
+	}
+	
+	&--bg-secondary {
+		background-color: #eeeeee;
+	}
+	
+	&--bg-muted {
+		background-color: #dddddd;
+	}
+}
+</style>
