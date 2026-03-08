@@ -11,10 +11,10 @@ hero:
   actions:
     - theme: brand
       text: 快速上手
-      link: /zh-TW/guide/introduction
+      link: /zh-HK/guide/introduction
     - theme: alt
       text: 元件
-      link: /zh-TW/components/button
+      link: /zh-HK/components/button
     - theme: alt
       text: GitHub
       link: https://github.com/parrotui/parrotui

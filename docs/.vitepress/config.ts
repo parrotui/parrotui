@@ -90,48 +90,48 @@ const zhSidebar = {
 
 // 繁体中文侧边栏
 const zhTWSidebar = {
-  '/zh-TW/guide/': [
+  '/zh-HK/guide/': [
     {
       text: '開始使用',
       collapsed: false,
       items: [
-        { text: '介紹',     link: '/zh-TW/guide/introduction' },
-        { text: '快速上手', link: '/zh-TW/guide/getting-started' },
-        { text: '安裝',     link: '/zh-TW/guide/installation' },
-        { text: '更新日誌', link: '/zh-TW/guide/changelog' },
+        { text: '介紹',     link: '/zh-HK/guide/introduction' },
+        { text: '快速上手', link: '/zh-HK/guide/getting-started' },
+        { text: '安裝',     link: '/zh-HK/guide/installation' },
+        { text: '更新日誌', link: '/zh-HK/guide/changelog' },
       ],
     },
     {
       text: '設計基礎',
       collapsed: false,
       items: [
-        { text: 'Design Tokens', link: '/zh-TW/guide/tokens' },
-        { text: '顏色系統',     link: '/zh-TW/guide/colors' },
-        { text: '字體規範',     link: '/zh-TW/guide/typography' },
-        { text: '間距規範',     link: '/zh-TW/guide/spacing' },
-        { text: '主題系統',     link: '/zh-TW/guide/theming' },
+        { text: 'Design Tokens', link: '/zh-HK/guide/tokens' },
+        { text: '顏色系統',     link: '/zh-HK/guide/colors' },
+        { text: '字體規範',     link: '/zh-HK/guide/typography' },
+        { text: '間距規範',     link: '/zh-HK/guide/spacing' },
+        { text: '主題系統',     link: '/zh-HK/guide/theming' },
       ],
     },
   ],
-  '/zh-TW/components/': [
+  '/zh-HK/components/': [
     {
       text: '基礎元件 Basic',
       collapsed: false,
       items: [
-        { text: 'Button 按鈕',  link: '/zh-TW/components/button' },
-        { text: 'Icon 圖示',    link: '/zh-TW/components/icon' },
-        { text: 'Text 文字',    link: '/zh-TW/components/text' },
-        { text: 'Tag 標籤',     link: '/zh-TW/components/tag' },
-        { text: 'Badge 徽標',   link: '/zh-TW/components/badge' },
+        { text: 'Button 按鈕',  link: '/zh-HK/components/button' },
+        { text: 'Icon 圖示',    link: '/zh-HK/components/icon' },
+        { text: 'Text 文字',    link: '/zh-HK/components/text' },
+        { text: 'Tag 標籤',     link: '/zh-HK/components/tag' },
+        { text: 'Badge 徽標',   link: '/zh-HK/components/badge' },
       ],
     },
     {
       text: '佈局元件 Layout',
       collapsed: false,
       items: [
-        { text: 'Layout 佈局',  link: '/zh-TW/components/layout' },
-        { text: 'Grid 柵格',    link: '/zh-TW/components/grid' },
-        { text: 'Card 卡片',    link: '/zh-TW/components/card' },
+        { text: 'Layout 佈局',  link: '/zh-HK/components/layout' },
+        { text: 'Grid 柵格',    link: '/zh-HK/components/grid' },
+        { text: 'Card 卡片',    link: '/zh-HK/components/card' },
       ],
     },
   ],
@@ -264,17 +264,17 @@ export default defineConfig({
       },
     },
 
-    'zh-TW': {
+    'zh-HK': {
       label: '繁體中文',
-      lang: 'zh-TW',
+      lang: 'zh-HK',
       title: 'Parrot UI',
       description: '基於 uni-app X 的跨終端元件庫',
       themeConfig: {
         nav: [
-          { text: '指南',           link: '/zh-TW/guide/introduction',   activeMatch: '/zh-TW/guide/' },
-          { text: '元件',           link: '/zh-TW/components/button',    activeMatch: '/zh-TW/components/' },
-          { text: 'Design Tokens', link: '/zh-TW/guide/tokens' },
-          { text: '更新日誌',       link: '/zh-TW/guide/changelog' },
+          { text: '指南',           link: '/zh-HK/guide/introduction',   activeMatch: '/zh-HK/guide/' },
+          { text: '元件',           link: '/zh-HK/components/button',    activeMatch: '/zh-HK/components/' },
+          { text: 'Design Tokens', link: '/zh-HK/guide/tokens' },
+          { text: '更新日誌',       link: '/zh-HK/guide/changelog' },
         ],
         sidebar: zhTWSidebar,
         outline:             { level: [2, 3], label: '本頁目錄' },
