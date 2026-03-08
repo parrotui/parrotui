@@ -142,6 +142,6 @@ export default defineConfig({
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:title', content: 'Parrot UI' }],
     ['meta', { property: 'og:description', content: '基于 uni-app X 的跨终端组件库' }],
-    ['meta', { property: 'og:url', content: 'https://parrotui.com' }],
+    ['meta', { property: 'og:url', content: 'https://doc.parrotui.com' }],
   ],
 })
