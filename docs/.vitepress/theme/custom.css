@@ -429,3 +429,107 @@ div[class*='language-'] {
 .VPMenu {
   font-variant-emoji: text;
 }
+
+/* ─── i18n 国际化页面国旗样式 ───────────────────── */
+
+/* 表格中的国旗图片 */
+.flag-img {
+  width: 36px;
+  height: auto;
+  border-radius: 3px;
+  vertical-align: middle;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  display: inline-block;
+}
+
+/* 语言列表 */
+.lang-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lang-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+  font-size: 15px;
+  font-weight: 500;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.lang-list li:hover {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.lang-list li .flag-img {
+  width: 32px;
+  flex-shrink: 0;
+}
+
+/* 1:1 圆形国旗列表 */
+.flag-circle-list {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.flag-circle-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  font-family: monospace;
+}
+
+.flag-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border: 2px solid var(--vp-c-divider);
+}
+
+/* i18n 表格外层容器 */
+.i18n-table {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.i18n-table table {
+  min-width: 400px;
+}
+
+.i18n-table td:first-child,
+.i18n-table th:first-child {
+  text-align: center;
+  width: 60px;
+}
+
+/* 暗色模式适配 */
+.dark .lang-list li {
+  background: var(--vp-c-bg-soft);
+  border-color: var(--vp-c-divider);
+}
+
+.dark .lang-list li:hover {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.dark .flag-circle {
+  border-color: var(--vp-c-divider);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}

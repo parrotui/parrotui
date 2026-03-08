@@ -25,6 +25,7 @@ const zhSidebar = {
         { text: '字体规范',     link: '/zh/guide/typography' },
         { text: '间距规范',     link: '/zh/guide/spacing' },
         { text: '主题系统',     link: '/zh/guide/theming' },
+        { text: '国际化 i18n', link: '/zh/guide/i18n' },
       ],
     },
   ],
