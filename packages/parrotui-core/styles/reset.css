@@ -1,0 +1,80 @@
+/**
+ * Parrot UI Reset CSS
+ * 跨端基础样式重置，兼容 uni-app X / Web / 小程序
+ */
+
+/* 盒模型统一 */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 基础重置 */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-size: 28rpx;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 块级元素 */
+div, view, scroll-view, swiper, page {
+  margin: 0;
+  padding: 0;
+}
+
+/* 文字元素 */
+h1, h2, h3, h4, h5, h6, p, text {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+/* 列表 */
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 图片 */
+img, image {
+  display: block;
+  max-width: 100%;
+  border: 0;
+}
+
+/* 链接 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 按钮基础重置 */
+button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+/* 表单元素 */
+input, textarea, select {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* 表格 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

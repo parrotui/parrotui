@@ -1,0 +1,16 @@
+{
+  "name": "parrotui",
+  "version": "0.1.0",
+  "description": "基于 uni-app X 的跨终端组件库",
+  "private": true,
+  "scripts": {
+    "docs:dev":   "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview":"vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.3.0",
+    "vue": "^3.4.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,89 @@
+/**
+ * Parrot UI 动画系统
+ * 参考 Animate.css / Element Plus / TDesign
+ */
+
+/* ─── 关键帧定义 ─────────────────────────────────────────────── */
+@keyframes pui-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pui-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes pui-slide-up-in {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pui-slide-up-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(100%); }
+}
+
+@keyframes pui-slide-down-in {
+  from { opacity: 0; transform: translateY(-100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pui-slide-down-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-100%); }
+}
+
+@keyframes pui-zoom-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pui-zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.8); }
+}
+
+@keyframes pui-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pui-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes pui-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8rpx); }
+}
+
+@keyframes pui-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8rpx); }
+  40%       { transform: translateX(8rpx); }
+  60%       { transform: translateX(-6rpx); }
+  80%       { transform: translateX(6rpx); }
+}
+
+/* ─── 工具类 ────────────────────────────────────────────────── */
+.pui-animate-fade-in     { animation: pui-fade-in 0.25s ease; }
+.pui-animate-fade-out    { animation: pui-fade-out 0.25s ease; }
+.pui-animate-slide-up    { animation: pui-slide-up-in 0.3s ease; }
+.pui-animate-slide-down  { animation: pui-slide-down-in 0.3s ease; }
+.pui-animate-zoom-in     { animation: pui-zoom-in 0.25s ease; }
+.pui-animate-zoom-out    { animation: pui-zoom-out 0.25s ease; }
+.pui-animate-spin        { animation: pui-spin 1s linear infinite; }
+.pui-animate-pulse       { animation: pui-pulse 1.5s ease-in-out infinite; }
+.pui-animate-bounce      { animation: pui-bounce 1s ease infinite; }
+.pui-animate-shake       { animation: pui-shake 0.4s ease; }
+
+/* ─── 过渡工具类 ─────────────────────────────────────────────── */
+.pui-transition          { transition: all 0.25s ease; }
+.pui-transition-fast     { transition: all 0.15s ease; }
+.pui-transition-slow     { transition: all 0.35s ease; }
+.pui-transition-colors   { transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease; }
+.pui-transition-opacity  { transition: opacity 0.25s ease; }
+.pui-transition-transform{ transition: transform 0.25s ease; }
+.pui-transition-none     { transition: none; }

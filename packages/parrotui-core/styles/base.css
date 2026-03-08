@@ -1,0 +1,140 @@
+/**
+ * Parrot UI Base CSS
+ * 基础工具类，参考 Tailwind / Vant / TDesign
+ * 使用扁平选择器，兼容 uni-app X
+ */
+@import './variables.css';
+
+/* ─── Flex 布局 ─────────────────────────────────────────────── */
+.pui-flex         { display: flex; }
+.pui-flex-col     { display: flex; flex-direction: column; }
+.pui-flex-wrap    { flex-wrap: wrap; }
+.pui-flex-nowrap  { flex-wrap: nowrap; }
+.pui-flex-1       { flex: 1; }
+.pui-flex-auto    { flex: auto; }
+.pui-flex-none    { flex: none; }
+.pui-items-start  { align-items: flex-start; }
+.pui-items-center { align-items: center; }
+.pui-items-end    { align-items: flex-end; }
+.pui-justify-start  { justify-content: flex-start; }
+.pui-justify-center { justify-content: center; }
+.pui-justify-end    { justify-content: flex-end; }
+.pui-justify-between{ justify-content: space-between; }
+.pui-justify-around { justify-content: space-around; }
+
+/* ─── 间距 ─────────────────────────────────────────────────── */
+.pui-p-1  { padding: 4rpx; }
+.pui-p-2  { padding: 8rpx; }
+.pui-p-3  { padding: 12rpx; }
+.pui-p-4  { padding: 16rpx; }
+.pui-p-5  { padding: 20rpx; }
+.pui-p-6  { padding: 24rpx; }
+.pui-p-8  { padding: 32rpx; }
+
+.pui-px-2 { padding-left: 8rpx; padding-right: 8rpx; }
+.pui-px-3 { padding-left: 12rpx; padding-right: 12rpx; }
+.pui-px-4 { padding-left: 16rpx; padding-right: 16rpx; }
+.pui-px-5 { padding-left: 20rpx; padding-right: 20rpx; }
+.pui-px-6 { padding-left: 24rpx; padding-right: 24rpx; }
+
+.pui-py-2 { padding-top: 8rpx; padding-bottom: 8rpx; }
+.pui-py-3 { padding-top: 12rpx; padding-bottom: 12rpx; }
+.pui-py-4 { padding-top: 16rpx; padding-bottom: 16rpx; }
+
+.pui-m-0  { margin: 0; }
+.pui-m-2  { margin: 8rpx; }
+.pui-m-4  { margin: 16rpx; }
+.pui-mx-auto { margin-left: auto; margin-right: auto; }
+.pui-mt-2 { margin-top: 8rpx; }
+.pui-mt-4 { margin-top: 16rpx; }
+.pui-mb-2 { margin-bottom: 8rpx; }
+.pui-mb-4 { margin-bottom: 16rpx; }
+
+/* ─── 文字 ─────────────────────────────────────────────────── */
+.pui-text-xs    { font-size: 20rpx; }
+.pui-text-sm    { font-size: 22rpx; }
+.pui-text-base  { font-size: 28rpx; }
+.pui-text-md    { font-size: 30rpx; }
+.pui-text-lg    { font-size: 32rpx; }
+.pui-text-xl    { font-size: 36rpx; }
+.pui-text-2xl   { font-size: 40rpx; }
+.pui-text-3xl   { font-size: 48rpx; }
+
+.pui-font-light    { font-weight: 300; }
+.pui-font-normal   { font-weight: 400; }
+.pui-font-medium   { font-weight: 500; }
+.pui-font-semibold { font-weight: 600; }
+.pui-font-bold     { font-weight: 700; }
+
+.pui-text-left    { text-align: left; }
+.pui-text-center  { text-align: center; }
+.pui-text-right   { text-align: right; }
+
+.pui-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ─── 颜色工具类 ─────────────────────────────────────────────── */
+.pui-color-primary   { color: var(--pui-primary); }
+.pui-color-success   { color: var(--pui-success); }
+.pui-color-warning   { color: var(--pui-warning); }
+.pui-color-danger    { color: var(--pui-danger); }
+.pui-color-info      { color: var(--pui-info); }
+.pui-color-text      { color: var(--pui-text-primary); }
+.pui-color-secondary { color: var(--pui-text-secondary); }
+.pui-color-disabled  { color: var(--pui-text-disabled); }
+
+.pui-bg-primary  { background-color: var(--pui-primary); }
+.pui-bg-success  { background-color: var(--pui-success); }
+.pui-bg-warning  { background-color: var(--pui-warning); }
+.pui-bg-danger   { background-color: var(--pui-danger); }
+.pui-bg-page     { background-color: var(--pui-bg-page); }
+.pui-bg-card     { background-color: var(--pui-bg-card); }
+.pui-bg-white    { background-color: #ffffff; }
+
+/* ─── 圆角 ─────────────────────────────────────────────────── */
+.pui-rounded-sm   { border-radius: var(--pui-radius-sm); }
+.pui-rounded      { border-radius: var(--pui-radius-base); }
+.pui-rounded-md   { border-radius: var(--pui-radius-md); }
+.pui-rounded-lg   { border-radius: var(--pui-radius-lg); }
+.pui-rounded-xl   { border-radius: var(--pui-radius-xl); }
+.pui-rounded-full { border-radius: var(--pui-radius-full); }
+
+/* ─── 阴影 ─────────────────────────────────────────────────── */
+.pui-shadow-sm   { box-shadow: var(--pui-shadow-sm); }
+.pui-shadow      { box-shadow: var(--pui-shadow-base); }
+.pui-shadow-md   { box-shadow: var(--pui-shadow-md); }
+.pui-shadow-lg   { box-shadow: var(--pui-shadow-lg); }
+
+/* ─── 尺寸 ─────────────────────────────────────────────────── */
+.pui-w-full  { width: 100%; }
+.pui-h-full  { height: 100%; }
+.pui-w-screen{ width: 100vw; }
+.pui-h-screen{ height: 100vh; }
+
+/* ─── 定位 ─────────────────────────────────────────────────── */
+.pui-relative { position: relative; }
+.pui-absolute { position: absolute; }
+.pui-fixed    { position: fixed; }
+.pui-inset-0  { top: 0; right: 0; bottom: 0; left: 0; }
+
+/* ─── 溢出 ─────────────────────────────────────────────────── */
+.pui-overflow-hidden { overflow: hidden; }
+.pui-overflow-auto   { overflow: auto; }
+.pui-overflow-scroll { overflow: scroll; }
+
+/* ─── 边框 ─────────────────────────────────────────────────── */
+.pui-border       { border: 1px solid var(--pui-border-base); }
+.pui-border-light { border: 1px solid var(--pui-border-light); }
+.pui-border-top   { border-top: 1px solid var(--pui-border-base); }
+.pui-border-bottom{ border-bottom: 1px solid var(--pui-border-base); }
+
+/* ─── 安全区域 ──────────────────────────────────────────────── */
+.pui-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pui-safe-top {
+  padding-top: env(safe-area-inset-top);
+}

@@ -1,0 +1,135 @@
+/**
+ * Parrot UI CSS 变量系统
+ * 亮色 / 暗色双主题，通过 [data-theme="dark"] 切换
+ * uni-app X 注意：部分低端 Android 不支持 CSS 变量，核心颜色同步写入 tokens/colors.ts
+ */
+
+/* ─── 亮色主题（默认）─────────────────────────────────────────── */
+:root {
+  /* 品牌色 */
+  --pui-primary:        #1a7eff;
+  --pui-primary-light:  #ecf5ff;
+  --pui-primary-dark:   #0065e6;
+
+  /* 功能色 */
+  --pui-success:        #41a906;
+  --pui-success-light:  #f0f9eb;
+  --pui-warning:        #e6a23c;
+  --pui-warning-light:  #fdf6ec;
+  --pui-danger:         #f56c6c;
+  --pui-danger-light:   #fef0f0;
+  --pui-info:           #6c6f78;
+  --pui-info-light:     #f4f4f5;
+
+  /* 文字色 */
+  --pui-text-primary:      #303133;
+  --pui-text-regular:      #606266;
+  --pui-text-secondary:    #909399;
+  --pui-text-placeholder:  #a8abb2;
+  --pui-text-disabled:     #c0c4cc;
+
+  /* 背景色 */
+  --pui-bg-page:    #f2f3f5;
+  --pui-bg-base:    #ffffff;
+  --pui-bg-card:    #ffffff;
+  --pui-bg-overlay: #ffffff;
+
+  /* 边框色 */
+  --pui-border-base:    #dcdfe6;
+  --pui-border-light:   #e4e7ed;
+  --pui-border-lighter: #ebeef5;
+
+  /* 阴影 */
+  --pui-shadow-xs:   0 1px 2px rgba(0,0,0,0.05);
+  --pui-shadow-sm:   0 1px 6px rgba(0,0,0,0.08);
+  --pui-shadow-base: 0 2px 12px rgba(0,0,0,0.10);
+  --pui-shadow-md:   0 4px 16px rgba(0,0,0,0.12);
+  --pui-shadow-lg:   0 8px 24px rgba(0,0,0,0.14);
+
+  /* 圆角 */
+  --pui-radius-sm:   4rpx;
+  --pui-radius-base: 8rpx;
+  --pui-radius-md:   12rpx;
+  --pui-radius-lg:   16rpx;
+  --pui-radius-xl:   24rpx;
+  --pui-radius-full: 9999rpx;
+
+  /* 字号 */
+  --pui-font-xs:   20rpx;
+  --pui-font-sm:   22rpx;
+  --pui-font-base: 28rpx;
+  --pui-font-md:   30rpx;
+  --pui-font-lg:   32rpx;
+  --pui-font-xl:   36rpx;
+  --pui-font-2xl:  40rpx;
+  --pui-font-3xl:  48rpx;
+
+  /* 间距 */
+  --pui-spacing-1:  4rpx;
+  --pui-spacing-2:  8rpx;
+  --pui-spacing-3:  12rpx;
+  --pui-spacing-4:  16rpx;
+  --pui-spacing-5:  20rpx;
+  --pui-spacing-6:  24rpx;
+  --pui-spacing-8:  32rpx;
+  --pui-spacing-10: 40rpx;
+  --pui-spacing-12: 48rpx;
+
+  /* 组件高度 */
+  --pui-size-xs: 48rpx;
+  --pui-size-sm: 56rpx;
+  --pui-size-md: 72rpx;
+  --pui-size-lg: 88rpx;
+
+  /* 过渡 */
+  --pui-transition-fast:   0.15s ease;
+  --pui-transition-base:   0.25s ease;
+  --pui-transition-slow:   0.35s ease;
+
+  /* 遮罩 */
+  --pui-mask:       rgba(0,0,0,0.5);
+  --pui-mask-light: rgba(0,0,0,0.2);
+
+  /* z-index 层级 */
+  --pui-z-popup:   1000;
+  --pui-z-modal:   2000;
+  --pui-z-toast:   3000;
+  --pui-z-loading: 4000;
+}
+
+/* ─── 暗色主题 ─────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --pui-primary:        #4d9eff;
+  --pui-primary-light:  #001f4d;
+  --pui-primary-dark:   #80bdff;
+
+  --pui-success:        #5dba30;
+  --pui-success-light:  #0d2601;
+  --pui-warning:        #f0a030;
+  --pui-warning-light:  #2d1f05;
+  --pui-danger:         #f07070;
+  --pui-danger-light:   #2d0808;
+  --pui-info:           '#8d9095';
+  --pui-info-light:     #1a1a1a;
+
+  --pui-text-primary:     #e5eaf3;
+  --pui-text-regular:     #cfd3dc;
+  --pui-text-secondary:   #a3a6ad;
+  --pui-text-placeholder: #8d9095;
+  --pui-text-disabled:    #6c6e72;
+
+  --pui-bg-page:    #0d0d0d;
+  --pui-bg-base:    #141414;
+  --pui-bg-card:    #1d1d1d;
+  --pui-bg-overlay: #242424;
+
+  --pui-border-base:    #3d3d3d;
+  --pui-border-light:   #333333;
+  --pui-border-lighter: #2a2a2a;
+
+  --pui-shadow-xs:   0 1px 2px rgba(0,0,0,0.20);
+  --pui-shadow-sm:   0 1px 6px rgba(0,0,0,0.30);
+  --pui-shadow-base: 0 2px 12px rgba(0,0,0,0.40);
+  --pui-shadow-md:   0 4px 16px rgba(0,0,0,0.50);
+  --pui-shadow-lg:   0 8px 24px rgba(0,0,0,0.60);
+}
