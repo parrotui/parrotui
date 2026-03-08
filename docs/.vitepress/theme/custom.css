@@ -18,6 +18,7 @@
   /* 侧边栏 */
   --vp-sidebar-bg-color:        #f8fafc;
   --vp-sidebar-item-hover-bg:   rgba(26, 126, 255, 0.06);
+  --vp-sidebar-width:           272px;
 
   /* 右侧 TOC */
   --vp-c-text-1:        #303133;
@@ -54,6 +55,7 @@
 
   /* 侧边栏 */
   --vp-sidebar-bg-color:        #1a1a1a;
+  --vp-sidebar-item-hover-bg:   rgba(77, 158, 255, 0.08);
 
   /* 文字 */
   --vp-c-text-1:        #e5eaf3;
@@ -100,10 +102,20 @@
   font-weight: 600;
 }
 
-/* ─── 左侧侧边栏样式 ────────────────────────────────────────── */
+/* ─── 左侧侧边栏：始终固定显示 ─────────────────────────────── */
+
+/* 桌面端：侧边栏 sticky 固定，不随内容滚动消失 */
 .VPSidebar {
+  position: sticky !important;
+  top: var(--vp-nav-height);
+  height: calc(100vh - var(--vp-nav-height));
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--vp-c-border) transparent;
+  background-color: var(--vp-sidebar-bg-color);
+  border-right: 1px solid var(--vp-c-divider);
+  flex-shrink: 0;
 }
 
 /* 侧边栏分组标题 */
@@ -116,10 +128,18 @@
   padding: 8px 0 4px;
 }
 
+/* 侧边栏 hover */
+.VPSidebarItem .item:hover {
+  background-color: var(--vp-sidebar-item-hover-bg);
+  border-radius: 6px;
+}
+
 /* 侧边栏激活项 */
 .VPSidebarItem.is-active > .item {
   color: var(--vp-c-brand-1);
   font-weight: 600;
+  background-color: var(--vp-c-brand-soft);
+  border-radius: 6px;
 }
 
 .VPSidebarItem.is-active > .item::before {
@@ -133,6 +153,11 @@
   height: 16px;
   background: var(--vp-c-brand-1);
   border-radius: 2px;
+}
+
+/* 暗黑模式下侧边栏激活项 */
+.dark .VPSidebarItem.is-active > .item {
+  background-color: rgba(77, 158, 255, 0.12);
 }
 
 /* ─── 右侧 TOC 目录样式 ─────────────────────────────────────── */
@@ -231,9 +256,45 @@ div[class*='language-'] {
   background: var(--vp-c-text-3);
 }
 
-/* ─── 响应式：移动端隐藏右侧 TOC ────────────────────────────── */
-@media (max-width: 1280px) {
+/* ─── 响应式：中等屏幕（tablet）────────────────────────────── */
+@media (min-width: 960px) {
+  /* 确保侧边栏在有内容的页面始终可见 */
+  .VPDoc.has-sidebar .container {
+    display: flex;
+  }
+
+  /* 侧边栏不随主内容区域消失 */
+  .VPSidebar {
+    display: block !important;
+  }
+}
+
+/* ─── 响应式：移动端（< 960px）─────────────────────────────── */
+@media (max-width: 959px) {
+  /* 移动端侧边栏恢复 VitePress 默认抽屉行为，不强制 sticky */
+  .VPSidebar {
+    position: fixed !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  /* 移动端打开状态 */
+  .VPSidebar.open {
+    transform: translateX(0);
+  }
+
+  /* 移动端隐藏右侧 TOC，节省空间 */
   .VPDocAside {
     display: none;
+  }
+}
+
+/* ─── 响应式：超宽屏（> 1280px）────────────────────────────── */
+@media (min-width: 1280px) {
+  .VPDocAside {
+    display: block;
   }
 }
