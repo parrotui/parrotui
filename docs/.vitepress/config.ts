@@ -41,6 +41,13 @@ const zhSidebar = {
   ],
   '/zh/components/': [
     {
+      text: '组件概览',
+      collapsed: false,
+      items: [
+        { text: '组件概览',      link: '/zh/components/overview' },
+      ],
+    },
+    {
       text: '基础组件 Basic',
       collapsed: false,
       items: [
@@ -129,6 +136,13 @@ const zhTWSidebar = {
   ],
   '/zh-HK/components/': [
     {
+      text: '元件概覽',
+      collapsed: false,
+      items: [
+        { text: '元件概覽',      link: '/zh-HK/components/overview' },
+      ],
+    },
+    {
       text: '基礎元件 Basic',
       collapsed: false,
       items: [
@@ -187,6 +201,13 @@ const enSidebar = {
     },
   ],
   '/en/components/': [
+    {
+      text: 'Overview',
+      collapsed: false,
+      items: [
+        { text: 'Overview',     link: '/en/components/overview' },
+      ],
+    },
     {
       text: 'Basic',
       collapsed: false,
@@ -259,7 +280,7 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: '指南',           link: '/guide/introduction',   activeMatch: '/guide/' },
-          { text: '组件',           link: '/components/button',    activeMatch: '/components/' },
+          { text: '组件',           link: '/components/overview',    activeMatch: '/components/' },
           { text: '架构',           link: '/guide/architecture' },
           { text: '更新日志',       link: '/guide/changelog' },
         ],
@@ -296,7 +317,7 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: '指南',           link: '/zh-HK/guide/introduction',   activeMatch: '/zh-HK/guide/' },
-          { text: '元件',           link: '/zh-HK/components/button',    activeMatch: '/zh-HK/components/' },
+          { text: '元件',           link: '/zh-HK/components/overview',    activeMatch: '/zh-HK/components/' },
           { text: '架構',           link: '/zh-HK/guide/architecture' },
           { text: '更新日誌',       link: '/zh-HK/guide/changelog' },
         ],
@@ -324,7 +345,7 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: 'Guide',          link: '/en/guide/introduction',  activeMatch: '/en/guide/' },
-          { text: 'Components',     link: '/en/components/button',   activeMatch: '/en/components/' },
+          { text: 'Components',     link: '/en/components/overview',   activeMatch: '/en/components/' },
           { text: 'Architecture',   link: '/en/guide/architecture' },
           { text: 'Changelog',      link: '/en/guide/changelog' },
         ],
