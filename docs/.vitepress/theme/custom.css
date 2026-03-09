@@ -105,6 +105,13 @@ html body .VPDoc.has-sidebar {
   padding-top: 0 !important;
 }
 
+/* 确保内容区左侧留出侧边栏宽度，防止 fixed 侧边栏遮挡内容 */
+@media (min-width: 960px) {
+  html body #VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width) !important;
+  }
+}
+
 /* 导航栏 logo + 标题 */
 .VPNavBarTitle .title {
   font-weight: 700;
