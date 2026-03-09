@@ -18,6 +18,10 @@
   /* 侧边栏 */
   --vp-sidebar-bg-color:        #f8fafc;
   --vp-sidebar-item-hover-bg:   rgba(26, 126, 255, 0.06);
+  /* 调整侧边栏宽度变量，使 VitePress 的 calc(padding-left) 与实际侧边栏宽度对齐
+     公式：padding-left = (100vw - 1440px)/2 + --vp-sidebar-width
+     实测侧边栏 447px，需要变量为 320px 才能算出正确偏移 */
+  --vp-sidebar-width:           320px;
 
   /* 右侧 TOC */
   --vp-c-text-1:        #303133;
