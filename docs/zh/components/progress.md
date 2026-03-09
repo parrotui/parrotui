@@ -1,3 +1,5 @@
+<ComponentDoc demo="ProgressDemo" title="Progress 进度条组件">
+
 # Progress 进度条组件
 
 进度条组件，线性进度、百分比、颜色。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

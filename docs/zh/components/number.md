@@ -1,3 +1,5 @@
+<ComponentDoc demo="NumberDemo" title="Number 数字">
+
 # Number 数字
 
 数字展示组件，支持前后缀、千分位、趋势指示。
@@ -38,3 +40,5 @@
 | `thousandSeparator` | `boolean` | `false` | 千分位 |
 | `size` | `string` | `'md'` | 尺寸 |
 | `trend` | `string` | `''` | 趋势：up/down |
+
+</ComponentDoc>

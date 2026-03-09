@@ -1,3 +1,5 @@
+<ComponentDoc demo="RatingDemo" title="Rating 评分组件">
+
 # Rating 评分组件
 
 评分组件，星级/心形、半星、只读。
@@ -29,3 +31,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

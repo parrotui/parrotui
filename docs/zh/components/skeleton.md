@@ -1,3 +1,5 @@
+<ComponentDoc demo="SkeletonDemo" title="Skeleton 骨架屏组件">
+
 # Skeleton 骨架屏组件
 
 骨架屏组件，加载占位动画。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

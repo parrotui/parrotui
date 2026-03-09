@@ -1,3 +1,5 @@
+<ComponentDoc demo="VisuallyHiddenDemo" title="VisuallyHidden 视觉隐藏组件">
+
 # VisuallyHidden 视觉隐藏组件
 
 视觉隐藏组件，无障碍隐藏元素（屏幕阅读器可见）。
@@ -23,3 +25,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

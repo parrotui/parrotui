@@ -1,3 +1,5 @@
+<ComponentDoc demo="AspectRatioDemo" title="AspectRatio 宽高比容器">
+
 # AspectRatio 宽高比容器
 
 宽高比容器，按比例锁定容器尺寸。
@@ -23,3 +25,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

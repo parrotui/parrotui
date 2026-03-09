@@ -1,0 +1,77 @@
+/* 所有组件 Demo 共享样式 */
+.demo-phone {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+}
+.demo-phone--dark { background: #111111; }
+
+.demo-phone__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+.demo-phone--dark .demo-phone__nav { background: #1b1b1b; border-bottom-color: #333; }
+
+.demo-phone__title { font-size: 16px; font-weight: 700; color: #181818; }
+.demo-phone--dark .demo-phone__title { color: #e5e5e5; }
+
+.demo-phone__dark-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid #eee; background: #f5f5f5;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; padding: 0;
+}
+.demo-phone--dark .demo-phone__dark-btn { border-color: #444; background: #333; }
+
+.demo-phone__body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 14px 16px; scrollbar-width: none;
+}
+.demo-phone__body::-webkit-scrollbar { display: none; }
+
+/* 分区 */
+.demo-section { margin-bottom: 18px; }
+.demo-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #aaa; margin-bottom: 8px;
+}
+.demo-phone--dark .demo-label { color: #555; }
+
+/* Tab 切换 */
+.demo-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.demo-tab {
+  padding: 4px 10px; border-radius: 20px; border: 1px solid #e0e0e0;
+  background: #fff; color: #666; font-size: 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.demo-phone--dark .demo-tab { background: #222; border-color: #333; color: #888; }
+.demo-tab.active { background: #1a7eff; color: #fff; border-color: #1a7eff; }
+
+/* 展示行 */
+.demo-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: #fff; border-radius: 10px;
+  border: 1px solid #f0f0f0; margin-bottom: 6px;
+}
+.demo-phone--dark .demo-row { background: #1b1b1b; border-color: #2a2a2a; }
+
+/* 通用文字颜色 */
+.demo-text { color: #181818; }
+.demo-phone--dark .demo-text { color: #e5e5e5; }
+.demo-muted { color: #999; font-size: 12px; }
+.demo-phone--dark .demo-muted { color: #555; }
+
+/* 卡片 */
+.demo-card {
+  background: #fff; border-radius: 12px; border: 1px solid #f0f0f0;
+  padding: 14px; margin-bottom: 10px;
+}
+.demo-phone--dark .demo-card { background: #1b1b1b; border-color: #2a2a2a; }

@@ -1,3 +1,5 @@
+<ComponentDoc demo="ParagraphDemo" title="Paragraph 段落">
+
 # Paragraph 段落
 
 段落组件，支持 3 种尺寸、首行缩进、文本对齐。
@@ -35,3 +37,5 @@
 | `align` | `string` | `'left'` | 对齐 |
 | `lineHeight` | `string` | `'1.8'` | 行高 |
 | `color` | `string` | `'#333333'` | 颜色 |
+
+</ComponentDoc>

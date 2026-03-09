@@ -1,3 +1,5 @@
+<ComponentDoc demo="ButtonDemo" title="Button 按钮">
+
 # Button 按钮
 
 按钮用于触发操作，支持 solid/outline/ghost 变体，多种尺寸和形状。
@@ -66,3 +68,5 @@
 | 事件 | 说明 |
 |------|------|
 | `click` | 点击（非禁用/加载时） |
+
+</ComponentDoc>

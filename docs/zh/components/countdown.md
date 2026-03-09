@@ -1,3 +1,5 @@
+<ComponentDoc demo="CountdownDemo" title="Countdown 倒计时">
+
 # Countdown 倒计时
 
 倒计时组件，支持天/时/分/秒和自定义格式。
@@ -47,3 +49,5 @@
 |------|------|
 | `start()` | 开始倒计时 |
 | `stop()` | 暂停倒计时 |
+
+</ComponentDoc>

@@ -1,3 +1,5 @@
+<ComponentDoc demo="TagDemo" title="Tag 标签">
+
 # Tag 标签
 
 标签组件，多色、可关闭、支持线框样式。
@@ -50,3 +52,5 @@
 |------|------|
 | `click` | 点击 |
 | `close` | 关闭 |
+
+</ComponentDoc>

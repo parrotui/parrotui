@@ -1,3 +1,5 @@
+<ComponentDoc demo="CaptionDemo" title="Caption 说明文字">
+
 # Caption 说明文字
 
 说明文字组件，固定 22rpx，支持 4 种颜色类型。
@@ -20,3 +22,5 @@
 |------|------|--------|------|
 | `text` | `string` | `''` | 文字内容 |
 | `type` | `string` | `'default'` | 颜色类型 |
+
+</ComponentDoc>

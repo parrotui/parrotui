@@ -1,3 +1,5 @@
+<ComponentDoc demo="PictureDemo" title="Picture 图文组件">
+
 # Picture 图文组件
 
 图文组件，图片+说明文字组合。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

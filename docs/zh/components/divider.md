@@ -1,3 +1,5 @@
+<ComponentDoc demo="DividerDemo" title="Divider 分割线">
+
 # Divider 分割线
 
 分割线组件，支持水平/垂直方向、文字分割。
@@ -36,3 +38,5 @@
 | `textPosition` | `string` | `'center'` | 文字位置 |
 | `color` | `string` | `'#e5e7eb'` | 线条颜色 |
 | `thickness` | `string` | `'2rpx'` | 线条粗细 |
+
+</ComponentDoc>

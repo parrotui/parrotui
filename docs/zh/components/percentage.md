@@ -1,3 +1,5 @@
+<ComponentDoc demo="PercentageDemo" title="Percentage 百分比">
+
 # Percentage 百分比
 
 百分比展示组件，带趋势箭头和涨跌配色。
@@ -22,3 +24,5 @@
 | `precision` | `number` | `1` | 小数位 |
 | `showSign` | `boolean` | `true` | 显示箭头 |
 | `size` | `string` | `'md'` | 尺寸 |
+
+</ComponentDoc>

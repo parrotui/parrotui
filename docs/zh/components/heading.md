@@ -1,3 +1,5 @@
+<ComponentDoc demo="HeadingDemo" title="Heading 标题">
+
 # Heading 标题
 
 标题组件，支持 h1-h6 六级标题，可设置颜色类型和下边框。
@@ -35,3 +37,5 @@
 | `type` | `string` | `'default'` | 颜色类型 |
 | `align` | `string` | `'left'` | 对齐方式 |
 | `border` | `boolean` | `false` | 是否下边框 |
+
+</ComponentDoc>

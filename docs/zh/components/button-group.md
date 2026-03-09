@@ -1,3 +1,5 @@
+<ComponentDoc demo="ButtonGroupDemo" title="ButtonGroup 按钮组">
+
 # ButtonGroup 按钮组
 
 将多个按钮组合在一起，支持水平/垂直排列。
@@ -30,3 +32,5 @@
 |------|------|--------|------|
 | `direction` | `string` | `'horizontal'` | 排列方向 |
 | `gap` | `string` | `'0'` | 间距 |
+
+</ComponentDoc>

@@ -1,3 +1,5 @@
+<ComponentDoc demo="ClipboardDemo" title="Clipboard 剪贴板组件">
+
 # Clipboard 剪贴板组件
 
 剪贴板组件，剪贴板读写操作。
@@ -23,3 +25,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

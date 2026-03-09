@@ -1,3 +1,5 @@
+<ComponentDoc demo="CircularProgressDemo" title="CircularProgress 环形进度组件">
+
 # CircularProgress 环形进度组件
 
 环形进度组件，环形进度条、仪表盘模式。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

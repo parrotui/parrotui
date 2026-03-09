@@ -1,3 +1,5 @@
+<ComponentDoc demo="SwitchDemo" title="Switch 开关组件">
+
 # Switch 开关组件
 
 开关组件，开/关切换、自定义颜色和文字。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

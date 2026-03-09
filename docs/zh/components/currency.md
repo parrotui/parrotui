@@ -1,3 +1,5 @@
+<ComponentDoc demo="CurrencyDemo" title="Currency 货币">
+
 # Currency 货币
 
 货币展示组件，支持符号、千分位、5 种尺寸。
@@ -30,3 +32,5 @@
 | `precision` | `number` | `2` | 小数位 |
 | `size` | `string` | `'md'` | 尺寸 |
 | `color` | `string` | `'#ef4444'` | 颜色 |
+
+</ComponentDoc>

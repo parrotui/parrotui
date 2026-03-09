@@ -1,6 +1,7 @@
 // Parrot UI VitePress 自定义主题入口
 import DefaultTheme from 'vitepress/theme'
 import './custom.css'
+import './components/demos/demo-shared.css'
 import { onMounted } from 'vue'
 import ParrotLayout from './components/ParrotLayout.vue'
 import ComponentDoc from './components/ComponentDoc.vue'

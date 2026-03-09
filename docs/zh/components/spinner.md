@@ -1,3 +1,5 @@
+<ComponentDoc demo="SpinnerDemo" title="Spinner 加载旋转组件">
+
 # Spinner 加载旋转组件
 
 加载旋转组件，多种旋转样式。
@@ -24,3 +26,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

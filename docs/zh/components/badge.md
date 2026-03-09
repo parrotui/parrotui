@@ -1,3 +1,5 @@
+<ComponentDoc demo="BadgeDemo" title="Badge 徽标">
+
 # Badge 徽标
 
 徽标组件，支持数字、圆点、自定义最大值。
@@ -41,3 +43,5 @@
 | `dot` | `boolean` | `false` | 圆点模式 |
 | `type` | `string` | `'danger'` | 类型 |
 | `hidden` | `boolean` | `false` | 隐藏 |
+
+</ComponentDoc>

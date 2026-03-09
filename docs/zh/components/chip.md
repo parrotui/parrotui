@@ -1,3 +1,5 @@
+<ComponentDoc demo="ChipDemo" title="Chip 标签片">
+
 # Chip 标签片
 
 标签片组件，可选中、可关闭、支持图标+文本。
@@ -29,3 +31,5 @@
 | `closeable` | `boolean` | `false` | 可关闭 |
 | `selected` | `boolean` | `false` | 选中 |
 | `disabled` | `boolean` | `false` | 禁用 |
+
+</ComponentDoc>

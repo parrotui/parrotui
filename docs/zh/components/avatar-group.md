@@ -1,3 +1,5 @@
+<ComponentDoc demo="AvatarGroupDemo" title="AvatarGroup 头像组组件">
+
 # AvatarGroup 头像组组件
 
 头像组组件，重叠展示多个头像，支持 +N 计数。
@@ -24,3 +26,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

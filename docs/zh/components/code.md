@@ -1,3 +1,5 @@
+<ComponentDoc demo="CodeDemo" title="Code 代码块">
+
 # Code 代码块
 
 代码展示组件，支持语言标识、复制按钮、暗色主题、内联代码。
@@ -32,3 +34,5 @@
 | 事件 | 说明 | 回调参数 |
 |------|------|---------|
 | `copy` | 复制成功 | `(code)` |
+
+</ComponentDoc>

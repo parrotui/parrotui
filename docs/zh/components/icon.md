@@ -1,3 +1,5 @@
+<ComponentDoc demo="IconDemo" title="Icon 图标">
+
 # Icon 图标
 
 图标组件，支持旋转、脉冲动画、翻转。
@@ -37,3 +39,5 @@
 | `color` | `string` | `'#333'` | 颜色 |
 | `spin` | `boolean` | `false` | 旋转动画 |
 | `rotate` | `number` | `0` | 旋转角度 |
+
+</ComponentDoc>

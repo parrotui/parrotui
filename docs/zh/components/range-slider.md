@@ -1,3 +1,5 @@
+<ComponentDoc demo="RangeSliderDemo" title="RangeSlider 双滑块组件">
+
 # RangeSlider 双滑块组件
 
 双滑块组件，范围选择。
@@ -27,3 +29,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

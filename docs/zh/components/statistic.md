@@ -1,3 +1,5 @@
+<ComponentDoc demo="StatisticDemo" title="Statistic 统计数值">
+
 # Statistic 统计数值
 
 统计数值组件，带标题、趋势、千分位。
@@ -31,3 +33,5 @@
 | `suffix` | `string` | `''` | 后缀 |
 | `trend` | `string` | `''` | 趋势 |
 | `groupSeparator` | `boolean` | `true` | 千分位 |
+
+</ComponentDoc>

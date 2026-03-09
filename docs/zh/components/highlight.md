@@ -1,3 +1,5 @@
+<ComponentDoc demo="HighlightDemo" title="Highlight 高亮组件">
+
 # Highlight 高亮组件
 
 高亮组件，关键词高亮、正则匹配。
@@ -26,3 +28,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

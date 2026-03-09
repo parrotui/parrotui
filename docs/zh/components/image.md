@@ -1,3 +1,5 @@
+<ComponentDoc demo="ImageDemo" title="Image 图片组件">
+
 # Image 图片组件
 
 图片组件，支持加载/错误占位、圆形、懒加载、预览。
@@ -28,3 +30,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

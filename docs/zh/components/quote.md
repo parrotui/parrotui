@@ -1,3 +1,5 @@
+<ComponentDoc demo="QuoteDemo" title="Quote 引用">
+
 # Quote 引用
 
 引用组件，支持边框和背景两种类型。
@@ -30,3 +32,5 @@
 |------|------|--------|------|
 | `type` | `string` | `'border'` | 类型：border/background |
 | `color` | `string` | `'#1a7eff'` | 主题颜色 |
+
+</ComponentDoc>

@@ -1,3 +1,5 @@
+<ComponentDoc demo="SliderDemo" title="Slider 滑块组件">
+
 # Slider 滑块组件
 
 滑块组件，单滑块、步长、刻度。
@@ -28,3 +30,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

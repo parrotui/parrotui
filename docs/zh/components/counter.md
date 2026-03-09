@@ -1,3 +1,5 @@
+<ComponentDoc demo="CounterDemo" title="Counter 动画计数器">
+
 # Counter 动画计数器
 
 数字递增动画组件，从起始值到结束值的动画过渡。
@@ -43,3 +45,5 @@
 | 事件 | 说明 |
 |------|------|
 | `finished` | 动画结束 |
+
+</ComponentDoc>

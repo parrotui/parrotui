@@ -1,3 +1,5 @@
+<ComponentDoc demo="IconButtonDemo" title="IconButton 图标按钮">
+
 # IconButton 图标按钮
 
 图标按钮组件，支持 circle/square/round 形状，徽标计数。
@@ -38,3 +40,5 @@
 | `type` | `string` | `'default'` | 类型 |
 | `disabled` | `boolean` | `false` | 禁用 |
 | `badge` | `string\|number` | `''` | 徽标 |
+
+</ComponentDoc>

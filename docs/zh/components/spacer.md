@@ -1,3 +1,5 @@
+<ComponentDoc demo="SpacerDemo" title="Spacer 间距">
+
 # Spacer 间距
 
 间距占位组件，用于在元素之间添加水平或垂直间距。
@@ -28,3 +30,5 @@
 |------|------|--------|------|
 | `size` | `string` | `'20rpx'` | 间距大小 |
 | `direction` | `string` | `'vertical'` | 方向 |
+
+</ComponentDoc>

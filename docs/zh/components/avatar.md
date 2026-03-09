@@ -1,3 +1,5 @@
+<ComponentDoc demo="AvatarDemo" title="Avatar 头像组件">
+
 # Avatar 头像组件
 
 头像组件，支持圆形/方形、图片/文字模式。
@@ -26,3 +28,5 @@
 | 插槽 | 说明 |
 |------|------|
 | `default` | 默认内容 |
+
+</ComponentDoc>

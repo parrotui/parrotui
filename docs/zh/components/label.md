@@ -1,3 +1,5 @@
+<ComponentDoc demo="LabelDemo" title="Label 标签文本">
+
 # Label 标签文本
 
 表单标签组件，支持必填标记、冒号、自定义宽度。
@@ -28,3 +30,5 @@
 | `required` | `boolean` | `false` | 必填标记 |
 | `colon` | `boolean` | `false` | 冒号 |
 | `width` | `string` | `''` | 宽度 |
+
+</ComponentDoc>
