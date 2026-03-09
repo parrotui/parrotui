@@ -1,6 +1,3 @@
----
-aside: false
----
 
 <ComponentDoc demo="ColorDemo">
 
