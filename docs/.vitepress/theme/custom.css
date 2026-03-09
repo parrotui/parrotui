@@ -18,9 +18,8 @@
   /* 侧边栏 */
   --vp-sidebar-bg-color:        #f8fafc;
   --vp-sidebar-item-hover-bg:   rgba(26, 126, 255, 0.06);
-  /* 调整侧边栏宽度变量，使 VitePress 的 calc(padding-left) 与实际侧边栏宽度对齐
-     公式：padding-left = (100vw - 1440px)/2 + --vp-sidebar-width
-     实测侧边栏 447px，需要变量为 320px 才能算出正确偏移 */
+  /* 侧边栏宽度：由布局模式 class (layout-full / layout-centered) 动态控制
+     这里保留默认值，确保无 class 时也正常显示 */
   --vp-sidebar-width:           320px;
 
   /* 右侧 TOC */
@@ -41,8 +40,8 @@
   --vp-c-border:        #dcdfe6;
   --vp-c-divider:       #ebeef5;
 
-  /* 行高容器最大宽度 */
-  --vp-layout-max-width: 1440px;
+  /* 行高容器最大宽度：兜底默认值，实际由 layout-full/layout-centered class 动态覆盖 */
+  --vp-layout-max-width: 100%;
 
   /* 清零公告栏高度变量，防止 VPContent 产生多余的 margin-top 顶部空白 */
   --vp-layout-top-height: 0px;
@@ -1154,4 +1153,33 @@ div[class*='language-'] {
   .VPDoc .container {
     padding-top: 20px;
   }
+}
+
+/* ─── 布局模式切换：全屏 vs 居中 1440px ───────────────────────── */
+
+/* 全屏模式（默认）：取消最大宽度限制，充分利用屏幕 */
+html.layout-full {
+  --vp-layout-max-width: 100%;
+  --vp-sidebar-width: 320px;
+}
+
+/* 居中模式：限制最大宽度为 1440px，内容居中 */
+html.layout-centered {
+  --vp-layout-max-width: 1440px;
+  --vp-sidebar-width: 320px;
+}
+
+/* 全屏模式下导航栏内容区域铺满 */
+html.layout-full .VPNav .container {
+  max-width: 100% !important;
+}
+
+/* 全屏模式下内容区域铺满 */
+html.layout-full .VPContent {
+  max-width: 100% !important;
+}
+
+/* 全屏模式下 footer 铺满 */
+html.layout-full .VPFooter .container {
+  max-width: 100% !important;
 }
