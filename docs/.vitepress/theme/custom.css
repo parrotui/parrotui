@@ -260,6 +260,13 @@ div[class*='language-'] {
 }
 
 /* 提示块 */
+/* 修复标题锚点滚动偏移 */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4 {
+  scroll-margin-top: 80px !important; /* 根据顶部导航栏的高度调整 */
+}
 .vp-doc .tip, .vp-doc .warning, .vp-doc .danger {
   border-radius: 8px;
   border-left-width: 4px;
