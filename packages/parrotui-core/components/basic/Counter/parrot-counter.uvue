@@ -1,0 +1,105 @@
+<template>
+	<text
+		class="parrot-counter"
+		:class="[size ? `parrot-counter--${size}` : '', bold ? 'parrot-counter--bold' : '']"
+		:style="counterStyle"
+	>{{ displayValue }}</text>
+</template>
+
+<script setup lang="uts">
+import { ref, watch, onMounted, computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	value?: number
+	duration?: number
+	precision?: number
+	thousandsSeparator?: boolean
+	prefix?: string
+	suffix?: string
+	size?: 'sm' | 'md' | 'lg' | 'xl'
+	bold?: boolean
+	color?: string
+	autoPlay?: boolean
+}>(), {
+	value: 0,
+	duration: 1500,
+	precision: 0,
+	thousandsSeparator: false,
+	prefix: '',
+	suffix: '',
+	size: 'md',
+	bold: true,
+	color: '',
+	autoPlay: true,
+})
+
+const emit = defineEmits<{ finish: [] }>()
+
+const current = ref<number>(0)
+let animTimer: number = -1
+
+function formatNum(num: number): string {
+	let str = props.precision > 0 ? num.toFixed(props.precision) : Math.floor(num).toString()
+	if (props.thousandsSeparator) {
+		const parts = str.split('.')
+		parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+		str = parts.join('.')
+	}
+	return props.prefix + str + props.suffix
+}
+
+function animate(from: number, to: number) {
+	if (animTimer !== -1) clearInterval(animTimer)
+	const steps = Math.max(30, Math.floor(props.duration / 16))
+	const increment = (to - from) / steps
+	let step = 0
+	current.value = from
+	animTimer = setInterval(() => {
+		step++
+		if (step >= steps) {
+			current.value = to
+			clearInterval(animTimer)
+			animTimer = -1
+			emit('finish')
+		} else {
+			current.value = from + increment * step
+		}
+	}, 16)
+}
+
+const displayValue = computed(() => formatNum(current.value))
+
+const counterStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.color) style.color = props.color
+	return style
+})
+
+watch(() => props.value, (newVal, oldVal) => {
+	animate(oldVal ?? 0, newVal)
+})
+
+onMounted(() => {
+	if (props.autoPlay && props.value !== 0) {
+		animate(0, props.value)
+	} else {
+		current.value = props.value
+	}
+})
+</script>
+
+<style lang="scss">
+.parrot-counter {
+	display: inline-block;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	color: #303133;
+
+	&--sm { font-size: 28rpx; }
+	&--md { font-size: 40rpx; }
+	&--lg { font-size: 56rpx; }
+	&--xl { font-size: 72rpx; }
+
+	&--bold { font-weight: bold; }
+}
+</style>

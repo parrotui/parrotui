@@ -1,0 +1,220 @@
+<template>
+  <!-- TimeAxis 时间轴：左/右/交替模式，支持自定义颜色和图标 -->
+  <view class="parrot-time-axis" :class="[`parrot-time-axis--${modeVal}`]">
+    <view
+      v-for="(item, index) in normalizedItems"
+      :key="index"
+      class="parrot-time-axis__item"
+      :class="[
+        `parrot-time-axis__item--${getItemSide(index)}`,
+        index === normalizedItems.length - 1 && pending ? 'parrot-time-axis__item--pending' : '',
+      ]"
+      @tap="onItemClick(item, index)"
+    >
+      <!-- 节点（圆点/图标） -->
+      <view class="parrot-time-axis__node">
+        <view
+          class="parrot-time-axis__dot"
+          :style="getDotStyle(item)"
+        >
+          <text v-if="item.icon != null && item.icon !== ''" class="parrot-time-axis__icon">{{ item.icon }}</text>
+        </view>
+        <!-- 连接线（非最后一个才显示） -->
+        <view
+          v-if="index < normalizedItems.length - 1"
+          class="parrot-time-axis__line"
+          :style="getLineStyle(item)"
+        ></view>
+      </view>
+
+      <!-- 内容区域 -->
+      <view class="parrot-time-axis__content">
+        <text class="parrot-time-axis__title">{{ item.title }}</text>
+        <text
+          v-if="item.content != null && item.content !== ''"
+          class="parrot-time-axis__desc"
+        >{{ item.content }}</text>
+        <text
+          v-if="item.time != null && item.time !== ''"
+          class="parrot-time-axis__time"
+        >{{ item.time }}</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-time-axis 时间轴
+ * 按时间线展示事件流，支持左侧/右侧/交替模式。
+ *
+ * @prop items   时间轴数据 [{title, content?, time?, icon?, color?}]
+ * @prop mode    模式：left/right/alternate，默认 left
+ * @prop pending 最后一项是否为进行中状态，默认 false
+ *
+ * @event click  点击某项
+ */
+import { computed } from 'vue'
+
+/** 时间轴项数据结构 */
+type TimeAxisItem = {
+  title : string
+  content ?: string
+  time ?: string
+  icon ?: string
+  color ?: string
+}
+
+interface Props {
+  items ?: TimeAxisItem[]
+  mode ?: string
+  pending ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  mode: 'left',
+  pending: false,
+})
+
+const emit = defineEmits<{
+  click: [payload : any]
+}>()
+
+/** 模式值 */
+const modeVal = computed(() : string => {
+  return props.mode ?? 'left'
+})
+
+/** 规范化数据 */
+const normalizedItems = computed(() : TimeAxisItem[] => {
+  return props.items ?? ([] as TimeAxisItem[])
+})
+
+/** 获取项目侧向（left/right/alternate 交替） */
+function getItemSide(index : number) : string {
+  const m = props.mode ?? 'left'
+  if (m === 'alternate') {
+    return index % 2 === 0 ? 'left' : 'right'
+  }
+  return m
+}
+
+/** 圆点样式 */
+function getDotStyle(item : TimeAxisItem) : string {
+  const c = item.color
+  if (c != null && c !== '') {
+    return `background-color:${c};border-color:${c}`
+  }
+  return ''
+}
+
+/** 连接线样式 */
+function getLineStyle(item : TimeAxisItem) : string {
+  const c = item.color
+  if (c != null && c !== '') {
+    return `background-color:${c}`
+  }
+  return ''
+}
+
+/** 点击事件 */
+function onItemClick(item : TimeAxisItem, index : number) {
+  emit('click', { item, index })
+}
+</script>
+
+<style scoped>
+/* ---- 容器 ---- */
+.parrot-time-axis {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24rpx;
+}
+
+/* ---- 每一项 ---- */
+.parrot-time-axis__item {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  padding-bottom: 32rpx;
+}
+
+/* 右侧模式反转 */
+.parrot-time-axis__item--right {
+  flex-direction: row-reverse;
+}
+
+/* ---- 节点区 ---- */
+.parrot-time-axis__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40rpx;
+  flex-shrink: 0;
+}
+
+/* 圆点 */
+.parrot-time-axis__dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background-color: #465CFF;
+  border-width: 3rpx;
+  border-style: solid;
+  border-color: #465CFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* 图标文字 */
+.parrot-time-axis__icon {
+  font-size: 18rpx;
+  color: #ffffff;
+}
+
+/* 连接线 */
+.parrot-time-axis__line {
+  flex: 1;
+  width: 3rpx;
+  background-color: #dcdfe6;
+  margin-top: 6rpx;
+  min-height: 40rpx;
+}
+
+/* ---- 内容区 ---- */
+.parrot-time-axis__content {
+  flex: 1;
+  padding: 0 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.parrot-time-axis__title {
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+  line-height: 40rpx;
+}
+
+.parrot-time-axis__desc {
+  font-size: 24rpx;
+  color: #666666;
+  margin-top: 8rpx;
+  line-height: 36rpx;
+}
+
+.parrot-time-axis__time {
+  font-size: 22rpx;
+  color: #999999;
+  margin-top: 6rpx;
+}
+
+/* 进行中（最后一项虚化） */
+.parrot-time-axis__item--pending {
+  opacity: 0.5;
+}
+</style>

@@ -1,0 +1,254 @@
+<template>
+	<!-- FormItem 表单项：标签 + 内容 + 校验提示 -->
+	<view class="parrot-form-item" :class="[isTop ? 'parrot-form-item--top' : '']">
+		<!-- 标签区域 -->
+		<view v-if="label || required" class="parrot-form-item__label" :style="labelStyle">
+			<text v-if="isRequired" class="parrot-form-item__required">*</text>
+			<text class="parrot-form-item__label-text">{{ label }}</text>
+		</view>
+		<!-- 内容区域 -->
+		<view class="parrot-form-item__content">
+			<slot></slot>
+			<!-- 错误提示 -->
+			<text
+				v-if="showError && errorMsg"
+				class="parrot-form-item__error"
+			>{{ errorMsg }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-form-item 表单项
+ * 表单行包裹组件，显示标签、内容和校验错误信息。
+ * 从 Form 父组件 inject 配置和校验规则。
+ *
+ * @prop prop          绑定 model 中的字段名
+ * @prop label         标签文字
+ * @prop required      是否必填（显示星号）
+ * @prop rules         本项校验规则（覆盖 Form 级别）
+ * @prop labelWidth    标签宽度（覆盖 Form 级别）
+ * @prop showMessage   是否显示错误提示
+ * @prop errorMessage  自定义错误信息
+ */
+import { computed, ref, inject, onMounted, onUnmounted, watch } from 'vue'
+
+interface Props {
+	prop ?: string
+	label ?: string
+	required ?: boolean
+	rules ?: any[]
+	labelWidth ?: string
+	showMessage ?: boolean
+	errorMessage ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	required: false,
+	showMessage: true,
+})
+
+// 从 Form inject
+const formModel = inject<any>('formModel', null)
+const formRules = inject<any>('formRules', null)
+const formLabelWidth = inject<any>('formLabelWidth', null)
+const formLabelPosition = inject<any>('formLabelPosition', null)
+const formDisabled = inject<any>('formDisabled', null)
+const formShowMessage = inject<any>('formShowMessage', null)
+const formAddField = inject<any>('formAddField', null)
+const formRemoveField = inject<any>('formRemoveField', null)
+
+const errorMsg = ref<string>('')
+const validateState = ref<string>('') // success / error / ''
+
+// provide 给子元素（Input 等）
+provide('formItemValidateState', computed(() => validateState.value))
+provide('formItemProp', computed(() => props.prop))
+
+// 是否顶部排列
+const isTop = computed(() : boolean => {
+	const pos = formLabelPosition != null ? formLabelPosition.value : 'left'
+	return pos === 'top'
+})
+
+// 计算标签宽度
+const labelStyle = computed(() : string => {
+	const w = props.labelWidth ?? (formLabelWidth != null ? formLabelWidth.value : '180rpx')
+	if (isTop.value) return ''
+	return `width:${w}`
+})
+
+// 是否显示必填星号
+const isRequired = computed(() : boolean => {
+	if (props.required) return true
+	const rules = getFieldRules()
+	return rules.some((r : any) => r.required === true)
+})
+
+// 是否显示错误
+const showError = computed(() : boolean => {
+	if (props.errorMessage) {
+		errorMsg.value = props.errorMessage as string
+		return true
+	}
+	const sm = props.showMessage ?? (formShowMessage != null ? formShowMessage.value : true)
+	return sm && validateState.value === 'error'
+})
+
+// 获取当前字段的校验规则
+function getFieldRules() : any[] {
+	if (props.rules) return props.rules as any[]
+	if (formRules != null && props.prop) {
+		const allRules = formRules.value
+		if (allRules && allRules[props.prop as string]) {
+			const r = allRules[props.prop as string]
+			return Array.isArray(r) ? r : [r]
+		}
+	}
+	return []
+}
+
+// 获取字段当前值
+function getFieldValue() : any {
+	if (formModel != null && props.prop) {
+		const model = formModel.value
+		if (model) return model[props.prop as string]
+	}
+	return null
+}
+
+// 校验
+function validate(callback ?: (error ?: any) => void) {
+	const rules = getFieldRules()
+	if (rules.length === 0) {
+		validateState.value = 'success'
+		errorMsg.value = ''
+		if (callback) callback()
+		return
+	}
+
+	const value = getFieldValue()
+	let hasError = false
+	let msg = ''
+
+	for (let i = 0; i < rules.length; i++) {
+		const rule = rules[i] as any
+		// required 校验
+		if (rule.required && (value == null || value === '')) {
+			hasError = true
+			msg = rule.message ?? `${props.label ?? props.prop ?? '此字段'}不能为空`
+			break
+		}
+		// min/max 长度校验
+		if (rule.min != null && typeof value === 'string' && value.length < rule.min) {
+			hasError = true
+			msg = rule.message ?? `长度不能少于${rule.min}个字符`
+			break
+		}
+		if (rule.max != null && typeof value === 'string' && value.length > rule.max) {
+			hasError = true
+			msg = rule.message ?? `长度不能超过${rule.max}个字符`
+			break
+		}
+		// pattern 正则校验
+		if (rule.pattern && typeof value === 'string') {
+			const reg = new RegExp(rule.pattern)
+			if (!reg.test(value)) {
+				hasError = true
+				msg = rule.message ?? '格式不正确'
+				break
+			}
+		}
+	}
+
+	if (hasError) {
+		validateState.value = 'error'
+		errorMsg.value = msg
+		if (callback) callback({ prop: props.prop, message: msg })
+	} else {
+		validateState.value = 'success'
+		errorMsg.value = ''
+		if (callback) callback()
+	}
+}
+
+// 重置
+function resetField() {
+	validateState.value = ''
+	errorMsg.value = ''
+}
+
+// 清除校验
+function clearValidate() {
+	validateState.value = ''
+	errorMsg.value = ''
+}
+
+// 注册到 Form
+onMounted(() => {
+	if (formAddField && props.prop) {
+		formAddField({ validate, resetField, clearValidate, prop: props.prop })
+	}
+})
+
+onUnmounted(() => {
+	if (formRemoveField && props.prop) {
+		formRemoveField({ prop: props.prop })
+	}
+})
+
+defineExpose({
+	validate,
+	resetField,
+	clearValidate,
+})
+</script>
+
+<style scoped>
+.parrot-form-item {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	padding: 20rpx 0;
+}
+.parrot-form-item--top {
+	flex-direction: column;
+}
+
+.parrot-form-item__label {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-shrink: 0;
+	height: 72rpx;
+	padding-right: 16rpx;
+}
+.parrot-form-item--top .parrot-form-item__label {
+	height: auto;
+	padding-right: 0;
+	padding-bottom: 12rpx;
+}
+
+.parrot-form-item__required {
+	color: #f56c6c;
+	font-size: 28rpx;
+	margin-right: 4rpx;
+}
+.parrot-form-item__label-text {
+	font-size: 28rpx;
+	color: #606266;
+}
+
+.parrot-form-item__content {
+	flex: 1;
+	position: relative;
+}
+
+.parrot-form-item__error {
+	font-size: 24rpx;
+	color: #f56c6c;
+	padding-top: 8rpx;
+	line-height: 1.2;
+}
+</style>

@@ -1,0 +1,256 @@
+<template>
+	<view v-if="show" class="parrot-share-sheet">
+		<!-- 遮罩层 -->
+		<view class="parrot-share-sheet__mask" :style="maskStyle" @tap.stop="handleCancel" />
+
+		<!-- 底部面板 -->
+		<view class="parrot-share-sheet__panel" :style="panelStyle">
+			<!-- 标题 -->
+			<view v-if="title" class="parrot-share-sheet__header">
+				<text class="parrot-share-sheet__title">{{ title }}</text>
+			</view>
+
+			<!-- 分享选项宫格 -->
+			<view class="parrot-share-sheet__grid">
+				<view
+					v-for="(item, idx) in parsedItems"
+					:key="idx"
+					class="parrot-share-sheet__grid-item"
+					@tap="handleSelect(idx)"
+				>
+					<view class="parrot-share-sheet__icon-wrap">
+						<text class="parrot-share-sheet__icon-emoji">{{ getIconEmoji(idx) }}</text>
+					</view>
+					<text class="parrot-share-sheet__label">{{ getItemLabel(idx) }}</text>
+				</view>
+			</view>
+
+			<!-- 取消按钮 -->
+			<view class="parrot-share-sheet__cancel-gap" />
+			<view class="parrot-share-sheet__cancel" @tap="handleCancel">
+				<text class="parrot-share-sheet__cancel-text">{{ cancelText }}</text>
+			</view>
+
+			<!-- 底部安全区域 -->
+			<view class="parrot-share-sheet__safe-area" />
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-share-sheet 分享面板组件
+ * 底部弹出的分享操作面板，宫格排列分享渠道选项（图标+文字）。
+ * 使用绝对定位实现遮罩+底部弹出效果。
+ * items 通过 JSON 字符串传入，格式：
+ * [{"icon":"wechat","label":"微信"},{"icon":"moments","label":"朋友圈"}]
+ *
+ * @prop show       是否显示，默认 false
+ * @prop title      面板标题，默认 '分享到'
+ * @prop cancelText 取消按钮文字，默认 '取消'
+ * @prop items      分享选项 JSON 数组字符串
+ *
+ * @event update:show   显隐状态变更
+ * @event select        选中某项，参数 {icon: string, label: string}
+ * @event cancel        点击取消
+ */
+import { computed } from 'vue'
+
+interface Props {
+	/** 是否显示 */
+	show ?: boolean
+	/** 标题文字 */
+	title ?: string
+	/** 取消按钮文字 */
+	cancelText ?: string
+	/** 分享选项 JSON 数组字符串 */
+	items ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	show: false,
+	title: '分享到',
+	cancelText: '取消',
+	items: '[]',
+})
+
+const emit = defineEmits<{
+	(e: 'update:show', val: boolean): void
+	(e: 'select', item: UTSJSONObject): void
+	(e: 'cancel'): void
+}>()
+
+/** 图标名称到 emoji 映射 */
+const iconMap : Record<string, string> = {
+	wechat: '💬',
+	moments: '🌐',
+	qq: '🐧',
+	weibo: '📢',
+	link: '🔗',
+	qrcode: '📱',
+	poster: '🖼',
+	more: '⋯',
+	email: '📧',
+	sms: '💌',
+	copy: '📋',
+	browser: '🌍',
+	download: '⬇',
+	collect: '⭐',
+}
+
+/** 解析后的分享项数组 */
+const parsedItems = computed(() : UTSJSONObject[] => {
+	try {
+		const arr = JSON.parse(props.items ?? '[]') as UTSJSONObject[]
+		return arr
+	} catch (e) {
+		return [] as UTSJSONObject[]
+	}
+})
+
+/** 遮罩样式 */
+const maskStyle = computed(() : string => {
+	return 'z-index:1000;'
+})
+
+/** 面板样式 */
+const panelStyle = computed(() : string => {
+	return 'z-index:1001;'
+})
+
+/** 获取分享项图标 emoji */
+function getIconEmoji(idx : number) : string {
+	const items = parsedItems.value
+	if (idx >= items.length) return ''
+	const item = items[idx]
+	const icon = (item['icon'] as string | null) ?? ''
+	return iconMap[icon] ?? '📤'
+}
+
+/** 获取分享项标签文字 */
+function getItemLabel(idx : number) : string {
+	const items = parsedItems.value
+	if (idx >= items.length) return ''
+	const item = items[idx]
+	return (item['label'] as string | null) ?? ''
+}
+
+/** 选中某项 */
+function handleSelect(idx : number) {
+	const items = parsedItems.value
+	if (idx >= items.length) return
+	const item = items[idx]
+	const payload = new UTSJSONObject()
+	payload['icon'] = (item['icon'] as string | null) ?? ''
+	payload['label'] = (item['label'] as string | null) ?? ''
+	emit('select', payload)
+	emit('update:show', false)
+}
+
+/** 取消 */
+function handleCancel() {
+	emit('cancel')
+	emit('update:show', false)
+}
+</script>
+
+<style scoped>
+.parrot-share-sheet {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 999;
+}
+
+.parrot-share-sheet__mask {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.45);
+}
+
+.parrot-share-sheet__panel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #f7f7f8;
+	border-radius: 24rpx 24rpx 0 0;
+}
+
+.parrot-share-sheet__header {
+	padding: 32rpx 32rpx 16rpx;
+	text-align: center;
+}
+
+.parrot-share-sheet__title {
+	font-size: 26rpx;
+	color: #909399;
+	line-height: 1.4;
+}
+
+.parrot-share-sheet__grid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	padding: 24rpx 16rpx;
+}
+
+.parrot-share-sheet__grid-item {
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20rpx 0;
+}
+
+.parrot-share-sheet__icon-wrap {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 48rpx;
+	background-color: #ffffff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 16rpx;
+}
+
+.parrot-share-sheet__icon-emoji {
+	font-size: 44rpx;
+	line-height: 1;
+}
+
+.parrot-share-sheet__label {
+	font-size: 22rpx;
+	color: #606266;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.parrot-share-sheet__cancel-gap {
+	height: 16rpx;
+	background-color: #ebeef0;
+}
+
+.parrot-share-sheet__cancel {
+	background-color: #ffffff;
+	padding: 28rpx 0;
+	text-align: center;
+}
+
+.parrot-share-sheet__cancel-text {
+	font-size: 30rpx;
+	color: #303133;
+	text-align: center;
+}
+
+.parrot-share-sheet__safe-area {
+	height: env(safe-area-inset-bottom);
+	min-height: 0;
+	background-color: #ffffff;
+}
+</style>

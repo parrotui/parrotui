@@ -1,0 +1,169 @@
+<template>
+	<view class="parrot-swiper-dot" :style="containerStyle">
+		<!-- 数字模式 -->
+		<view v-if="dotMode === 'number'" class="parrot-swiper-dot__number" :style="numberBgStyle">
+			<text class="parrot-swiper-dot__number-text" :style="numberTextStyle">{{ displayText }}</text>
+		</view>
+		<!-- dot / round / rect 模式 -->
+		<view v-else class="parrot-swiper-dot__dots">
+			<view
+				v-for="(item, index) in dotList"
+				:key="index"
+				class="parrot-swiper-dot__item"
+				:class="index === currentIndex ? 'parrot-swiper-dot__item--active' : ''"
+				:style="dotItemStyle(index)"
+				@tap="handleClickItem(index)"
+			/>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSwiperDot 轮播指示点
+ * @description 配合 swiper 使用的指示器组件，支持圆点、长条、方形、数字四种模式
+ * @property {number} current - 当前激活索引
+ * @property {number} total - 总数
+ * @property {string} mode - 指示器模式：dot 圆点 / round 长条 / rect 方形 / number 数字
+ * @property {string} activeColor - 激活颜色
+ * @property {string} inactiveColor - 未激活颜色
+ * @property {number} dotSize - 指示点尺寸 rpx
+ * @event {Function} clickItem - 点击某个指示点时触发，参数为索引
+ */
+import { computed } from 'vue'
+
+interface Props {
+	/** 当前激活索引 */
+	current ?: number
+	/** 总数 */
+	total ?: number
+	/** 指示器模式：dot / round / rect / number */
+	mode ?: string
+	/** 激活颜色 */
+	activeColor ?: string
+	/** 未激活颜色 */
+	inactiveColor ?: string
+	/** 指示点尺寸 rpx */
+	dotSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	current: 0,
+	total: 0,
+	mode: 'dot',
+	activeColor: '#1a7eff',
+	inactiveColor: '#cccccc',
+	dotSize: 16,
+})
+
+const emit = defineEmits<{
+	(e: 'clickItem', index: number): void
+}>()
+
+/** 当前索引 */
+const currentIndex = computed(() : number => {
+	return props.current ?? 0
+})
+
+/** 模式 */
+const dotMode = computed(() : string => {
+	return props.mode ?? 'dot'
+})
+
+/** 生成指示点数组 */
+const dotList = computed(() : number[] => {
+	const t = props.total ?? 0
+	const arr : number[] = []
+	for (let i = 0; i < t; i++) {
+		arr.push(i)
+	}
+	return arr
+})
+
+/** 数字模式的显示文字 */
+const displayText = computed(() : string => {
+	const cur = (props.current ?? 0) + 1
+	const t = props.total ?? 0
+	return `${cur}/${t}`
+})
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return 'display:flex;flex-direction:row;align-items:center;justify-content:center'
+})
+
+/** 数字模式背景样式 */
+const numberBgStyle = computed(() : string => {
+	return 'background:rgba(0,0,0,0.3);border-radius:20rpx;padding:4rpx 16rpx'
+})
+
+/** 数字模式文字样式 */
+const numberTextStyle = computed(() : string => {
+	const s = props.dotSize ?? 16
+	/* 数字模式字号略大 */
+	const fs = Math.round(s * 1.5)
+	return `font-size:${fs}rpx;color:#ffffff`
+})
+
+/** 获取单个指示点样式 */
+function dotItemStyle(index : number) : string {
+	const s = props.dotSize ?? 16
+	const ac = props.activeColor ?? '#1a7eff'
+	const ic = props.inactiveColor ?? '#cccccc'
+	const isActive = index === (props.current ?? 0)
+	const color = isActive ? ac : ic
+	const m = props.mode ?? 'dot'
+
+	if (m === 'round') {
+		/* 长条模式：激活时宽度加倍 */
+		const w = isActive ? s * 2 : s
+		const h = s
+		return `width:${w}rpx;height:${h}rpx;border-radius:${h}rpx;background:${color};margin-left:6rpx;margin-right:6rpx`
+	}
+
+	if (m === 'rect') {
+		/* 方形模式 */
+		return `width:${s}rpx;height:${s}rpx;border-radius:4rpx;background:${color};margin-left:6rpx;margin-right:6rpx`
+	}
+
+	/* 默认 dot 圆点模式 */
+	return `width:${s}rpx;height:${s}rpx;border-radius:${s}rpx;background:${color};margin-left:6rpx;margin-right:6rpx`
+}
+
+/** 点击指示点 */
+function handleClickItem(index : number) {
+	emit('clickItem', index)
+}
+</script>
+
+<style scoped>
+.parrot-swiper-dot {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-swiper-dot__dots {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-swiper-dot__item {
+	transition-property: width, background-color;
+	transition-duration: 0.3s;
+}
+
+.parrot-swiper-dot__number {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-swiper-dot__number-text {
+	line-height: 1.4;
+}
+</style>

@@ -1,0 +1,174 @@
+<template>
+	<!-- Timer 正计时器：从 0 开始计时，支持自定义格式、毫秒级、手动控制 -->
+	<view class="parrot-timer">
+		<slot :current="currentTime">
+			<text class="parrot-timer__text">{{ formattedTime }}</text>
+		</slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-timer 正计时器
+ * 从 0 开始计时，与 CountDown 倒计时相反。
+ * 支持自定义显示格式、毫秒精度、手动 start/pause/reset。
+ *
+ * @prop autoStart   是否自动开始计时，默认 false
+ * @prop format      格式化字符串，默认 'mm:ss'
+ *                   支持 HH/mm/ss/SSS（毫秒）
+ * @prop millisecond 是否开启毫秒级渲染，默认 false
+ *
+ * @event change 计时变化 {minutes, seconds, milliseconds}
+ *
+ * @expose start(), pause(), reset()
+ */
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+/** 时间对象结构 */
+type TimerData = {
+	hours : number
+	minutes : number
+	seconds : number
+	milliseconds : number
+}
+
+interface Props {
+	/** 是否自动开始计时 */
+	autoStart ?: boolean
+	/** 格式化字符串 */
+	format ?: string
+	/** 是否开启毫秒级渲染 */
+	millisecond ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	autoStart: false,
+	format: 'mm:ss',
+	millisecond: false,
+})
+
+const emit = defineEmits<{
+	change: [time : TimerData]
+}>()
+
+/** 已计时的毫秒数 */
+const elapsed = ref<number>(0)
+
+/** 定时器 id */
+let timerId : number = 0
+
+/** 是否正在运行 */
+const counting = ref<boolean>(false)
+
+/** 将毫秒拆解为时分秒毫秒 */
+function parseTime(ms : number) : TimerData {
+	const t = Math.max(0, ms)
+	const hours = Math.floor(t / 3600000)
+	const minutes = Math.floor((t % 3600000) / 60000)
+	const seconds = Math.floor((t % 60000) / 1000)
+	const milliseconds = Math.floor(t % 1000)
+	return { hours, minutes, seconds, milliseconds } as TimerData
+}
+
+/** 当前时间对象 */
+const currentTime = computed(() : TimerData => {
+	return parseTime(elapsed.value)
+})
+
+/** 数字补零 */
+function padZero(n : number, len : number) : string {
+	let s = n.toString()
+	while (s.length < len) {
+		s = '0' + s
+	}
+	return s
+}
+
+/** 格式化后的显示文字 */
+const formattedTime = computed(() : string => {
+	const t = currentTime.value
+	let fmt = props.format ?? 'mm:ss'
+
+	/* 小时 */
+	if (fmt.indexOf('HH') !== -1) {
+		fmt = fmt.replace('HH', padZero(t.hours, 2))
+	}
+	/* 分钟 */
+	if (fmt.indexOf('mm') !== -1) {
+		fmt = fmt.replace('mm', padZero(t.minutes, 2))
+	}
+	/* 秒 */
+	if (fmt.indexOf('ss') !== -1) {
+		fmt = fmt.replace('ss', padZero(t.seconds, 2))
+	}
+	/* 毫秒 */
+	if (fmt.indexOf('SSS') !== -1) {
+		fmt = fmt.replace('SSS', padZero(t.milliseconds, 3))
+	}
+	return fmt
+})
+
+/** 每帧/每秒 tick */
+function tick() {
+	const interval = props.millisecond ? 30 : 1000
+	timerId = setInterval(() => {
+		const newElapsed = elapsed.value + interval
+		elapsed.value = newElapsed
+		emit('change', parseTime(newElapsed))
+	}, interval) as number
+}
+
+/** 开始计时 */
+function start() {
+	if (counting.value) return
+	counting.value = true
+	tick()
+}
+
+/** 暂停计时 */
+function pause() {
+	counting.value = false
+	if (timerId !== 0) {
+		clearInterval(timerId)
+		timerId = 0
+	}
+}
+
+/** 重置计时器 */
+function reset() {
+	pause()
+	elapsed.value = 0
+	emit('change', parseTime(0))
+}
+
+onMounted(() => {
+	if (props.autoStart === true) {
+		start()
+	}
+})
+
+onUnmounted(() => {
+	pause()
+})
+
+/* 暴露方法给父组件 */
+defineExpose({
+	start,
+	pause,
+	reset,
+})
+</script>
+
+<style scoped>
+.parrot-timer {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.parrot-timer__text {
+	font-size: 28rpx;
+	color: #333333;
+	font-variant-numeric: tabular-nums;
+}
+</style>

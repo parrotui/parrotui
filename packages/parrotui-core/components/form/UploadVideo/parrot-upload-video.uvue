@@ -1,0 +1,150 @@
+<template>
+	<!-- UploadVideo 视频上传：选择/预览/删除视频 -->
+	<view class="parrot-upload-video">
+		<view class="parrot-upload-video__list">
+			<!-- 已上传视频 -->
+			<view
+				v-for="(file, index) in fileList"
+				:key="index"
+				class="parrot-upload-video__item"
+				:style="itemSizeStyle"
+			>
+				<video
+					class="parrot-upload-video__player"
+					:src="file.url ?? file"
+					:poster="file.poster ?? ''"
+					:autoplay="false"
+					:controls="false"
+					object-fit="cover"
+				></video>
+				<!-- 播放图标 -->
+				<view class="parrot-upload-video__play" @tap="handlePreview(index)">
+					<text class="parrot-upload-video__play-icon">▶</text>
+				</view>
+				<!-- 删除按钮 -->
+				<view v-if="deletable && !disabled" class="parrot-upload-video__delete" @tap.stop="handleDelete(index)">
+					<text class="parrot-upload-video__delete-icon">✕</text>
+				</view>
+			</view>
+
+			<!-- 上传按钮 -->
+			<view
+				v-if="fileList.length < maxCount && !disabled"
+				class="parrot-upload-video__add"
+				:class="[glass ? 'parrot-upload-video__add--glass' : '']"
+				:style="itemSizeStyle"
+				@tap="handleChoose"
+			>
+				<text class="parrot-upload-video__add-icon">+</text>
+				<text class="parrot-upload-video__add-text">{{ uploadText ?? '上传视频' }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-upload-video 视频上传
+ *
+ * @prop modelValue     已上传视频列表
+ * @prop maxCount       最大上传数
+ * @prop maxDuration    最大录制时长 秒
+ * @prop compressed     是否压缩
+ * @prop deletable      是否可删除
+ * @prop disabled       是否禁用
+ * @prop previewSize    预览尺寸 rpx
+ * @prop purpose        用途文案
+ * @prop uploadText     按钮文字
+ * @prop glass          磨砂玻璃
+ *
+ * @event update:modelValue  列表变更
+ * @event afterRead          读取后
+ * @event delete             删除
+ */
+import { computed } from 'vue'
+
+interface Props {
+	modelValue ?: any[]
+	maxCount ?: number
+	maxDuration ?: number
+	compressed ?: boolean
+	deletable ?: boolean
+	disabled ?: boolean
+	previewSize ?: number
+	purpose ?: string
+	uploadText ?: string
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: () : any[] => [] as any[],
+	maxCount: 1,
+	maxDuration: 60,
+	compressed: true,
+	deletable: true,
+	disabled: false,
+	previewSize: 200,
+	purpose: '上传视频',
+	uploadText: '上传视频',
+	glass: false,
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: any[]]
+	afterRead: [event: any]
+	delete: [event: { index: number }]
+}>()
+
+const fileList = computed(() : any[] => {
+	return props.modelValue ?? ([] as any[])
+})
+
+const itemSizeStyle = computed(() : string => {
+	const s = props.previewSize ?? 200
+	return `width:${s}rpx;height:${s}rpx`
+})
+
+function handleChoose() {
+	if (props.disabled) return
+	uni.chooseVideo({
+		maxDuration: props.maxDuration ?? 60,
+		compressed: props.compressed ?? true,
+		sourceType: ['album', 'camera'],
+		success: (res) => {
+			const file = { url: res.tempFilePath, duration: res.duration, size: res.size }
+			const updated = [...fileList.value, file]
+			emit('update:modelValue', updated)
+			emit('afterRead', { file })
+		},
+	})
+}
+
+function handleDelete(index : number) {
+	const updated = [...fileList.value]
+	updated.splice(index, 1)
+	emit('update:modelValue', updated)
+	emit('delete', { index })
+}
+
+function handlePreview(index : number) {
+	const file = fileList.value[index]
+	const url = typeof file === 'string' ? file : (file?.url ?? '')
+	if (url) {
+		uni.navigateTo({ url: `/pages/common/video-player?url=${encodeURIComponent(url)}` })
+	}
+}
+</script>
+
+<style scoped>
+.parrot-upload-video__list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 16rpx; }
+.parrot-upload-video__item { position: relative; border-radius: 12rpx; overflow: hidden; }
+.parrot-upload-video__player { width: 100%; height: 100%; }
+.parrot-upload-video__play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 64rpx; height: 64rpx; border-radius: 50%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+.parrot-upload-video__play-icon { font-size: 28rpx; color: #ffffff; margin-left: 4rpx; }
+.parrot-upload-video__delete { position: absolute; top: 0; right: 0; width: 40rpx; height: 40rpx; background: rgba(0,0,0,0.5); border-radius: 0 0 0 12rpx; display: flex; align-items: center; justify-content: center; }
+.parrot-upload-video__delete-icon { font-size: 20rpx; color: #ffffff; }
+.parrot-upload-video__add { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f5f7fa; border-radius: 12rpx; border-width: 2rpx; border-style: dashed; border-color: #dcdfe6; }
+.parrot-upload-video__add--glass { background: rgba(255,255,255,0.18) !important; border-color: rgba(255,255,255,0.35) !important; }
+.parrot-upload-video__add-icon { font-size: 48rpx; color: #909399; }
+.parrot-upload-video__add-text { font-size: 22rpx; color: #909399; margin-top: 4rpx; }
+</style>

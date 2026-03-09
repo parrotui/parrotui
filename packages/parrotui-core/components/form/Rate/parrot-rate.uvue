@@ -1,0 +1,123 @@
+<template>
+	<!-- Rate 评分：星级评分组件 -->
+	<view class="parrot-rate" :class="[disabled ? 'parrot-rate--disabled' : '', readonly ? 'parrot-rate--readonly' : '']">
+		<view
+			v-for="i in count"
+			:key="i"
+			class="parrot-rate__item"
+			:style="`margin-right:${gap}rpx`"
+			@tap="handleSelect(i)"
+		>
+			<!-- 整星/空星 -->
+			<text
+				class="parrot-rate__icon"
+				:style="starStyle(i)"
+			>{{ getStarIcon(i) }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-rate 评分
+ * 星级评分组件，支持半星、自定义图标和颜色。
+ *
+ * @prop modelValue    当前分数
+ * @prop count         星星数量，默认 5
+ * @prop size          图标大小 rpx
+ * @prop activeColor   选中颜色
+ * @prop inactiveColor 未选中颜色
+ * @prop allowHalf     是否允许半星
+ * @prop disabled      是否禁用
+ * @prop readonly      是否只读
+ * @prop gap           间距 rpx
+ * @prop icon          自定义图标（选中）
+ * @prop inactiveIcon  自定义图标（未选中）
+ *
+ * @event update:modelValue  分数变更
+ * @event change             分数变化
+ */
+import { computed } from 'vue'
+
+interface Props {
+	modelValue ?: number
+	count ?: number
+	size ?: number
+	activeColor ?: string
+	inactiveColor ?: string
+	allowHalf ?: boolean
+	disabled ?: boolean
+	readonly ?: boolean
+	gap ?: number
+	icon ?: string
+	inactiveIcon ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: 0,
+	count: 5,
+	size: 40,
+	activeColor: '#f7ba2a',
+	inactiveColor: '#c0c4cc',
+	allowHalf: false,
+	disabled: false,
+	readonly: false,
+	gap: 8,
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: number]
+	change: [value: number]
+}>()
+
+function getStarIcon(index : number) : string {
+	const val = props.modelValue ?? 0
+	if (index <= Math.floor(val)) {
+		return props.icon ?? '★'
+	}
+	if (props.allowHalf && index - 0.5 <= val) {
+		return '⯪' // 半星
+	}
+	return props.inactiveIcon ?? '☆'
+}
+
+function starStyle(index : number) : string {
+	const val = props.modelValue ?? 0
+	const isActive = index <= val || (props.allowHalf && index - 0.5 <= val)
+	const color = isActive ? (props.activeColor ?? '#f7ba2a') : (props.inactiveColor ?? '#c0c4cc')
+	return `font-size:${props.size ?? 40}rpx;color:${color}`
+}
+
+function handleSelect(index : number) {
+	if (props.disabled || props.readonly) return
+	let val = index as number
+	// 点击已选中的星取消
+	if (val === props.modelValue) {
+		val = val - 1
+	}
+	emit('update:modelValue', val)
+	emit('change', val)
+}
+</script>
+
+<style scoped>
+.parrot-rate {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+.parrot-rate--disabled {
+	opacity: 0.5;
+}
+.parrot-rate--readonly {
+	/* 只读不做视觉区分 */
+}
+.parrot-rate__item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-rate__icon {
+	line-height: 1;
+}
+</style>

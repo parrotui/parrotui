@@ -1,0 +1,58 @@
+<template>
+	<text
+		class="parrot-caption"
+		:class="[
+			type ? `parrot-caption--${type}` : '',
+			align ? `parrot-caption--${align}` : ''
+		]"
+		:style="captionStyle"
+		@click="$emit('click', $event)"
+	>
+		<slot>{{ text }}</slot>
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	text?: string
+	type?: 'default' | 'secondary' | 'muted' | 'primary'
+	align?: 'left' | 'center' | 'right'
+	color?: string
+	margin?: string
+}>(), {
+	text: '',
+	type: 'secondary',
+	align: 'left',
+	color: '',
+	margin: '',
+})
+
+defineEmits<{ click: [event: Event] }>()
+
+const captionStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.color) style.color = props.color
+	if (props.margin) style.margin = props.margin
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-caption {
+	display: block;
+	font-size: 22rpx;
+	line-height: 1.5;
+
+	&--default { color: #606266; }
+	&--secondary { color: #909399; }
+	&--muted { color: #c0c4cc; }
+	&--primary { color: #1a7eff; }
+
+	&--left { text-align: left; }
+	&--center { text-align: center; }
+	&--right { text-align: right; }
+}
+</style>

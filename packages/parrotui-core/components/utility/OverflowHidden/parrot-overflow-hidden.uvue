@@ -1,0 +1,173 @@
+<template>
+	<!-- OverflowHidden 内容超出隐藏：超出最大高度时裁剪显示，底部显示展开/收起按钮 -->
+	<view class="parrot-overflow-hidden">
+		<!-- 内容区域 -->
+		<view
+			class="parrot-overflow-hidden__content"
+			:style="contentStyle"
+		>
+			<slot />
+		</view>
+
+		<!-- 渐变遮罩层（收起状态时显示） -->
+		<view v-if="showMask" class="parrot-overflow-hidden__mask" />
+
+		<!-- 展开/收起按钮 -->
+		<view
+			v-if="props.showToggle === true"
+			class="parrot-overflow-hidden__toggle"
+			@tap="handleToggle"
+		>
+			<text class="parrot-overflow-hidden__toggle-text" :style="toggleStyle">
+				{{ toggleText }}
+			</text>
+			<text class="parrot-overflow-hidden__toggle-arrow" :style="toggleStyle">
+				{{ arrowIcon }}
+			</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-overflow-hidden 内容超出隐藏
+ * 当内容高度超出 maxHeight 时裁剪显示，底部展示展开/收起按钮。
+ * 适用于长文本、公告内容等需要折叠展示的场景。
+ *
+ * @prop maxHeight     最大高度 rpx，默认 200
+ * @prop expandText    展开按钮文字，默认 '展开'
+ * @prop collapseText  收起按钮文字，默认 '收起'
+ * @prop showToggle    是否显示展开/收起按钮，默认 true
+ * @prop color         按钮文字颜色，默认 '#1a7eff'
+ *
+ * @event change 展开/收起状态变化，参数为 expanded: boolean
+ *
+ * @slot default 内容区域
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	/** 最大高度 rpx */
+	maxHeight ?: number
+	/** 展开按钮文字 */
+	expandText ?: string
+	/** 收起按钮文字 */
+	collapseText ?: string
+	/** 是否显示展开/收起按钮 */
+	showToggle ?: boolean
+	/** 按钮文字颜色 */
+	color ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	maxHeight: 200,
+	expandText: '展开',
+	collapseText: '收起',
+	showToggle: true,
+	color: '#1a7eff',
+})
+
+const emit = defineEmits<{
+	change: [expanded : boolean]
+}>()
+
+/** 是否展开 */
+const expanded = ref<boolean>(false)
+
+/** 内容区域样式 */
+const contentStyle = computed(() : string => {
+	if (expanded.value) {
+		return ''
+	}
+	const h = props.maxHeight ?? 200
+	return 'max-height:' + h.toString() + 'rpx;overflow:hidden'
+})
+
+/** 是否显示遮罩 */
+const showMask = computed(() : boolean => {
+	return !expanded.value
+})
+
+/** 按钮文字 */
+const toggleText = computed(() : string => {
+	if (expanded.value) {
+		return props.collapseText ?? '收起'
+	}
+	return props.expandText ?? '展开'
+})
+
+/** 箭头图标 */
+const arrowIcon = computed(() : string => {
+	if (expanded.value) {
+		return '∧'
+	}
+	return '∨'
+})
+
+/** 按钮文字样式 */
+const toggleStyle = computed(() : string => {
+	return 'color:' + (props.color ?? '#1a7eff')
+})
+
+/** 切换展开/收起 */
+function handleToggle() {
+	expanded.value = !expanded.value
+	emit('change', expanded.value)
+}
+
+/* 暴露状态和方法给父组件 */
+defineExpose({
+	toggle: handleToggle,
+	expand: () => {
+		if (!expanded.value) {
+			expanded.value = true
+			emit('change', true)
+		}
+	},
+	collapse: () => {
+		if (expanded.value) {
+			expanded.value = false
+			emit('change', false)
+		}
+	},
+})
+</script>
+
+<style scoped>
+.parrot-overflow-hidden {
+	width: 100%;
+	position: relative;
+}
+
+.parrot-overflow-hidden__content {
+	width: 100%;
+}
+
+.parrot-overflow-hidden__mask {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 40rpx;
+	height: 80rpx;
+	background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+}
+
+.parrot-overflow-hidden__toggle {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 16rpx 0;
+}
+
+.parrot-overflow-hidden__toggle-text {
+	font-size: 26rpx;
+	line-height: 1.4;
+}
+
+.parrot-overflow-hidden__toggle-arrow {
+	font-size: 24rpx;
+	margin-left: 8rpx;
+	line-height: 1.4;
+}
+</style>

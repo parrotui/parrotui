@@ -1,0 +1,260 @@
+<template>
+	<!-- LoginC 第三方登录模板：品牌背景 + Logo + 一键登录 + 第三方图标行 -->
+	<view class="parrot-login-c">
+		<!-- 品牌色背景区域 -->
+		<view class="parrot-login-c__brand" :style="brandBgStyle">
+			<!-- Logo -->
+			<view class="parrot-login-c__logo-area">
+				<image
+					v-if="logo"
+					class="parrot-login-c__logo"
+					:src="logo"
+					mode="aspectFit"
+				/>
+				<view v-if="!logo" class="parrot-login-c__logo-default">
+					<text class="parrot-login-c__logo-default-text">LOGO</text>
+				</view>
+				<text class="parrot-login-c__title">{{ title }}</text>
+			</view>
+
+			<!-- 一键登录按钮 -->
+			<view class="parrot-login-c__quick-btn" @tap="handleQuickLogin">
+				<text class="parrot-login-c__quick-btn-text">一键登录</text>
+			</view>
+		</view>
+
+		<!-- 底部白色区域：第三方登录 -->
+		<view class="parrot-login-c__bottom">
+			<view class="parrot-login-c__divider-row">
+				<view class="parrot-login-c__divider-line"></view>
+				<text class="parrot-login-c__divider-text">其他方式登录</text>
+				<view class="parrot-login-c__divider-line"></view>
+			</view>
+
+			<!-- 第三方登录图标行 -->
+			<view class="parrot-login-c__providers">
+				<view
+					v-for="(item, index) in providerList"
+					:key="index"
+					class="parrot-login-c__provider-item"
+					@tap="handleThirdLogin(item['id'] as string)"
+				>
+					<view class="parrot-login-c__provider-icon" :style="providerIconStyle(item)">
+						<text class="parrot-login-c__provider-icon-text">{{ item['icon'] as string }}</text>
+					</view>
+					<text class="parrot-login-c__provider-label">{{ item['label'] as string }}</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * LoginC 第三方登录模板
+ * 社交登录页：大面积品牌背景色 + 中央 Logo + 一键登录按钮 + 底部第三方图标行
+ *
+ * @prop logo         Logo 图片地址
+ * @prop title        页面标题
+ * @prop brandColor   品牌主色
+ * @prop providers    第三方登录列表 JSON 数组字符串
+ *
+ * @event quickLogin   点击一键登录
+ * @event thirdLogin   点击第三方登录，返回 provider id
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	logo ?: string
+	title ?: string
+	brandColor ?: string
+	providers ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	logo: '',
+	title: '一键登录',
+	brandColor: '#1a7eff',
+	providers: '[{"id":"wechat","icon":"微","label":"微信","color":"#07c160"},{"id":"qq","icon":"Q","label":"QQ","color":"#12b7f5"},{"id":"weibo","icon":"微","label":"微博","color":"#e6162d"},{"id":"apple","icon":"A","label":"Apple","color":"#000000"}]',
+})
+
+const emit = defineEmits<{
+	quickLogin: []
+	thirdLogin: [provider: string]
+}>()
+
+// 品牌背景样式
+const brandBgStyle = computed(() : string => {
+	return `background-color:${props.brandColor ?? '#1a7eff'}`
+})
+
+// 解析第三方登录列表
+const providerList = computed(() : UTSJSONObject[] => {
+	const result : UTSJSONObject[] = []
+	const raw = props.providers ?? '[]'
+	const arr = JSON.parse(raw) as UTSJSONObject[]
+	if (arr != null) {
+		for (let i = 0; i < arr.length; i++) {
+			result.push(arr[i])
+		}
+	}
+	return result
+})
+
+// 第三方图标样式
+function providerIconStyle(item : UTSJSONObject) : string {
+	const color = (item['color'] as string) ?? '#333333'
+	return `background-color:${color}`
+}
+
+// 一键登录
+function handleQuickLogin() {
+	emit('quickLogin')
+}
+
+// 第三方登录
+function handleThirdLogin(provider : string) {
+	emit('thirdLogin', provider)
+}
+</script>
+
+<style scoped>
+.parrot-login-c {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-color: #ffffff;
+}
+
+/* 品牌色区域 */
+.parrot-login-c__brand {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	padding: 0 60rpx;
+	padding-bottom: 80rpx;
+}
+
+/* Logo 区域 */
+.parrot-login-c__logo-area {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 80rpx;
+}
+
+.parrot-login-c__logo {
+	width: 180rpx;
+	height: 180rpx;
+	margin-bottom: 32rpx;
+	border-radius: 36rpx;
+}
+
+.parrot-login-c__logo-default {
+	width: 180rpx;
+	height: 180rpx;
+	margin-bottom: 32rpx;
+	border-radius: 36rpx;
+	background-color: rgba(255, 255, 255, 0.25);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-c__logo-default-text {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.parrot-login-c__title {
+	font-size: 44rpx;
+	font-weight: 700;
+	color: #ffffff;
+	line-height: 64rpx;
+}
+
+/* 一键登录按钮 */
+.parrot-login-c__quick-btn {
+	width: 100%;
+	height: 96rpx;
+	background-color: #ffffff;
+	border-radius: 48rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-c__quick-btn-text {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #1a7eff;
+}
+
+/* 底部白色区域 */
+.parrot-login-c__bottom {
+	background-color: #ffffff;
+	padding: 48rpx 60rpx;
+	padding-bottom: 80rpx;
+	border-top-left-radius: 40rpx;
+	border-top-right-radius: 40rpx;
+	margin-top: -40rpx;
+}
+
+/* 分割线 */
+.parrot-login-c__divider-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 48rpx;
+}
+
+.parrot-login-c__divider-line {
+	flex: 1;
+	height: 1rpx;
+	background-color: #e4e7ed;
+}
+
+.parrot-login-c__divider-text {
+	font-size: 24rpx;
+	color: #909399;
+	padding: 0 24rpx;
+}
+
+/* 第三方登录列表 */
+.parrot-login-c__providers {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+.parrot-login-c__provider-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0 28rpx;
+}
+
+.parrot-login-c__provider-icon {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 12rpx;
+}
+
+.parrot-login-c__provider-icon-text {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.parrot-login-c__provider-label {
+	font-size: 22rpx;
+	color: #606266;
+}
+</style>

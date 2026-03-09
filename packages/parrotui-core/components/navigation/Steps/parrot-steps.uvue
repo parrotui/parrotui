@@ -1,0 +1,242 @@
+<template>
+	<!-- Steps 步骤条：支持横向/纵向、自定义颜色、图标、描述 -->
+	<view class="parrot-steps" :class="[`parrot-steps--${direction ?? 'horizontal'}`]">
+		<view
+			v-for="(item, index) in items"
+			:key="index"
+			class="parrot-steps__item"
+			:class="[
+				`parrot-steps__item--${direction ?? 'horizontal'}`,
+				index < (current ?? 0) ? 'parrot-steps__item--finished' : '',
+				index === (current ?? 0) ? 'parrot-steps__item--active' : '',
+				index > (current ?? 0) ? 'parrot-steps__item--pending' : '',
+			]"
+			@tap="onStepTap(index)"
+		>
+			<!-- 图标/序号圆圈 -->
+			<view class="parrot-steps__icon-wrap">
+				<view
+					class="parrot-steps__icon"
+					:style="getIconStyle(index)"
+				>
+					<text v-if="item.icon" class="parrot-steps__icon-text" :style="getIconTextStyle(index)">{{ item.icon }}</text>
+					<text v-if="!item.icon && index < (current ?? 0)" class="parrot-steps__icon-text" :style="getIconTextStyle(index)">✓</text>
+					<text v-if="!item.icon && index >= (current ?? 0)" class="parrot-steps__icon-text" :style="getIconTextStyle(index)">{{ index + 1 }}</text>
+				</view>
+				<!-- 连接线（最后一个不显示） -->
+				<view
+					v-if="index < items.length - 1"
+					class="parrot-steps__line"
+					:class="[`parrot-steps__line--${direction ?? 'horizontal'}`]"
+					:style="getLineStyle(index)"
+				></view>
+			</view>
+			<!-- 文字区域 -->
+			<view class="parrot-steps__content" :class="[`parrot-steps__content--${direction ?? 'horizontal'}`]">
+				<text class="parrot-steps__title" :style="getTitleStyle(index)">{{ item.title }}</text>
+				<text v-if="item.description" class="parrot-steps__desc">{{ item.description }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-steps 步骤条
+ * 支持横向/纵向布局，自定义激活/未激活颜色，图标和描述文字。
+ *
+ * @prop current       当前步骤索引，默认 0
+ * @prop direction     方向：horizontal / vertical，默认 horizontal
+ * @prop activeColor   激活颜色
+ * @prop inactiveColor 未激活颜色
+ * @prop items         步骤数据 { title, description?, icon? }[]
+ *
+ * @event clickStep    点击步骤，返回 index
+ */
+import { computed } from 'vue'
+
+/** 步骤项数据结构 */
+interface StepItem {
+	title : string
+	description ?: string
+	icon ?: string
+}
+
+interface Props {
+	/** 当前激活步骤索引 */
+	current ?: number
+	/** 布局方向 */
+	direction ?: string
+	/** 激活颜色 */
+	activeColor ?: string
+	/** 未激活颜色 */
+	inactiveColor ?: string
+	/** 步骤数据列表 */
+	items ?: StepItem[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	current: 0,
+	direction: 'horizontal',
+	activeColor: '#1a7eff',
+	inactiveColor: '#c0c4cc',
+	items: () : StepItem[] => [],
+})
+
+const emit = defineEmits<{
+	clickStep: [index: number]
+}>()
+
+/** 获取图标圆圈样式 */
+const getIconStyle = (index : number) : string => {
+	const cur = props.current ?? 0
+	const active = props.activeColor ?? '#1a7eff'
+	const inactive = props.inactiveColor ?? '#c0c4cc'
+	if (index <= cur) {
+		return `background-color:${active};border-color:${active}`
+	}
+	return `background-color:transparent;border-color:${inactive}`
+}
+
+/** 获取图标文字样式 */
+const getIconTextStyle = (index : number) : string => {
+	const cur = props.current ?? 0
+	if (index <= cur) {
+		return 'color:#ffffff'
+	}
+	return `color:${props.inactiveColor ?? '#c0c4cc'}`
+}
+
+/** 获取连接线样式 */
+const getLineStyle = (index : number) : string => {
+	const cur = props.current ?? 0
+	const active = props.activeColor ?? '#1a7eff'
+	const inactive = props.inactiveColor ?? '#c0c4cc'
+	if (index < cur) {
+		return `background-color:${active}`
+	}
+	return `background-color:${inactive}`
+}
+
+/** 获取标题文字样式 */
+const getTitleStyle = (index : number) : string => {
+	const cur = props.current ?? 0
+	const active = props.activeColor ?? '#1a7eff'
+	if (index === cur) {
+		return `color:${active};font-weight:600`
+	}
+	if (index < cur) {
+		return 'color:#303133'
+	}
+	return `color:${props.inactiveColor ?? '#c0c4cc'}`
+}
+
+/** 点击步骤 */
+function onStepTap(index : number) {
+	emit('clickStep', index)
+}
+</script>
+
+<style scoped>
+/* ---- 容器 ---- */
+.parrot-steps {
+	width: 100%;
+}
+.parrot-steps--horizontal {
+	display: flex;
+	flex-direction: row;
+}
+.parrot-steps--vertical {
+	display: flex;
+	flex-direction: column;
+}
+
+/* ---- 单个步骤 ---- */
+.parrot-steps__item {
+	position: relative;
+}
+.parrot-steps__item--horizontal {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.parrot-steps__item--vertical {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	padding-bottom: 40rpx;
+}
+
+/* ---- 图标区域 ---- */
+.parrot-steps__icon-wrap {
+	display: flex;
+	align-items: center;
+	position: relative;
+}
+.parrot-steps__item--horizontal .parrot-steps__icon-wrap {
+	flex-direction: row;
+	width: 100%;
+	justify-content: center;
+}
+.parrot-steps__item--vertical .parrot-steps__icon-wrap {
+	flex-direction: column;
+	align-items: center;
+	margin-right: 24rpx;
+}
+
+/* ---- 图标圆圈 ---- */
+.parrot-steps__icon {
+	width: 48rpx;
+	height: 48rpx;
+	border-radius: 50%;
+	border-width: 2rpx;
+	border-style: solid;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	z-index: 1;
+}
+.parrot-steps__icon-text {
+	font-size: 24rpx;
+	font-weight: 600;
+}
+
+/* ---- 连接线 ---- */
+.parrot-steps__line--horizontal {
+	position: absolute;
+	top: 24rpx;
+	left: 50%;
+	right: -50%;
+	height: 2rpx;
+	z-index: 0;
+}
+.parrot-steps__line--vertical {
+	width: 2rpx;
+	flex: 1;
+	min-height: 40rpx;
+	margin-top: 8rpx;
+	margin-bottom: 8rpx;
+}
+
+/* ---- 文字区域 ---- */
+.parrot-steps__content--horizontal {
+	align-items: center;
+	padding-top: 12rpx;
+}
+.parrot-steps__content--vertical {
+	flex: 1;
+	padding-top: 4rpx;
+}
+.parrot-steps__title {
+	font-size: 26rpx;
+	line-height: 1.4;
+}
+.parrot-steps__desc {
+	font-size: 22rpx;
+	color: #909399;
+	margin-top: 4rpx;
+	line-height: 1.4;
+}
+</style>

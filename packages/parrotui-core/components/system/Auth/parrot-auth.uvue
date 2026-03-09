@@ -1,0 +1,384 @@
+<template>
+	<view class="parrot-auth">
+		<!-- ========== status 模式：头像 + 用户名 + Token 状态 ========== -->
+		<view v-if="mode === 'status'" class="parrot-auth__status">
+			<view class="parrot-auth__avatar-wrap">
+				<image v-if="avatar !== ''" class="parrot-auth__avatar" :src="avatar" mode="aspectFill" />
+				<view v-if="avatar === ''" class="parrot-auth__avatar-placeholder">
+					<text class="parrot-auth__avatar-letter">{{ avatarFallback }}</text>
+				</view>
+			</view>
+			<view class="parrot-auth__info">
+				<text class="parrot-auth__name">{{ userName || '未登录' }}</text>
+				<view class="parrot-auth__token-row">
+					<view class="parrot-auth__token-dot" :style="tokenDotStyle" />
+					<text class="parrot-auth__token-label">{{ tokenStatusText }}</text>
+				</view>
+			</view>
+			<view v-if="isLoggedIn" class="parrot-auth__actions">
+				<view class="parrot-auth__action-btn" @tap="handleRefresh">
+					<text class="parrot-auth__action-icon">🔄</text>
+				</view>
+				<view class="parrot-auth__action-btn" @tap="handleLogout">
+					<text class="parrot-auth__action-icon">🚪</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- ========== login 模式：认证方式图标栏 ========== -->
+		<view v-if="mode === 'login'" class="parrot-auth__login">
+			<text class="parrot-auth__login-title">选择登录方式</text>
+			<view class="parrot-auth__methods">
+				<view
+					v-for="(method, index) in parsedMethods"
+					:key="index"
+					class="parrot-auth__method-item"
+					@tap="handleLogin(method)"
+				>
+					<view class="parrot-auth__method-icon">
+						<text class="parrot-auth__method-emoji">{{ getMethodIcon(method) }}</text>
+					</view>
+					<text class="parrot-auth__method-label">{{ methodStr(method, 'label') }}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- ========== switch 模式：切换 / 退出账号 ========== -->
+		<view v-if="mode === 'switch'" class="parrot-auth__switch">
+			<view class="parrot-auth__switch-current">
+				<view class="parrot-auth__avatar-wrap">
+					<image v-if="avatar !== ''" class="parrot-auth__avatar" :src="avatar" mode="aspectFill" />
+					<view v-if="avatar === ''" class="parrot-auth__avatar-placeholder">
+						<text class="parrot-auth__avatar-letter">{{ avatarFallback }}</text>
+					</view>
+				</view>
+				<view class="parrot-auth__info">
+					<text class="parrot-auth__name">{{ userName || '未登录' }}</text>
+					<text class="parrot-auth__sub-label">当前账号</text>
+				</view>
+			</view>
+			<view class="parrot-auth__switch-actions">
+				<view class="parrot-auth__switch-btn" @tap="handleSwitchAccount">
+					<text class="parrot-auth__switch-btn-text">切换账号</text>
+				</view>
+				<view class="parrot-auth__switch-btn parrot-auth__switch-btn--danger" @tap="handleLogout">
+					<text class="parrot-auth__switch-btn-text parrot-auth__switch-btn-text--danger">退出登录</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-auth 认证状态组件
+ * 三种模式：status（Token 状态灯）/ login（登录方式入口）/ switch（账号切换）
+ *
+ * @prop mode          模式 status / login / switch
+ * @prop isLoggedIn    是否已登录
+ * @prop userName      用户名
+ * @prop avatar        头像地址
+ * @prop tokenExpireAt Token 过期时间戳（毫秒）
+ * @prop methods       认证方式 JSON 数组
+ */
+import { computed } from 'vue'
+
+interface Props {
+	/** 模式 status/login/switch */
+	mode ?: string
+	/** 是否已登录 */
+	isLoggedIn ?: boolean
+	/** 用户名 */
+	userName ?: string
+	/** 头像地址 */
+	avatar ?: string
+	/** Token 过期时间戳（毫秒） */
+	tokenExpireAt ?: number
+	/** 认证方式 JSON 数组 */
+	methods ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	mode: 'status',
+	isLoggedIn: false,
+	userName: '',
+	avatar: '',
+	tokenExpireAt: 0,
+	methods: '',
+})
+
+const emit = defineEmits<{
+	(e : 'login', method : string) : void
+	(e : 'logout') : void
+	(e : 'refreshToken') : void
+	(e : 'switchAccount') : void
+}>()
+
+/* ==================== Token 状态 ==================== */
+const tokenStatus = computed(() : string => {
+	if (!props.isLoggedIn) return 'expired'
+	const expire = props.tokenExpireAt ?? 0
+	if (expire <= 0) return 'expired'
+	const now = Date.now()
+	if (now >= expire) return 'expired'
+	// 10 分钟内即将过期 → 黄色警告
+	if (expire - now < 600000) return 'warning'
+	return 'normal'
+})
+
+const tokenDotStyle = computed(() : string => {
+	const s = tokenStatus.value
+	if (s == 'normal') return 'background-color:#41a906;'
+	if (s == 'warning') return 'background-color:#e6a23c;'
+	return 'background-color:#f56c6c;'
+})
+
+const tokenStatusText = computed(() : string => {
+	const s = tokenStatus.value
+	if (s == 'normal') return '令牌有效'
+	if (s == 'warning') return '即将过期'
+	return '已过期'
+})
+
+/* ==================== 头像占位 ==================== */
+const avatarFallback = computed(() : string => {
+	const name = props.userName ?? ''
+	if (name.length > 0) return name.substring(0, 1)
+	return '?'
+})
+
+/* ==================== 认证方式解析 ==================== */
+const parsedMethods = computed(() : UTSJSONObject[] => {
+	const str = props.methods ?? ''
+	if (str == '') return [] as UTSJSONObject[]
+	try {
+		return JSON.parse(str) as UTSJSONObject[]
+	} catch (e) {
+		return [] as UTSJSONObject[]
+	}
+})
+
+function methodStr(item : UTSJSONObject, key : string) : string {
+	const v = item[key]
+	return v != null ? `${v}` : ''
+}
+
+/** 认证方式类型映射为图标 emoji */
+function getMethodIcon(item : UTSJSONObject) : string {
+	const t = methodStr(item, 'type')
+	if (t == 'phone') return '📱'
+	if (t == 'wechat') return '💬'
+	if (t == 'email') return '📧'
+	if (t == 'apple') return '🍎'
+	if (t == 'alipay') return '💰'
+	if (t == 'qq') return '🐧'
+	return '🔑'
+}
+
+/* ==================== 事件处理 ==================== */
+function handleLogin(method : UTSJSONObject) {
+	emit('login', methodStr(method, 'type'))
+}
+
+function handleLogout() {
+	emit('logout')
+}
+
+function handleRefresh() {
+	emit('refreshToken')
+}
+
+function handleSwitchAccount() {
+	emit('switchAccount')
+}
+</script>
+
+<style scoped>
+.parrot-auth {
+	background-color: #ffffff;
+	border-radius: 20rpx;
+	overflow: hidden;
+}
+
+/* ========== status 模式 ========== */
+.parrot-auth__status {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 32rpx 28rpx;
+}
+
+.parrot-auth__avatar-wrap {
+	margin-right: 24rpx;
+	flex-shrink: 0;
+}
+
+.parrot-auth__avatar {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 48rpx;
+}
+
+.parrot-auth__avatar-placeholder {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 48rpx;
+	background-color: #1a7eff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-auth__avatar-letter {
+	font-size: 36rpx;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.parrot-auth__info {
+	flex: 1;
+}
+
+.parrot-auth__name {
+	font-size: 32rpx;
+	color: #303133;
+	font-weight: 600;
+}
+
+.parrot-auth__token-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-top: 8rpx;
+}
+
+.parrot-auth__token-dot {
+	width: 14rpx;
+	height: 14rpx;
+	border-radius: 7rpx;
+	margin-right: 8rpx;
+}
+
+.parrot-auth__token-label {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+.parrot-auth__actions {
+	display: flex;
+	flex-direction: row;
+	gap: 16rpx;
+}
+
+.parrot-auth__action-btn {
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 36rpx;
+	background-color: #f5f6fa;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-auth__action-icon {
+	font-size: 32rpx;
+}
+
+/* ========== login 模式 ========== */
+.parrot-auth__login {
+	padding: 40rpx 28rpx;
+}
+
+.parrot-auth__login-title {
+	font-size: 30rpx;
+	color: #303133;
+	font-weight: 600;
+	margin-bottom: 36rpx;
+	text-align: center;
+}
+
+.parrot-auth__methods {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 40rpx;
+}
+
+.parrot-auth__method-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12rpx;
+}
+
+.parrot-auth__method-icon {
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50rpx;
+	background-color: #f5f6fa;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-auth__method-emoji {
+	font-size: 40rpx;
+}
+
+.parrot-auth__method-label {
+	font-size: 24rpx;
+	color: #606266;
+}
+
+/* ========== switch 模式 ========== */
+.parrot-auth__switch {
+	padding: 32rpx 28rpx;
+}
+
+.parrot-auth__switch-current {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding-bottom: 28rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #f0f0f0;
+	margin-bottom: 28rpx;
+}
+
+.parrot-auth__sub-label {
+	font-size: 24rpx;
+	color: #c0c4cc;
+	margin-top: 4rpx;
+}
+
+.parrot-auth__switch-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 20rpx;
+}
+
+.parrot-auth__switch-btn {
+	height: 88rpx;
+	border-radius: 16rpx;
+	background-color: #f5f6fa;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-auth__switch-btn--danger {
+	background-color: #fff2f2;
+}
+
+.parrot-auth__switch-btn-text {
+	font-size: 28rpx;
+	color: #303133;
+	font-weight: 500;
+}
+
+.parrot-auth__switch-btn-text--danger {
+	color: #f56c6c;
+}
+</style>

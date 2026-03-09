@@ -1,0 +1,259 @@
+<template>
+	<view class="parrot-puzzle-verify" :style="containerStyle">
+		<!-- 提示文字 -->
+		<text class="parrot-puzzle-verify__tip">{{ tipText }}</text>
+		<!-- 图片画布 -->
+		<view class="parrot-puzzle-verify__canvas" :style="canvasStyle">
+			<!-- 背景图 -->
+			<image
+				class="parrot-puzzle-verify__bg"
+				:src="src"
+				:style="bgStyle"
+				mode="aspectFill"
+			/>
+			<!-- 缺口区域（暗色方块） -->
+			<view class="parrot-puzzle-verify__gap" :style="gapStyle" />
+			<!-- 可拖动拼图块 -->
+			<view
+				class="parrot-puzzle-verify__piece"
+				:style="pieceStyle"
+				@touchstart="onTouchStart"
+				@touchmove="onTouchMove"
+				@touchend="onTouchEnd"
+			>
+				<image
+					class="parrot-puzzle-verify__piece-img"
+					:src="src"
+					:style="pieceImgStyle"
+					mode="aspectFill"
+				/>
+			</view>
+			<!-- 状态遮罩 -->
+			<view v-if="status !== 'pending'" class="parrot-puzzle-verify__overlay" :style="overlayStyle">
+				<text class="parrot-puzzle-verify__overlay-text">{{ status === 'success' ? '验证成功' : '验证失败，请重试' }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+/** 组件属性 */
+interface Props {
+	/** 图片地址 */
+	src ?: string
+	/** 组件宽度 rpx */
+	width ?: number
+	/** 组件高度 rpx */
+	height ?: number
+	/** 提示文字 */
+	tipText ?: string
+	/** 拼图块大小 rpx */
+	puzzleSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	src: '',
+	width: 600,
+	height: 400,
+	tipText: '请完成拼图验证',
+	puzzleSize: 100,
+})
+
+const emit = defineEmits<{
+	(e : 'success') : void
+	(e : 'fail') : void
+}>()
+
+/** 验证状态 */
+const status = ref<string>('pending')
+/** 缺口位置 rpx */
+const gapX = ref<number>(0)
+const gapY = ref<number>(0)
+/** 拼图块当前位置 rpx（初始放在左下角） */
+const pieceX = ref<number>(0)
+const pieceY = ref<number>(0)
+/** 触摸起始坐标 px */
+const touchStartX = ref<number>(0)
+const touchStartY = ref<number>(0)
+/** 拖动起始时拼图块位置 rpx */
+const pieceStartX = ref<number>(0)
+const pieceStartY = ref<number>(0)
+/** 是否正在拖动 */
+const dragging = ref<boolean>(false)
+
+/** 初始化缺口和拼图块位置 */
+function initPosition() : void {
+	/* 缺口在图片中偏右偏上区域 */
+	const minGapX = props.width / 2
+	const maxGapX = props.width - props.puzzleSize - 20
+	gapX.value = Math.floor(Math.random() * (maxGapX - minGapX)) + minGapX
+	const minGapY = 40
+	const maxGapY = props.height - props.puzzleSize - 40
+	gapY.value = Math.floor(Math.random() * (maxGapY - minGapY)) + minGapY
+	/* 拼图块初始位置在左下角附近 */
+	pieceX.value = 20
+	pieceY.value = props.height - props.puzzleSize - 20
+}
+initPosition()
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return `width:${props.width}rpx`
+})
+
+/** 画布样式 */
+const canvasStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:${props.height}rpx`
+})
+
+/** 背景图样式 */
+const bgStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:${props.height}rpx`
+})
+
+/** 缺口样式 */
+const gapStyle = computed(() : string => {
+	return `width:${props.puzzleSize}rpx;height:${props.puzzleSize}rpx;left:${gapX.value}rpx;top:${gapY.value}rpx;border-radius:8rpx`
+})
+
+/** 拼图块样式 */
+const pieceStyle = computed(() : string => {
+	return `width:${props.puzzleSize}rpx;height:${props.puzzleSize}rpx;left:${pieceX.value}rpx;top:${pieceY.value}rpx;border-radius:8rpx`
+})
+
+/** 拼图块内图片偏移，显示缺口对应位置的图片 */
+const pieceImgStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:${props.height}rpx;margin-left:${-gapX.value}rpx;margin-top:${-gapY.value}rpx`
+})
+
+/** 遮罩样式 */
+const overlayStyle = computed(() : string => {
+	const bg = status.value === 'success' ? 'rgba(103,194,58,0.6)' : 'rgba(245,108,108,0.6)'
+	return `width:${props.width}rpx;height:${props.height}rpx;background:${bg}`
+})
+
+/** 触摸开始 */
+function onTouchStart(e : TouchEvent) : void {
+	if (status.value !== 'pending') return
+	dragging.value = true
+	const touch = e.touches[0]
+	touchStartX.value = touch.screenX
+	touchStartY.value = touch.screenY
+	pieceStartX.value = pieceX.value
+	pieceStartY.value = pieceY.value
+}
+
+/** 触摸移动 */
+function onTouchMove(e : TouchEvent) : void {
+	if (!dragging.value) return
+	if (status.value !== 'pending') return
+	const touch = e.touches[0]
+	/* px 差值转 rpx（近似 ×2） */
+	const diffX = (touch.screenX - touchStartX.value) * 2
+	const diffY = (touch.screenY - touchStartY.value) * 2
+	let newX = pieceStartX.value + diffX
+	let newY = pieceStartY.value + diffY
+	/* 边界限制 */
+	if (newX < 0) newX = 0
+	if (newX > props.width - props.puzzleSize) newX = props.width - props.puzzleSize
+	if (newY < 0) newY = 0
+	if (newY > props.height - props.puzzleSize) newY = props.height - props.puzzleSize
+	pieceX.value = newX
+	pieceY.value = newY
+}
+
+/** 触摸结束 */
+function onTouchEnd(_ : TouchEvent) : void {
+	if (!dragging.value) return
+	dragging.value = false
+	if (status.value !== 'pending') return
+	/* 检查拼图块是否移动到缺口位置 */
+	const diffX = Math.abs(pieceX.value - gapX.value)
+	const diffY = Math.abs(pieceY.value - gapY.value)
+	/* 容差：puzzleSize 的 15% */
+	const toleranceRpx = props.puzzleSize * 0.15
+	if (diffX <= toleranceRpx && diffY <= toleranceRpx) {
+		/* 吸附到正确位置 */
+		pieceX.value = gapX.value
+		pieceY.value = gapY.value
+		status.value = 'success'
+		emit('success')
+	} else {
+		status.value = 'fail'
+		emit('fail')
+		setTimeout(function () {
+			reset()
+		}, 800)
+	}
+}
+
+/** 重置验证 */
+function reset() : void {
+	status.value = 'pending'
+	initPosition()
+}
+
+defineExpose({ reset })
+</script>
+
+<style>
+.parrot-puzzle-verify {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.parrot-puzzle-verify__tip {
+	font-size: 26rpx;
+	color: #909399;
+	margin-bottom: 16rpx;
+}
+
+.parrot-puzzle-verify__canvas {
+	position: relative;
+	overflow: hidden;
+	border-radius: 12rpx;
+	background-color: #f0f2f5;
+}
+
+.parrot-puzzle-verify__bg {
+	display: block;
+}
+
+.parrot-puzzle-verify__gap {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.45);
+	border-width: 2rpx;
+	border-style: dashed;
+	border-color: rgba(255, 255, 255, 0.5);
+}
+
+.parrot-puzzle-verify__piece {
+	position: absolute;
+	overflow: hidden;
+	border-width: 3rpx;
+	border-style: solid;
+	border-color: rgba(255, 255, 255, 0.9);
+}
+
+.parrot-puzzle-verify__piece-img {
+	display: block;
+}
+
+.parrot-puzzle-verify__overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-puzzle-verify__overlay-text {
+	font-size: 28rpx;
+	color: #ffffff;
+	font-weight: 600;
+}
+</style>

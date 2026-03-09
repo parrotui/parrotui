@@ -1,0 +1,157 @@
+<template>
+	<!-- CountdownVerify 验证码倒计时按钮：点击后倒计时，结束后恢复可点击 -->
+	<view class="parrot-countdown-verify" @tap="handleClick">
+		<text
+			class="parrot-countdown-verify__text"
+			:style="textStyle"
+		>{{ displayText }}</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-countdown-verify 验证码倒计时按钮
+ * 点击后开始倒计时，倒计时结束后恢复可点击状态。
+ * 常用于手机号/邮箱验证码发送场景。
+ *
+ * @prop seconds       倒计时秒数，默认 60
+ * @prop text          初始按钮文字，默认 '获取验证码'
+ * @prop changeText    倒计时中的文字（s会被替换为剩余秒数），默认 's后重新获取'
+ * @prop endText       倒计时结束后文字，默认 '重新获取'
+ * @prop color         正常状态文字颜色，默认 '#1a7eff'
+ * @prop disabledColor 倒计时中文字颜色，默认 '#c0c4cc'
+ * @prop fontSize      文字大小 rpx，默认 28
+ *
+ * @event start  倒计时开始
+ * @event end    倒计时结束
+ * @event click  按钮被点击（仅非倒计时状态触发）
+ */
+import { ref, computed, onUnmounted } from 'vue'
+
+interface Props {
+	/** 倒计时秒数 */
+	seconds ?: number
+	/** 初始按钮文字 */
+	text ?: string
+	/** 倒计时中的文字模板 */
+	changeText ?: string
+	/** 倒计时结束后文字 */
+	endText ?: string
+	/** 正常状态文字颜色 */
+	color ?: string
+	/** 倒计时中文字颜色 */
+	disabledColor ?: string
+	/** 文字大小 rpx */
+	fontSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	seconds: 60,
+	text: '获取验证码',
+	changeText: 's后重新获取',
+	endText: '重新获取',
+	color: '#1a7eff',
+	disabledColor: '#c0c4cc',
+	fontSize: 28,
+})
+
+const emit = defineEmits<{
+	start: []
+	end: []
+	click: []
+}>()
+
+/** 是否处于倒计时中 */
+const counting = ref<boolean>(false)
+
+/** 剩余秒数 */
+const remainSeconds = ref<number>(0)
+
+/** 是否已经使用过（用于区分初始文字和结束文字） */
+const hasUsed = ref<boolean>(false)
+
+/** 定时器 id */
+let timerId : number = 0
+
+/** 显示的文字 */
+const displayText = computed(() : string => {
+	if (counting.value) {
+		return remainSeconds.value.toString() + (props.changeText ?? 's后重新获取')
+	}
+	if (hasUsed.value) {
+		return props.endText ?? '重新获取'
+	}
+	return props.text ?? '获取验证码'
+})
+
+/** 文字样式 */
+const textStyle = computed(() : string => {
+	const size = props.fontSize ?? 28
+	if (counting.value) {
+		return 'font-size:' + size.toString() + 'rpx;color:' + (props.disabledColor ?? '#c0c4cc')
+	}
+	return 'font-size:' + size.toString() + 'rpx;color:' + (props.color ?? '#1a7eff')
+})
+
+/** 开始倒计时 */
+function startCountdown() {
+	if (counting.value) return
+	counting.value = true
+	hasUsed.value = true
+	remainSeconds.value = props.seconds ?? 60
+	emit('start')
+
+	timerId = setInterval(() => {
+		const newRemain = remainSeconds.value - 1
+		if (newRemain <= 0) {
+			remainSeconds.value = 0
+			stopCountdown()
+			emit('end')
+		} else {
+			remainSeconds.value = newRemain
+		}
+	}, 1000) as number
+}
+
+/** 停止倒计时 */
+function stopCountdown() {
+	counting.value = false
+	if (timerId !== 0) {
+		clearInterval(timerId)
+		timerId = 0
+	}
+}
+
+/** 按钮点击 */
+function handleClick() {
+	if (counting.value) return
+	emit('click')
+}
+
+onUnmounted(() => {
+	stopCountdown()
+})
+
+/* 暴露方法给父组件，允许外部触发倒计时 */
+defineExpose({
+	start: startCountdown,
+	reset: () => {
+		stopCountdown()
+		remainSeconds.value = 0
+		hasUsed.value = false
+	},
+})
+</script>
+
+<style scoped>
+.parrot-countdown-verify {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-countdown-verify__text {
+	line-height: 1.4;
+}
+</style>

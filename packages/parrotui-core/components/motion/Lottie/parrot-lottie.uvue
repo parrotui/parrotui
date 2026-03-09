@@ -1,0 +1,207 @@
+<template>
+	<!-- Lottie 动画容器：预留 slot 以便接入原生 Lottie 插件 -->
+	<view class="parrot-lottie" :style="containerStyle">
+		<!-- 有自定义内容时显示 slot -->
+		<slot>
+			<!-- 默认占位区域 -->
+			<view v-if="hasSrc" class="parrot-lottie__player">
+				<view class="parrot-lottie__placeholder">
+					<text class="parrot-lottie__icon">▶</text>
+					<text class="parrot-lottie__label">{{ statusText }}</text>
+				</view>
+			</view>
+			<view v-if="!hasSrc" class="parrot-lottie__empty">
+				<text class="parrot-lottie__empty-text">未设置动画资源</text>
+			</view>
+		</slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-lottie 动画容器
+ * 提供 Lottie 动画的容器组件。因 UTS 原生 Lottie 需要原生插件，
+ * 当前版本使用 view 容器实现占位 + 状态展示，预留 slot 以便
+ * 未来接入原生 Lottie 插件或自定义动画内容。
+ *
+ * @prop src        动画 JSON 文件路径
+ * @prop autoPlay   是否自动播放，默认 true
+ * @prop loop       是否循环播放，默认 true
+ * @prop width      容器宽度，默认 '300rpx'
+ * @prop height     容器高度，默认 '300rpx'
+ * @prop background 容器背景色，默认 'transparent'
+ *
+ * @event ready    动画准备就绪
+ * @event complete 动画播放完成
+ * @event error    动画加载失败
+ *
+ * @slot default   用于放置自定义动画内容
+ */
+import { ref, computed, watch, onMounted } from 'vue'
+
+interface Props {
+	/** 动画 JSON 文件路径 */
+	src ?: string
+	/** 是否自动播放 */
+	autoPlay ?: boolean
+	/** 是否循环播放 */
+	loop ?: boolean
+	/** 容器宽度 */
+	width ?: string
+	/** 容器高度 */
+	height ?: string
+	/** 容器背景色 */
+	background ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	src: '',
+	autoPlay: true,
+	loop: true,
+	width: '300rpx',
+	height: '300rpx',
+	background: 'transparent',
+})
+
+const emit = defineEmits<{
+	ready: []
+	complete: []
+	error: []
+}>()
+
+/** 动画状态：idle / loading / playing / paused / error */
+const status = ref<string>('idle')
+
+/** 是否有动画资源 */
+const hasSrc = computed(() : boolean => {
+	const s = props.src ?? ''
+	return s.length > 0
+})
+
+/** 状态文字 */
+const statusText = computed(() : string => {
+	const s = status.value
+	if (s === 'loading') return '加载中...'
+	if (s === 'playing') return '播放中'
+	if (s === 'paused') return '已暂停'
+	if (s === 'error') return '加载失败'
+	return '动画就绪'
+})
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	const w = props.width ?? '300rpx'
+	const h = props.height ?? '300rpx'
+	const bg = props.background ?? 'transparent'
+	return 'width:' + w + ';height:' + h + ';background:' + bg
+})
+
+/** 初始化动画（当前为模拟实现，预留接口） */
+function initAnimation() {
+	if (!hasSrc.value) return
+	status.value = 'loading'
+
+	/* 模拟加载完成，实际接入 Lottie 插件时替换此逻辑 */
+	setTimeout(() => {
+		status.value = 'playing'
+		emit('ready')
+
+		/* 如果非循环模式，模拟播放完成 */
+		if (props.loop !== true) {
+			setTimeout(() => {
+				status.value = 'idle'
+				emit('complete')
+			}, 3000)
+		}
+	}, 500)
+}
+
+/** 播放动画 */
+function play() {
+	status.value = 'playing'
+}
+
+/** 暂停动画 */
+function pause() {
+	status.value = 'paused'
+}
+
+/** 停止动画 */
+function stop() {
+	status.value = 'idle'
+}
+
+/* 监听 src 变化重新加载 */
+watch(
+	() : string => props.src ?? '',
+	(val : string) => {
+		if (val.length > 0) {
+			initAnimation()
+		}
+	}
+)
+
+onMounted(() => {
+	if (props.autoPlay === true && hasSrc.value) {
+		initAnimation()
+	}
+})
+
+/* 暴露方法给父组件 */
+defineExpose({
+	play,
+	pause,
+	stop,
+})
+</script>
+
+<style scoped>
+.parrot-lottie {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.parrot-lottie__player {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-lottie__placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-lottie__icon {
+	font-size: 60rpx;
+	color: #1a7eff;
+	margin-bottom: 16rpx;
+}
+
+.parrot-lottie__label {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+.parrot-lottie__empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.parrot-lottie__empty-text {
+	font-size: 24rpx;
+	color: #c0c4cc;
+}
+</style>

@@ -1,0 +1,203 @@
+<template>
+  <!-- CountDown 倒计时：支持自定义格式、毫秒级、手动控制 -->
+  <view class="parrot-count-down">
+    <slot :current="currentTime">
+      <text class="parrot-count-down__text">{{ formattedTime }}</text>
+    </slot>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-count-down 倒计时
+ * 支持自定义显示格式、毫秒精度、手动 start/pause/reset。
+ *
+ * @prop time        倒计时总时长（毫秒），默认 0
+ * @prop format      格式化字符串，默认 'HH:mm:ss'
+ *                   支持 DD/HH/mm/ss/SSS（毫秒）
+ * @prop autoStart   是否自动开始，默认 true
+ * @prop millisecond 是否开启毫秒级渲染，默认 false
+ *
+ * @event finish  倒计时结束
+ * @event change  剩余时间变化 {days, hours, minutes, seconds, milliseconds}
+ *
+ * @expose start(), pause(), reset()
+ */
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+
+/** 时间对象结构 */
+type TimeData = {
+  days : number
+  hours : number
+  minutes : number
+  seconds : number
+  milliseconds : number
+}
+
+interface Props {
+  time ?: number
+  format ?: string
+  autoStart ?: boolean
+  millisecond ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  time: 0,
+  format: 'HH:mm:ss',
+  autoStart: true,
+  millisecond: false,
+})
+
+const emit = defineEmits<{
+  finish: []
+  change: [data : TimeData]
+}>()
+
+/** 剩余毫秒数 */
+const remain = ref<number>(props.time ?? 0)
+
+/** 定时器 id */
+let timerId : number = 0
+
+/** 是否正在运行 */
+const counting = ref<boolean>(false)
+
+/** 将毫秒拆解为天时分秒毫秒 */
+function parseTime(ms : number) : TimeData {
+  const t = Math.max(0, ms)
+  const days = Math.floor(t / 86400000)
+  const hours = Math.floor((t % 86400000) / 3600000)
+  const minutes = Math.floor((t % 3600000) / 60000)
+  const seconds = Math.floor((t % 60000) / 1000)
+  const milliseconds = Math.floor(t % 1000)
+  return { days, hours, minutes, seconds, milliseconds } as TimeData
+}
+
+/** 当前时间对象 */
+const currentTime = computed(() : TimeData => {
+  return parseTime(remain.value)
+})
+
+/** 格式化后的显示文字 */
+const formattedTime = computed(() : string => {
+  const t = currentTime.value
+  let fmt = props.format ?? 'HH:mm:ss'
+
+  /* 天数 */
+  if (fmt.indexOf('DD') !== -1) {
+    fmt = fmt.replace('DD', padZero(t.days, 2))
+  }
+  /* 小时 */
+  if (fmt.indexOf('HH') !== -1) {
+    fmt = fmt.replace('HH', padZero(t.hours, 2))
+  }
+  /* 分钟 */
+  if (fmt.indexOf('mm') !== -1) {
+    fmt = fmt.replace('mm', padZero(t.minutes, 2))
+  }
+  /* 秒 */
+  if (fmt.indexOf('ss') !== -1) {
+    fmt = fmt.replace('ss', padZero(t.seconds, 2))
+  }
+  /* 毫秒 */
+  if (fmt.indexOf('SSS') !== -1) {
+    fmt = fmt.replace('SSS', padZero(t.milliseconds, 3))
+  }
+  return fmt
+})
+
+/** 数字补零 */
+function padZero(n : number, len : number) : string {
+  let s = n.toString()
+  while (s.length < len) {
+    s = '0' + s
+  }
+  return s
+}
+
+/** 每帧/每秒 tick */
+function tick() {
+  const interval = props.millisecond ? 30 : 1000
+  timerId = setInterval(() => {
+    const newRemain = remain.value - interval
+    if (newRemain <= 0) {
+      remain.value = 0
+      pause()
+      emit('change', parseTime(0))
+      emit('finish')
+    } else {
+      remain.value = newRemain
+      emit('change', parseTime(newRemain))
+    }
+  }, interval) as number
+}
+
+/** 开始倒计时 */
+function start() {
+  if (counting.value) return
+  counting.value = true
+  tick()
+}
+
+/** 暂停倒计时 */
+function pause() {
+  counting.value = false
+  if (timerId !== 0) {
+    clearInterval(timerId)
+    timerId = 0
+  }
+}
+
+/** 重置倒计时 */
+function reset() {
+  pause()
+  remain.value = props.time ?? 0
+  emit('change', parseTime(remain.value))
+  if (props.autoStart !== false) {
+    start()
+  }
+}
+
+/* 监听 time 属性变化 */
+watch(
+  () : number => props.time ?? 0,
+  (val : number) => {
+    remain.value = val
+    if (props.autoStart !== false) {
+      pause()
+      start()
+    }
+  }
+)
+
+onMounted(() => {
+  if (props.autoStart !== false && remain.value > 0) {
+    start()
+  }
+})
+
+onUnmounted(() => {
+  pause()
+})
+
+/* 暴露方法给父组件 */
+defineExpose({
+  start,
+  pause,
+  reset,
+})
+</script>
+
+<style scoped>
+.parrot-count-down {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.parrot-count-down__text {
+  font-size: 28rpx;
+  color: #333333;
+  font-variant-numeric: tabular-nums;
+}
+</style>

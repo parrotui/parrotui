@@ -1,0 +1,257 @@
+<template>
+	<view class="parrot-rotate-verify" :style="containerStyle">
+		<!-- 提示文字 -->
+		<text class="parrot-rotate-verify__tip">{{ tipText }}</text>
+		<!-- 圆形图片区域 -->
+		<view class="parrot-rotate-verify__image-wrap" :style="imageWrapStyle">
+			<image
+				class="parrot-rotate-verify__image"
+				:src="src"
+				:style="imageStyle"
+				mode="aspectFill"
+			/>
+			<!-- 成功/失败状态遮罩 -->
+			<view v-if="status !== 'pending'" class="parrot-rotate-verify__overlay" :style="overlayStyle">
+				<text class="parrot-rotate-verify__overlay-text">{{ status === 'success' ? '验证成功' : '验证失败' }}</text>
+			</view>
+		</view>
+		<!-- 滑块轨道 -->
+		<view class="parrot-rotate-verify__track" :style="trackStyle">
+			<view class="parrot-rotate-verify__track-bg" :style="trackBgStyle" />
+			<!-- 滑块按钮 -->
+			<view
+				class="parrot-rotate-verify__slider"
+				:style="sliderStyle"
+				@touchstart="onTouchStart"
+				@touchmove="onTouchMove"
+				@touchend="onTouchEnd"
+			>
+				<text class="parrot-rotate-verify__slider-icon">&#8594;</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+/** 组件属性 */
+interface Props {
+	/** 图片地址 */
+	src ?: string
+	/** 需要旋转到的目标角度（默认随机 30-330） */
+	angle ?: number
+	/** 图片宽度 rpx */
+	width ?: number
+	/** 容差角度 */
+	threshold ?: number
+	/** 提示文字 */
+	tipText ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	src: '',
+	angle: -1,
+	width: 500,
+	threshold: 5,
+	tipText: '拖动滑块旋转图片至正位',
+})
+
+const emit = defineEmits<{
+	(e : 'success') : void
+	(e : 'fail') : void
+}>()
+
+/** 验证状态: pending / success / fail */
+const status = ref<string>('pending')
+/** 实际目标角度（若 prop 为 -1 则随机生成） */
+const targetAngle = ref<number>(0)
+/** 当前旋转角度 */
+const currentAngle = ref<number>(0)
+/** 滑块拖动起始 X 坐标 */
+const startX = ref<number>(0)
+/** 滑块当前偏移 px */
+const sliderOffset = ref<number>(0)
+/** 轨道可滑动最大距离 px（运行时计算） */
+const trackMaxPx = ref<number>(200)
+/** 是否正在拖动 */
+const dragging = ref<boolean>(false)
+
+/** 初始化目标角度 */
+function initAngle() : void {
+	if (props.angle >= 0) {
+		targetAngle.value = props.angle
+	} else {
+		targetAngle.value = Math.floor(Math.random() * 300) + 30
+	}
+	currentAngle.value = targetAngle.value
+}
+initAngle()
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return `width:${props.width}rpx`
+})
+
+/** 图片外框样式 */
+const imageWrapStyle = computed(() : string => {
+	const size = props.width - 60
+	return `width:${size}rpx;height:${size}rpx;border-radius:${size}rpx`
+})
+
+/** 图片旋转样式 */
+const imageStyle = computed(() : string => {
+	const size = props.width - 60
+	return `width:${size}rpx;height:${size}rpx;border-radius:${size}rpx;transform:rotate(${currentAngle.value}deg)`
+})
+
+/** 遮罩样式 */
+const overlayStyle = computed(() : string => {
+	const size = props.width - 60
+	const bg = status.value === 'success' ? 'rgba(103,194,58,0.7)' : 'rgba(245,108,108,0.7)'
+	return `width:${size}rpx;height:${size}rpx;border-radius:${size}rpx;background:${bg}`
+})
+
+/** 轨道样式 */
+const trackStyle = computed(() : string => {
+	return `width:${props.width - 80}rpx;height:80rpx;border-radius:40rpx`
+})
+
+/** 轨道已滑过背景 */
+const trackBgStyle = computed(() : string => {
+	return `width:${sliderOffset.value}px;height:80rpx;border-radius:40rpx`
+})
+
+/** 滑块样式 */
+const sliderStyle = computed(() : string => {
+	return `transform:translateX(${sliderOffset.value}px)`
+})
+
+/** 触摸开始 */
+function onTouchStart(e : TouchEvent) : void {
+	if (status.value !== 'pending') return
+	dragging.value = true
+	const touch = e.touches[0]
+	startX.value = touch.screenX
+}
+
+/** 触摸移动 */
+function onTouchMove(e : TouchEvent) : void {
+	if (!dragging.value) return
+	if (status.value !== 'pending') return
+	const touch = e.touches[0]
+	let diff = touch.screenX - startX.value
+	if (diff < 0) diff = 0
+	if (diff > trackMaxPx.value) diff = trackMaxPx.value
+	sliderOffset.value = diff
+	/* 将滑块偏移量映射到 0-360 度旋转 */
+	const ratio = diff / trackMaxPx.value
+	currentAngle.value = targetAngle.value - ratio * 360
+}
+
+/** 触摸结束 */
+function onTouchEnd(_ : TouchEvent) : void {
+	if (!dragging.value) return
+	dragging.value = false
+	if (status.value !== 'pending') return
+	/* 判断当前角度是否在 ±threshold 范围内回到 0（即 360 的整数倍附近） */
+	let normalAngle = currentAngle.value % 360
+	if (normalAngle < 0) normalAngle = normalAngle + 360
+	const isSuccess = normalAngle <= props.threshold || normalAngle >= (360 - props.threshold)
+	if (isSuccess) {
+		status.value = 'success'
+		emit('success')
+	} else {
+		status.value = 'fail'
+		emit('fail')
+		/* 失败后 800ms 自动重置 */
+		setTimeout(function () {
+			reset()
+		}, 800)
+	}
+}
+
+/** 重置验证 */
+function reset() : void {
+	status.value = 'pending'
+	sliderOffset.value = 0
+	initAngle()
+}
+
+defineExpose({ reset })
+</script>
+
+<style>
+.parrot-rotate-verify {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 30rpx 0;
+}
+
+.parrot-rotate-verify__tip {
+	font-size: 26rpx;
+	color: #909399;
+	margin-bottom: 20rpx;
+}
+
+.parrot-rotate-verify__image-wrap {
+	overflow: hidden;
+	position: relative;
+	margin-bottom: 30rpx;
+	border-width: 4rpx;
+	border-style: solid;
+	border-color: #e4e7ed;
+}
+
+.parrot-rotate-verify__image {
+	display: block;
+}
+
+.parrot-rotate-verify__overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-rotate-verify__overlay-text {
+	font-size: 28rpx;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.parrot-rotate-verify__track {
+	position: relative;
+	background-color: #e4e7ed;
+	overflow: hidden;
+}
+
+.parrot-rotate-verify__track-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #d9ecff;
+}
+
+.parrot-rotate-verify__slider {
+	position: absolute;
+	top: 5rpx;
+	left: 5rpx;
+	width: 70rpx;
+	height: 70rpx;
+	border-radius: 35rpx;
+	background-color: #1a7eff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-rotate-verify__slider-icon {
+	font-size: 32rpx;
+	color: #ffffff;
+	font-weight: 700;
+}
+</style>

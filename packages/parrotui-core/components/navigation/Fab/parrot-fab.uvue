@@ -1,0 +1,132 @@
+<template>
+	<!-- Fab 浮动按钮：固定在页面角落的悬浮操作按钮 -->
+	<view
+		class="parrot-fab"
+		:class="[
+			`parrot-fab--${position ?? 'right-bottom'}`,
+			glass ? 'parrot-fab--glass' : '',
+		]"
+		:style="fabStyle"
+		@tap="handleClick"
+	>
+		<text v-if="icon" class="parrot-fab__icon">{{ icon }}</text>
+		<text v-if="text && !icon" class="parrot-fab__text">{{ text }}</text>
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-fab 浮动操作按钮
+ * 固定定位在页面角落的圆形操作按钮。
+ *
+ * @prop icon       按钮图标
+ * @prop text       按钮文字（无图标时显示）
+ * @prop type       按钮类型：primary/success/warning/danger
+ * @prop position   位置：right-bottom/left-bottom/right-top/left-top
+ * @prop size       按钮尺寸 rpx
+ * @prop offset     偏移 [bottom, right] rpx
+ * @prop glass      磨砂玻璃
+ * @prop zIndex     层级
+ *
+ * @event click  点击事件
+ */
+import { computed } from 'vue'
+
+interface Props {
+	icon ?: string
+	text ?: string
+	type ?: string
+	position ?: string
+	size ?: number
+	offset ?: string
+	glass ?: boolean
+	zIndex ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	type: 'primary',
+	position: 'right-bottom',
+	size: 100,
+	glass: false,
+	zIndex: 99,
+})
+
+const emit = defineEmits<{
+	click: []
+}>()
+
+// 类型颜色
+const typeColorMap : Record<string, string> = {
+	primary: '#1a7eff',
+	success: '#41a906',
+	warning: '#e6a23c',
+	danger: '#f56c6c',
+}
+
+const fabStyle = computed(() : string => {
+	const s = props.size ?? 100
+	const parts : string[] = [
+		`width:${s}rpx`,
+		`height:${s}rpx`,
+		`border-radius:${s}rpx`,
+		`z-index:${props.zIndex ?? 99}`,
+	]
+	if (!props.glass) {
+		parts.push(`background-color:${typeColorMap[props.type ?? 'primary'] ?? '#1a7eff'}`)
+	}
+	if (props.offset) {
+		const arr = (props.offset as string).split(',')
+		if (arr.length >= 2) {
+			parts.push(`margin-bottom:${arr[0].trim()}`)
+			parts.push(`margin-right:${arr[1].trim()}`)
+		}
+	}
+	return parts.join(';')
+})
+
+function handleClick() {
+	emit('click')
+}
+</script>
+
+<style scoped>
+.parrot-fab {
+	position: fixed;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.18);
+}
+
+.parrot-fab--right-bottom {
+	right: 32rpx;
+	bottom: 120rpx;
+}
+.parrot-fab--left-bottom {
+	left: 32rpx;
+	bottom: 120rpx;
+}
+.parrot-fab--right-top {
+	right: 32rpx;
+	top: 200rpx;
+}
+.parrot-fab--left-top {
+	left: 32rpx;
+	top: 200rpx;
+}
+
+.parrot-fab--glass {
+	background: rgba(255, 255, 255, 0.65) !important;
+	border: 1.5rpx solid rgba(255, 255, 255, 0.45);
+}
+
+.parrot-fab__icon {
+	font-size: 44rpx;
+	color: #ffffff;
+}
+.parrot-fab__text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+</style>

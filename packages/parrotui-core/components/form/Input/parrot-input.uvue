@@ -1,0 +1,331 @@
+<template>
+	<!-- Input 输入框：支持前后缀图标、清除、密码切换、多种类型、glass -->
+	<view
+		class="parrot-input"
+		:class="[
+			`parrot-input--${size ?? 'normal'}`,
+			disabled ? 'parrot-input--disabled' : '',
+			isFocus ? 'parrot-input--focus' : '',
+			border ? 'parrot-input--border' : '',
+			glass ? 'parrot-input--glass' : '',
+			validateState === 'error' ? 'parrot-input--error' : '',
+		]"
+		:style="wrapStyle"
+	>
+		<!-- 前缀图标 -->
+		<view v-if="prefixIcon" class="parrot-input__prefix" @tap="handlePrefixClick">
+			<text class="parrot-input__icon">{{ prefixIcon }}</text>
+		</view>
+
+		<!-- 输入框 -->
+		<input
+			class="parrot-input__inner"
+			:class="[`parrot-input__inner--${size ?? 'normal'}`]"
+			:style="inputStyle"
+			:type="inputType"
+			:value="modelValue"
+			:placeholder="placeholder"
+			:placeholder-style="placeholderStyleStr"
+			:disabled="disabled"
+			:maxlength="maxlength"
+			:password="showPassword && !passwordVisible"
+			:focus="autoFocus"
+			:confirm-type="confirmType"
+			:cursor-spacing="cursorSpacing"
+			@input="onInput"
+			@focus="onFocus"
+			@blur="onBlur"
+			@confirm="onConfirm"
+		/>
+
+		<!-- 清除按钮 -->
+		<view
+			v-if="clearable && modelValue && !disabled && !readonly"
+			class="parrot-input__clear"
+			@tap.stop="onClear"
+		>
+			<text class="parrot-input__clear-icon">✕</text>
+		</view>
+
+		<!-- 密码可见切换 -->
+		<view
+			v-if="showPassword"
+			class="parrot-input__eye"
+			@tap.stop="togglePassword"
+		>
+			<text class="parrot-input__icon">{{ passwordVisible ? '👁' : '👁‍🗨' }}</text>
+		</view>
+
+		<!-- 后缀图标 -->
+		<view v-if="suffixIcon" class="parrot-input__suffix" @tap="handleSuffixClick">
+			<text class="parrot-input__icon">{{ suffixIcon }}</text>
+		</view>
+
+		<!-- 右侧插槽 -->
+		<slot name="suffix"></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-input 输入框
+ * 超越 firstui：
+ *   - Vue3 Composition API + UTS
+ *   - 支持前后缀图标
+ *   - 支持 clearable 一键清除
+ *   - 支持 showPassword 密码可见切换
+ *   - 支持 glass 磨砂玻璃风格
+ *   - 支持 inject FormItem 验证状态
+ *
+ * @prop modelValue     输入值（v-model）
+ * @prop type           输入类型：text/number/password/tel/digit
+ * @prop placeholder    占位文字
+ * @prop disabled       是否禁用
+ * @prop readonly       是否只读
+ * @prop clearable      是否显示清除按钮
+ * @prop showPassword   是否显示密码切换
+ * @prop maxlength      最大长度，-1 不限制
+ * @prop prefixIcon     前缀图标
+ * @prop suffixIcon     后缀图标
+ * @prop size           尺寸：large/normal/small
+ * @prop border         是否显示边框
+ * @prop glass          磨砂玻璃风格
+ * @prop autoFocus      自动聚焦
+ * @prop confirmType    键盘右下角按钮类型
+ * @prop cursorSpacing  光标与键盘的距离
+ * @prop background     自定义背景色
+ * @prop placeholderColor 占位符颜色
+ *
+ * @event update:modelValue  值变更
+ * @event input              输入事件
+ * @event focus              聚焦
+ * @event blur               失焦
+ * @event clear              清除
+ * @event confirm            键盘确认
+ */
+import { computed, ref } from 'vue'
+
+interface Props {
+	modelValue ?: string
+	type ?: string
+	placeholder ?: string
+	disabled ?: boolean
+	readonly ?: boolean
+	clearable ?: boolean
+	showPassword ?: boolean
+	maxlength ?: number
+	prefixIcon ?: string
+	suffixIcon ?: string
+	size ?: string
+	border ?: boolean
+	glass ?: boolean
+	autoFocus ?: boolean
+	confirmType ?: string
+	cursorSpacing ?: number
+	background ?: string
+	placeholderColor ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: '',
+	type: 'text',
+	placeholder: '请输入',
+	disabled: false,
+	readonly: false,
+	clearable: false,
+	showPassword: false,
+	maxlength: -1,
+	size: 'normal',
+	border: true,
+	glass: false,
+	autoFocus: false,
+	confirmType: 'done',
+	cursorSpacing: 20,
+	placeholderColor: '#a8abb2',
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: string]
+	input: [value: string]
+	focus: [event: any]
+	blur: [event: any]
+	clear: []
+	confirm: [value: string]
+}>()
+
+// 注入来自 FormItem 的验证状态（可选）
+const validateState = inject<string | null>('formItemValidateState', null)
+
+const isFocus = ref<boolean>(false)
+const passwordVisible = ref<boolean>(false)
+
+const inputType = computed(() : string => {
+	const t = props.type ?? 'text'
+	if (props.showPassword) return 'text'
+	return t
+})
+
+const wrapStyle = computed(() : string => {
+	const parts : string[] = []
+	if (props.background) parts.push(`background:${props.background}`)
+	return parts.join(';')
+})
+
+const inputStyle = computed(() : string => {
+	return ''
+})
+
+const placeholderStyleStr = computed(() : string => {
+	return `color:${props.placeholderColor ?? '#a8abb2'}`
+})
+
+function onInput(e : InputEvent) {
+	const value = e.detail.value
+	emit('update:modelValue', value)
+	emit('input', value)
+}
+
+function onFocus(e : any) {
+	isFocus.value = true
+	emit('focus', e)
+}
+
+function onBlur(e : any) {
+	isFocus.value = false
+	emit('blur', e)
+}
+
+function onClear() {
+	emit('update:modelValue', '')
+	emit('input', '')
+	emit('clear')
+}
+
+function onConfirm(e : any) {
+	emit('confirm', props.modelValue ?? '')
+}
+
+function togglePassword() {
+	passwordVisible.value = !passwordVisible.value
+}
+
+function handlePrefixClick() {
+	// 前缀图标点击暂留，可扩展
+}
+
+function handleSuffixClick() {
+	// 后缀图标点击暂留，可扩展
+}
+</script>
+
+<style scoped>
+.parrot-input {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background-color: #f5f7fa;
+	border-radius: 12rpx;
+	padding: 0 24rpx;
+	transition: border-color 0.2s, background-color 0.2s;
+}
+
+/* 尺寸 */
+.parrot-input--large {
+	height: 88rpx;
+}
+.parrot-input--normal {
+	height: 72rpx;
+}
+.parrot-input--small {
+	height: 56rpx;
+}
+
+/* 边框 */
+.parrot-input--border {
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #dcdfe6;
+	background-color: #ffffff;
+}
+
+/* 聚焦 */
+.parrot-input--focus.parrot-input--border {
+	border-color: #1a7eff;
+}
+
+/* 禁用 */
+.parrot-input--disabled {
+	opacity: 0.55;
+	background-color: #f5f7fa;
+}
+
+/* 错误状态 */
+.parrot-input--error.parrot-input--border {
+	border-color: #f56c6c;
+}
+
+/* 磨砂玻璃 */
+.parrot-input--glass {
+	background: rgba(255, 255, 255, 0.18) !important;
+	border: 1.5rpx solid rgba(255, 255, 255, 0.35) !important;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 输入框 */
+.parrot-input__inner {
+	flex: 1;
+	background: transparent;
+	border: none;
+	outline: none;
+	color: #303133;
+	font-size: 28rpx;
+}
+.parrot-input__inner--large {
+	font-size: 32rpx;
+}
+.parrot-input__inner--normal {
+	font-size: 28rpx;
+}
+.parrot-input__inner--small {
+	font-size: 24rpx;
+}
+
+/* 图标 */
+.parrot-input__prefix {
+	margin-right: 12rpx;
+	display: flex;
+	align-items: center;
+}
+.parrot-input__suffix {
+	margin-left: 12rpx;
+	display: flex;
+	align-items: center;
+}
+.parrot-input__icon {
+	font-size: 32rpx;
+	color: #909399;
+}
+
+/* 清除 */
+.parrot-input__clear {
+	margin-left: 12rpx;
+	width: 36rpx;
+	height: 36rpx;
+	border-radius: 50%;
+	background-color: #c0c4cc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-input__clear-icon {
+	font-size: 18rpx;
+	color: #ffffff;
+}
+
+/* 密码可见 */
+.parrot-input__eye {
+	margin-left: 12rpx;
+	display: flex;
+	align-items: center;
+}
+</style>

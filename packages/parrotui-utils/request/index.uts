@@ -1,0 +1,356 @@
+// Parrot UI Request 网络请求工具
+// 封装 uni.request 为 Promise 风格，支持拦截器、BaseUrl 配置
+
+// ==================== 类型定义 ====================
+
+/**
+ * 请求配置选项
+ */
+export interface RequestOptions {
+  // 请求地址（相对路径或完整 URL）
+  url: string
+  // 请求方法，默认 GET
+  method?: string
+  // 请求参数
+  data?: UTSJSONObject | null
+  // 自定义请求头
+  header?: UTSJSONObject | null
+  // 超时时间（毫秒），默认 30000
+  timeout?: number
+}
+
+/**
+ * 统一响应数据格式
+ */
+export interface ResponseData {
+  // 业务状态码
+  code: number
+  // 提示信息
+  message: string
+  // 响应数据
+  data: any
+}
+
+/**
+ * 请求拦截器回调
+ */
+type RequestInterceptor = (options: RequestOptions) => RequestOptions
+
+/**
+ * 响应拦截器回调
+ */
+type ResponseInterceptor = (response: ResponseData) => ResponseData
+
+// ==================== 内部状态 ====================
+
+// 基础请求地址
+let _baseUrl: string = ''
+
+// 默认请求头
+let _defaultHeaders: UTSJSONObject = {} as UTSJSONObject
+
+// 默认超时时间（毫秒）
+let _defaultTimeout: number = 30000
+
+// 请求拦截器列表
+let _requestInterceptors: Array<RequestInterceptor> = []
+
+// 响应拦截器列表
+let _responseInterceptors: Array<ResponseInterceptor> = []
+
+// ==================== 配置方法 ====================
+
+/**
+ * 设置基础请求地址
+ * @param url - 基础 URL，如 https://api.example.com
+ */
+export function setBaseUrl(url: string): void {
+  _baseUrl = url
+}
+
+/**
+ * 获取当前基础请求地址
+ * @returns 当前 baseUrl
+ */
+export function getBaseUrl(): string {
+  return _baseUrl
+}
+
+/**
+ * 设置默认请求头
+ * @param key - 请求头名称
+ * @param value - 请求头值
+ */
+export function setHeader(key: string, value: string): void {
+  _defaultHeaders[key] = value
+}
+
+/**
+ * 移除默认请求头
+ * @param key - 请求头名称
+ */
+export function removeHeader(key: string): void {
+  delete _defaultHeaders[key]
+}
+
+/**
+ * 设置默认超时时间
+ * @param timeout - 超时时间（毫秒）
+ */
+export function setDefaultTimeout(timeout: number): void {
+  _defaultTimeout = timeout
+}
+
+/**
+ * 添加请求拦截器（请求发送前执行）
+ * @param interceptor - 拦截器回调函数
+ */
+export function addRequestInterceptor(interceptor: RequestInterceptor): void {
+  _requestInterceptors.push(interceptor)
+}
+
+/**
+ * 添加响应拦截器（响应返回后执行）
+ * @param interceptor - 拦截器回调函数
+ */
+export function addResponseInterceptor(interceptor: ResponseInterceptor): void {
+  _responseInterceptors.push(interceptor)
+}
+
+/**
+ * 清除所有请求拦截器
+ */
+export function clearRequestInterceptors(): void {
+  _requestInterceptors = []
+}
+
+/**
+ * 清除所有响应拦截器
+ */
+export function clearResponseInterceptors(): void {
+  _responseInterceptors = []
+}
+
+// ==================== 工具函数 ====================
+
+/**
+ * 构建完整的请求 URL
+ * @param url - 请求路径
+ * @returns 完整的请求 URL
+ */
+function buildUrl(url: string): string {
+  // 如果已经是完整 URL，直接返回
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  // 拼接 baseUrl
+  if (_baseUrl.length > 0) {
+    // 去除 baseUrl 末尾的斜杠
+    let base = _baseUrl
+    if (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1)
+    }
+    // 确保 url 以斜杠开头
+    if (!url.startsWith('/')) {
+      url = '/' + url
+    }
+    return base + url
+  }
+  return url
+}
+
+/**
+ * 合并请求头
+ * @param customHeaders - 自定义请求头
+ * @returns 合并后的请求头
+ */
+function mergeHeaders(customHeaders: UTSJSONObject | null): UTSJSONObject {
+  const merged: UTSJSONObject = {} as UTSJSONObject
+
+  // 设置默认 Content-Type
+  merged['Content-Type'] = 'application/json'
+
+  // 合并默认请求头
+  const defaultKeys = Object.keys(_defaultHeaders)
+  for (let i = 0; i < defaultKeys.length; i++) {
+    const key = defaultKeys[i]
+    merged[key] = _defaultHeaders[key]
+  }
+
+  // 合并自定义请求头（优先级更高）
+  if (customHeaders != null) {
+    const customKeys = Object.keys(customHeaders)
+    for (let i = 0; i < customKeys.length; i++) {
+      const key = customKeys[i]
+      merged[key] = customHeaders[key]
+    }
+  }
+
+  return merged
+}
+
+/**
+ * 执行请求拦截器链
+ * @param options - 原始请求配置
+ * @returns 处理后的请求配置
+ */
+function applyRequestInterceptors(options: RequestOptions): RequestOptions {
+  let result = options
+  for (let i = 0; i < _requestInterceptors.length; i++) {
+    result = _requestInterceptors[i](result)
+  }
+  return result
+}
+
+/**
+ * 执行响应拦截器链
+ * @param response - 原始响应数据
+ * @returns 处理后的响应数据
+ */
+function applyResponseInterceptors(response: ResponseData): ResponseData {
+  let result = response
+  for (let i = 0; i < _responseInterceptors.length; i++) {
+    result = _responseInterceptors[i](result)
+  }
+  return result
+}
+
+// ==================== 核心请求方法 ====================
+
+/**
+ * 基础请求方法
+ * @param options - 请求配置
+ * @returns Promise<ResponseData> - 统一格式的响应数据
+ */
+export function request(options: RequestOptions): Promise<ResponseData> {
+  return new Promise<ResponseData>((resolve, reject) => {
+    // 执行请求拦截器
+    let processedOptions = applyRequestInterceptors(options)
+
+    // 构建完整 URL
+    const fullUrl = buildUrl(processedOptions.url)
+
+    // 合并请求头
+    const headers = mergeHeaders(processedOptions.header ?? null)
+
+    // 确定请求方法，默认 GET
+    const method = (processedOptions.method ?? 'GET').toUpperCase()
+
+    // 确定超时时间
+    const timeout = processedOptions.timeout ?? _defaultTimeout
+
+    // 发起请求
+    uni.request({
+      url: fullUrl,
+      method: method as RequestMethod,
+      data: processedOptions.data ?? ({} as UTSJSONObject),
+      header: headers,
+      timeout: timeout,
+      success: (res: RequestSuccessCallbackResult) => {
+        // 解析响应数据
+        const statusCode = res.statusCode
+        const resData = res.data as UTSJSONObject | null
+
+        let responseData: ResponseData
+
+        if (statusCode >= 200 && statusCode < 300) {
+          // HTTP 状态码正常，解析业务数据
+          if (resData != null) {
+            responseData = {
+              code: (resData['code'] as number) ?? 0,
+              message: (resData['message'] as string) ?? (resData['msg'] as string) ?? 'success',
+              data: resData['data'] ?? null
+            } as ResponseData
+          } else {
+            responseData = {
+              code: 0,
+              message: 'success',
+              data: null
+            } as ResponseData
+          }
+        } else {
+          // HTTP 状态码异常
+          responseData = {
+            code: statusCode,
+            message: `请求失败，状态码: ${statusCode}`,
+            data: null
+          } as ResponseData
+        }
+
+        // 执行响应拦截器
+        responseData = applyResponseInterceptors(responseData)
+
+        resolve(responseData)
+      },
+      fail: (err: UniError) => {
+        console.error('[ParrotUI Request] 请求失败:', fullUrl, err.errMsg)
+
+        const errorResponse: ResponseData = {
+          code: -1,
+          message: err.errMsg ?? '网络请求失败',
+          data: null
+        } as ResponseData
+
+        reject(errorResponse)
+      }
+    })
+  })
+}
+
+// ==================== 快捷方法 ====================
+
+/**
+ * GET 请求快捷方法
+ * @param url - 请求地址
+ * @param data - 请求参数（会拼接到 URL query string）
+ * @returns Promise<ResponseData>
+ */
+export function get(url: string, data?: UTSJSONObject | null): Promise<ResponseData> {
+  return request({
+    url: url,
+    method: 'GET',
+    data: data ?? null
+  } as RequestOptions)
+}
+
+/**
+ * POST 请求快捷方法
+ * @param url - 请求地址
+ * @param data - 请求体数据
+ * @returns Promise<ResponseData>
+ */
+export function post(url: string, data?: UTSJSONObject | null): Promise<ResponseData> {
+  return request({
+    url: url,
+    method: 'POST',
+    data: data ?? null
+  } as RequestOptions)
+}
+
+/**
+ * PUT 请求快捷方法
+ * @param url - 请求地址
+ * @param data - 请求体数据
+ * @returns Promise<ResponseData>
+ */
+export function put(url: string, data?: UTSJSONObject | null): Promise<ResponseData> {
+  return request({
+    url: url,
+    method: 'PUT',
+    data: data ?? null
+  } as RequestOptions)
+}
+
+/**
+ * DELETE 请求快捷方法
+ * @param url - 请求地址
+ * @param data - 请求参数
+ * @returns Promise<ResponseData>
+ */
+export function del(url: string, data?: UTSJSONObject | null): Promise<ResponseData> {
+  return request({
+    url: url,
+    method: 'DELETE',
+    data: data ?? null
+  } as RequestOptions)
+}

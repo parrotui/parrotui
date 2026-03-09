@@ -87,3 +87,97 @@
 .pui-transition-opacity  { transition: opacity 0.25s ease; }
 .pui-transition-transform{ transition: transform 0.25s ease; }
 .pui-transition-none     { transition: none; }
+
+/* ─── 扩展关键帧 ──────────────────────────────────────────────── */
+
+/* 滑入（左 → 右） */
+@keyframes pui-slide-left-in {
+  from { opacity: 0; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 滑出（右 → 左） */
+@keyframes pui-slide-left-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-100%); }
+}
+
+/* 滑入（右 → 左） */
+@keyframes pui-slide-right-in {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 滑出（左 → 右） */
+@keyframes pui-slide-right-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
+/* 翻转进入 */
+@keyframes pui-flip-in {
+  from { opacity: 0; transform: perspective(400px) rotateY(90deg); }
+  to   { opacity: 1; transform: perspective(400px) rotateY(0); }
+}
+
+/* 弹性缩放 */
+@keyframes pui-scale-bounce {
+  0%   { transform: scale(0); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* 心跳 */
+@keyframes pui-heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%      { transform: scale(1.15); }
+  28%      { transform: scale(1); }
+  42%      { transform: scale(1.15); }
+}
+
+/* 浮动 */
+@keyframes pui-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10rpx); }
+}
+
+/* 闪烁 */
+@keyframes pui-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* 摇晃（增强版） */
+@keyframes pui-wobble {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(-5deg); }
+  30%  { transform: rotate(3deg); }
+  45%  { transform: rotate(-3deg); }
+  60%  { transform: rotate(2deg); }
+  75%  { transform: rotate(-1deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ─── 扩展工具类 ──────────────────────────────────────────────── */
+.pui-animate-slide-left   { animation: pui-slide-left-in 0.3s ease; }
+.pui-animate-slide-right  { animation: pui-slide-right-in 0.3s ease; }
+.pui-animate-flip         { animation: pui-flip-in 0.4s ease; }
+.pui-animate-scale-bounce { animation: pui-scale-bounce 0.5s ease; }
+.pui-animate-heartbeat    { animation: pui-heartbeat 1.5s ease infinite; }
+.pui-animate-float        { animation: pui-float 3s ease-in-out infinite; }
+.pui-animate-blink        { animation: pui-blink 1s step-end infinite; }
+.pui-animate-wobble       { animation: pui-wobble 0.8s ease; }
+
+/* ─── 动画控制 ──────────────────────────────────────────────── */
+.pui-animate-paused  { animation-play-state: paused; }
+.pui-animate-running { animation-play-state: running; }
+.pui-animate-once    { animation-iteration-count: 1; }
+.pui-animate-infinite{ animation-iteration-count: infinite; }
+.pui-animate-delay-100 { animation-delay: 0.1s; }
+.pui-animate-delay-200 { animation-delay: 0.2s; }
+.pui-animate-delay-300 { animation-delay: 0.3s; }
+.pui-animate-delay-500 { animation-delay: 0.5s; }
+.pui-animate-delay-1000{ animation-delay: 1s; }
+.pui-animate-duration-fast { animation-duration: 0.15s; }
+.pui-animate-duration-normal { animation-duration: 0.3s; }
+.pui-animate-duration-slow { animation-duration: 0.5s; }

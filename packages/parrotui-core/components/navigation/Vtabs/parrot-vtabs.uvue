@@ -1,0 +1,206 @@
+<template>
+	<!-- Vtabs 纵向选项卡：左侧标签 + 右侧内容区域 -->
+	<view class="parrot-vtabs" :style="containerStyle">
+		<!-- 左侧标签列表 -->
+		<scroll-view
+			class="parrot-vtabs__sidebar"
+			:style="sidebarStyle"
+			direction="vertical"
+			:show-scrollbar="false"
+		>
+			<view
+				v-for="(tab, index) in tabs"
+				:key="index"
+				class="parrot-vtabs__tab"
+				:class="[
+					currentIndex === index ? 'parrot-vtabs__tab--active' : '',
+					tab.disabled ? 'parrot-vtabs__tab--disabled' : '',
+				]"
+				@tap="onTabTap(index, tab)"
+			>
+				<!-- 激活指示条 -->
+				<view
+					v-if="currentIndex === index"
+					class="parrot-vtabs__indicator"
+					:style="`background-color:${activeColor ?? '#1a7eff'}`"
+				></view>
+				<!-- 标签名称 -->
+				<text
+					class="parrot-vtabs__name"
+					:style="currentIndex === index ? `color:${activeColor ?? '#1a7eff'};font-weight:600` : 'color:#606266'"
+				>{{ tab.name }}</text>
+				<!-- 角标 -->
+				<text
+					v-if="tab.badge && tab.badge > 0 && !tab.dot"
+					class="parrot-vtabs__badge"
+				>{{ tab.badge > 99 ? '99+' : tab.badge }}</text>
+				<!-- 小红点 -->
+				<view
+					v-if="tab.dot"
+					class="parrot-vtabs__dot"
+				></view>
+			</view>
+		</scroll-view>
+
+		<!-- 右侧内容区域 -->
+		<view class="parrot-vtabs__content">
+			<slot />
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-vtabs 纵向选项卡
+ * 左侧标签列表 + 右侧内容区域，适用于分类筛选场景。
+ *
+ * @prop modelValue  当前选中索引，默认 0
+ * @prop tabs        标签数据 { name, badge?, dot?, disabled? }[]
+ * @prop tabWidth    左侧标签栏宽度，默认 '180rpx'
+ * @prop activeColor 激活颜色
+ * @prop height      容器高度，默认 '100%'
+ *
+ * @event update:modelValue  选中索引变更
+ * @event change             切换标签
+ */
+import { ref, watch, computed } from 'vue'
+
+/** 标签数据结构 */
+interface VtabItem {
+	name : string
+	badge ?: number
+	dot ?: boolean
+	disabled ?: boolean
+}
+
+interface Props {
+	/** 当前选中索引 */
+	modelValue ?: number
+	/** 标签数据 */
+	tabs ?: VtabItem[]
+	/** 左侧标签栏宽度 */
+	tabWidth ?: string
+	/** 激活颜色 */
+	activeColor ?: string
+	/** 容器高度 */
+	height ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: 0,
+	tabs: () : VtabItem[] => [],
+	tabWidth: '180rpx',
+	activeColor: '#1a7eff',
+	height: '100%',
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [index: number]
+	change: [index: number]
+}>()
+
+/** 当前选中索引 */
+const currentIndex = ref<number>(props.modelValue ?? 0)
+
+watch(() => props.modelValue, (val) => {
+	currentIndex.value = val ?? 0
+})
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return `height:${props.height ?? '100%'}`
+})
+
+/** 侧边栏样式 */
+const sidebarStyle = computed(() : string => {
+	return `width:${props.tabWidth ?? '180rpx'}`
+})
+
+/** 点击标签 */
+function onTabTap(index : number, tab : VtabItem) {
+	if (tab.disabled) return
+	if (currentIndex.value === index) return
+	currentIndex.value = index
+	emit('update:modelValue', index)
+	emit('change', index)
+}
+</script>
+
+<style scoped>
+.parrot-vtabs {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	overflow: hidden;
+}
+
+/* ---- 左侧标签栏 ---- */
+.parrot-vtabs__sidebar {
+	background-color: #f5f7fa;
+	flex-shrink: 0;
+}
+.parrot-vtabs__tab {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 28rpx 20rpx;
+	position: relative;
+}
+.parrot-vtabs__tab--active {
+	background-color: #ffffff;
+}
+.parrot-vtabs__tab--disabled {
+	opacity: 0.4;
+}
+
+/* ---- 激活指示条 ---- */
+.parrot-vtabs__indicator {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 6rpx;
+	height: 40rpx;
+	border-radius: 0 3rpx 3rpx 0;
+}
+
+/* ---- 名称 ---- */
+.parrot-vtabs__name {
+	flex: 1;
+	font-size: 26rpx;
+	padding-left: 16rpx;
+	line-height: 1.4;
+}
+
+/* ---- 角标 ---- */
+.parrot-vtabs__badge {
+	min-width: 32rpx;
+	height: 32rpx;
+	padding: 0 8rpx;
+	border-radius: 100px;
+	background-color: #ff2b2b;
+	font-size: 20rpx;
+	color: #ffffff;
+	text-align: center;
+	line-height: 32rpx;
+	margin-left: 4rpx;
+	flex-shrink: 0;
+}
+
+/* ---- 小红点 ---- */
+.parrot-vtabs__dot {
+	width: 12rpx;
+	height: 12rpx;
+	border-radius: 50%;
+	background-color: #ff2b2b;
+	margin-left: 4rpx;
+	flex-shrink: 0;
+}
+
+/* ---- 右侧内容区域 ---- */
+.parrot-vtabs__content {
+	flex: 1;
+	overflow: hidden;
+	background-color: #ffffff;
+}
+</style>

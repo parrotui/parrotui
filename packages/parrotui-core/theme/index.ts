@@ -7,26 +7,29 @@ export { darkTheme }  from './dark'
 
 // 主题颜色结构类型
 export interface ThemeColors {
-  primary:       string
-  primaryLight:  string
-  primaryDark:   string
-  success:       string
-  successLight:  string
-  warning:       string
-  warningLight:  string
-  danger:        string
-  dangerLight:   string
-  info:          string
-  infoLight:     string
-  textPrimary:   string
-  textRegular:   string
-  textSecondary: string
-  textDisabled:  string
-  bgPage:        string
-  bgBase:        string
-  bgCard:        string
-  borderBase:    string
-  borderLight:   string
+  primary:         string
+  primaryLight:    string
+  primaryDark:     string
+  secondary:       string
+  secondaryLight:  string
+  secondaryDark:   string
+  success:         string
+  successLight:    string
+  warning:         string
+  warningLight:    string
+  danger:          string
+  dangerLight:     string
+  info:            string
+  infoLight:       string
+  textPrimary:     string
+  textRegular:     string
+  textSecondary:   string
+  textDisabled:    string
+  bgPage:          string
+  bgBase:          string
+  bgCard:          string
+  borderBase:      string
+  borderLight:     string
 }
 
 export interface ThemeConfig {

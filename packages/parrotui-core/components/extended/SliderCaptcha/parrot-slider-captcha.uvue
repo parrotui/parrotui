@@ -1,0 +1,320 @@
+<template>
+	<view class="parrot-slider-captcha" :style="containerStyle">
+		<!-- 提示文字 -->
+		<text class="parrot-slider-captcha__tip">{{ tipText }}</text>
+		<!-- 背景图区域 -->
+		<view class="parrot-slider-captcha__canvas" :style="canvasStyle">
+			<!-- 背景图 -->
+			<image
+				class="parrot-slider-captcha__bg"
+				:src="src"
+				:style="bgStyle"
+				mode="aspectFill"
+			/>
+			<!-- 缺口位置（暗色遮罩模拟） -->
+			<view class="parrot-slider-captcha__gap" :style="gapStyle" />
+			<!-- 滑动拼图块 -->
+			<view class="parrot-slider-captcha__piece" :style="pieceStyle">
+				<image
+					class="parrot-slider-captcha__piece-img"
+					:src="src"
+					:style="pieceImgStyle"
+					mode="aspectFill"
+				/>
+			</view>
+			<!-- 成功/失败遮罩 -->
+			<view v-if="status !== 'pending'" class="parrot-slider-captcha__overlay" :style="overlayStatusStyle">
+				<text class="parrot-slider-captcha__overlay-text">{{ status === 'success' ? '验证成功' : '验证失败，请重试' }}</text>
+			</view>
+		</view>
+		<!-- 滑块轨道 -->
+		<view class="parrot-slider-captcha__track" :style="trackStyle">
+			<view class="parrot-slider-captcha__track-fill" :style="trackFillStyle" />
+			<text class="parrot-slider-captcha__track-text">{{ status === 'pending' ? tipText : '' }}</text>
+			<!-- 滑块 -->
+			<view
+				class="parrot-slider-captcha__slider"
+				:style="sliderBtnStyle"
+				@touchstart="onTouchStart"
+				@touchmove="onTouchMove"
+				@touchend="onTouchEnd"
+			>
+				<text class="parrot-slider-captcha__slider-icon">&#8594;</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+/** 组件属性 */
+interface Props {
+	/** 组件宽度 rpx */
+	width ?: number
+	/** 组件高度 rpx */
+	height ?: number
+	/** 背景图 URL */
+	src ?: string
+	/** 拼图块大小 rpx */
+	puzzleSize ?: number
+	/** 提示文字 */
+	tipText ?: string
+	/** 容差 rpx */
+	threshold ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	width: 600,
+	height: 400,
+	src: '',
+	puzzleSize: 80,
+	tipText: '向右滑动完成拼图',
+	threshold: 10,
+})
+
+const emit = defineEmits<{
+	(e : 'success') : void
+	(e : 'fail') : void
+}>()
+
+/** 验证状态 */
+const status = ref<string>('pending')
+/** 缺口 X 位置 rpx（随机生成，范围在图片右半部分） */
+const gapX = ref<number>(0)
+/** 缺口 Y 位置 rpx（随机在中间区域） */
+const gapY = ref<number>(0)
+/** 滑块偏移量 px */
+const sliderOffset = ref<number>(0)
+/** 拖动起始 X */
+const startX = ref<number>(0)
+/** 是否正在拖动 */
+const dragging = ref<boolean>(false)
+/** 轨道最大滑动距离 px */
+const trackMaxPx = ref<number>(200)
+
+/** 初始化缺口位置 */
+function initGap() : void {
+	/* 缺口在右半区域，留出拼图块大小的边距 */
+	const minX = props.width / 2
+	const maxX = props.width - props.puzzleSize - 20
+	gapX.value = Math.floor(Math.random() * (maxX - minX)) + minX
+	const minY = props.puzzleSize
+	const maxY = props.height - props.puzzleSize * 2
+	gapY.value = Math.floor(Math.random() * (maxY - minY)) + minY
+}
+initGap()
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return `width:${props.width}rpx`
+})
+
+/** 画布样式 */
+const canvasStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:${props.height}rpx`
+})
+
+/** 背景图样式 */
+const bgStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:${props.height}rpx`
+})
+
+/** 缺口样式 */
+const gapStyle = computed(() : string => {
+	return `width:${props.puzzleSize}rpx;height:${props.puzzleSize}rpx;left:${gapX.value}rpx;top:${gapY.value}rpx;border-radius:8rpx`
+})
+
+/** 拼图块容器样式 */
+const pieceStyle = computed(() : string => {
+	return `width:${props.puzzleSize}rpx;height:${props.puzzleSize}rpx;top:${gapY.value}rpx;left:10rpx;transform:translateX(${sliderOffset.value}px);border-radius:8rpx`
+})
+
+/** 拼图块内图片样式（偏移显示对应位置的图片） */
+const pieceImgStyle = computed(() : string => {
+	const offsetX = -gapX.value
+	const offsetY = -gapY.value
+	return `width:${props.width}rpx;height:${props.height}rpx;margin-left:${offsetX}rpx;margin-top:${offsetY}rpx`
+})
+
+/** 状态遮罩样式 */
+const overlayStatusStyle = computed(() : string => {
+	const bg = status.value === 'success' ? 'rgba(103,194,58,0.6)' : 'rgba(245,108,108,0.6)'
+	return `width:${props.width}rpx;height:${props.height}rpx;background:${bg}`
+})
+
+/** 轨道样式 */
+const trackStyle = computed(() : string => {
+	return `width:${props.width}rpx;height:80rpx;border-radius:40rpx`
+})
+
+/** 轨道填充样式 */
+const trackFillStyle = computed(() : string => {
+	return `width:${sliderOffset.value}px;height:80rpx;border-radius:40rpx`
+})
+
+/** 滑块按钮样式 */
+const sliderBtnStyle = computed(() : string => {
+	return `transform:translateX(${sliderOffset.value}px)`
+})
+
+/** 触摸开始 */
+function onTouchStart(e : TouchEvent) : void {
+	if (status.value !== 'pending') return
+	dragging.value = true
+	const touch = e.touches[0]
+	startX.value = touch.screenX
+}
+
+/** 触摸移动 */
+function onTouchMove(e : TouchEvent) : void {
+	if (!dragging.value) return
+	if (status.value !== 'pending') return
+	const touch = e.touches[0]
+	let diff = touch.screenX - startX.value
+	if (diff < 0) diff = 0
+	if (diff > trackMaxPx.value) diff = trackMaxPx.value
+	sliderOffset.value = diff
+}
+
+/** 触摸结束 */
+function onTouchEnd(_ : TouchEvent) : void {
+	if (!dragging.value) return
+	dragging.value = false
+	if (status.value !== 'pending') return
+	/*
+	 * 判断拼图块是否移动到缺口位置
+	 * 拼图块初始 left = 10rpx，缺口在 gapX rpx
+	 * 滑块偏移 px 需要与 rpx 差值比较
+	 * 此处简化：将偏移量 px 近似转换为 rpx (×2)
+	 */
+	const offsetRpx = sliderOffset.value * 2
+	const targetOffset = gapX.value - 10
+	const diff = Math.abs(offsetRpx - targetOffset)
+	if (diff <= props.threshold * 2) {
+		status.value = 'success'
+		emit('success')
+	} else {
+		status.value = 'fail'
+		emit('fail')
+		setTimeout(function () {
+			reset()
+		}, 800)
+	}
+}
+
+/** 重置验证 */
+function reset() : void {
+	status.value = 'pending'
+	sliderOffset.value = 0
+	initGap()
+}
+
+defineExpose({ reset })
+</script>
+
+<style>
+.parrot-slider-captcha {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.parrot-slider-captcha__tip {
+	font-size: 26rpx;
+	color: #909399;
+	margin-bottom: 16rpx;
+}
+
+.parrot-slider-captcha__canvas {
+	position: relative;
+	overflow: hidden;
+	border-radius: 12rpx;
+	background-color: #f0f2f5;
+	margin-bottom: 20rpx;
+}
+
+.parrot-slider-captcha__bg {
+	display: block;
+}
+
+.parrot-slider-captcha__gap {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-width: 2rpx;
+	border-style: solid;
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+.parrot-slider-captcha__piece {
+	position: absolute;
+	overflow: hidden;
+	border-width: 2rpx;
+	border-style: solid;
+	border-color: rgba(255, 255, 255, 0.9);
+}
+
+.parrot-slider-captcha__piece-img {
+	display: block;
+}
+
+.parrot-slider-captcha__overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-slider-captcha__overlay-text {
+	font-size: 28rpx;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.parrot-slider-captcha__track {
+	position: relative;
+	background-color: #e4e7ed;
+	overflow: hidden;
+}
+
+.parrot-slider-captcha__track-fill {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #d9ecff;
+}
+
+.parrot-slider-captcha__track-text {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24rpx;
+	color: #909399;
+}
+
+.parrot-slider-captcha__slider {
+	position: absolute;
+	top: 5rpx;
+	left: 5rpx;
+	width: 70rpx;
+	height: 70rpx;
+	border-radius: 35rpx;
+	background-color: #1a7eff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-slider-captcha__slider-icon {
+	font-size: 32rpx;
+	color: #ffffff;
+	font-weight: 700;
+}
+</style>

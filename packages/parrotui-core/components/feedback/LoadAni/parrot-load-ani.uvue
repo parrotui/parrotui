@@ -1,0 +1,193 @@
+<template>
+  <!-- LoadAni 加载动画：多种动画形态（bounce/wave/pulse） -->
+  <view v-if="show" class="parrot-load-ani">
+    <!-- bounce 弹跳模式：三个圆点交替弹跳 -->
+    <view v-if="typeVal === 'bounce'" class="parrot-load-ani__bounce">
+      <view class="parrot-load-ani__bounce-dot parrot-load-ani__bounce-dot--1" :style="dotStyleStr"></view>
+      <view class="parrot-load-ani__bounce-dot parrot-load-ani__bounce-dot--2" :style="dotStyleStr"></view>
+      <view class="parrot-load-ani__bounce-dot parrot-load-ani__bounce-dot--3" :style="dotStyleStr"></view>
+    </view>
+
+    <!-- wave 波浪模式：五根柱子高低起伏 -->
+    <view v-if="typeVal === 'wave'" class="parrot-load-ani__wave" :style="waveContainerStyle">
+      <view class="parrot-load-ani__wave-bar parrot-load-ani__wave-bar--1" :style="barStyleStr"></view>
+      <view class="parrot-load-ani__wave-bar parrot-load-ani__wave-bar--2" :style="barStyleStr"></view>
+      <view class="parrot-load-ani__wave-bar parrot-load-ani__wave-bar--3" :style="barStyleStr"></view>
+      <view class="parrot-load-ani__wave-bar parrot-load-ani__wave-bar--4" :style="barStyleStr"></view>
+      <view class="parrot-load-ani__wave-bar parrot-load-ani__wave-bar--5" :style="barStyleStr"></view>
+    </view>
+
+    <!-- pulse 脉冲模式：单个圆形缩放 -->
+    <view v-if="typeVal === 'pulse'" class="parrot-load-ani__pulse" :style="pulseStyle"></view>
+
+    <!-- 文字 -->
+    <text v-if="text != null && text !== ''" class="parrot-load-ani__text" :style="textStyle">{{ text }}</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-load-ani 加载动画
+ * 提供多种加载动画形态，用于页面或区域级别的加载提示。
+ *
+ * @prop show  是否显示，默认 true
+ * @prop type  动画类型：bounce/wave/pulse，默认 bounce
+ * @prop size  尺寸（rpx），影响各子元素大小，默认 48
+ * @prop color 动画颜色，默认 #465CFF
+ * @prop text  加载文字
+ */
+import { computed } from 'vue'
+
+interface Props {
+  show ?: boolean
+  type ?: string
+  size ?: number
+  color ?: string
+  text ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  show: true,
+  type: 'bounce',
+  size: 48,
+  color: '#465CFF',
+})
+
+/** 安全类型值 */
+const typeVal = computed(() : string => {
+  return props.type ?? 'bounce'
+})
+
+/** bounce 圆点样式 */
+const dotStyleStr = computed(() : string => {
+  const c = props.color ?? '#465CFF'
+  const s = props.size ?? 48
+  const dotSize = Math.max(12, Math.floor(s / 3))
+  return `width:${dotSize}rpx;height:${dotSize}rpx;background-color:${c}`
+})
+
+/** wave 容器样式 */
+const waveContainerStyle = computed(() : string => {
+  const s = props.size ?? 48
+  return `height:${s}rpx`
+})
+
+/** wave 柱状条样式 */
+const barStyleStr = computed(() : string => {
+  const c = props.color ?? '#465CFF'
+  const s = props.size ?? 48
+  const barW = Math.max(6, Math.floor(s / 8))
+  return `width:${barW}rpx;background-color:${c}`
+})
+
+/** pulse 脉冲样式 */
+const pulseStyle = computed(() : string => {
+  const c = props.color ?? '#465CFF'
+  const s = props.size ?? 48
+  return `width:${s}rpx;height:${s}rpx;background-color:${c}`
+})
+
+/** 文字样式 */
+const textStyle = computed(() : string => {
+  const c = props.color ?? '#465CFF'
+  return `color:${c}`
+})
+</script>
+
+<style scoped>
+/* ---- 容器 ---- */
+.parrot-load-ani {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- bounce 弹跳 ---- */
+.parrot-load-ani__bounce {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.parrot-load-ani__bounce-dot {
+  border-radius: 50%;
+  animation: parrot-loadani-bounce 0.6s ease-in-out infinite alternate;
+}
+
+.parrot-load-ani__bounce-dot--1 {
+  animation-delay: 0s;
+}
+
+.parrot-load-ani__bounce-dot--2 {
+  animation-delay: 0.15s;
+}
+
+.parrot-load-ani__bounce-dot--3 {
+  animation-delay: 0.3s;
+}
+
+@keyframes parrot-loadani-bounce {
+  from { transform: translateY(0); opacity: 0.4; }
+  to { transform: translateY(-16rpx); opacity: 1; }
+}
+
+/* ---- wave 波浪 ---- */
+.parrot-load-ani__wave {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+
+.parrot-load-ani__wave-bar {
+  border-radius: 4rpx;
+  height: 40%;
+  animation: parrot-loadani-wave 1s ease-in-out infinite;
+}
+
+.parrot-load-ani__wave-bar--1 {
+  animation-delay: 0s;
+}
+
+.parrot-load-ani__wave-bar--2 {
+  animation-delay: 0.12s;
+}
+
+.parrot-load-ani__wave-bar--3 {
+  animation-delay: 0.24s;
+}
+
+.parrot-load-ani__wave-bar--4 {
+  animation-delay: 0.36s;
+}
+
+.parrot-load-ani__wave-bar--5 {
+  animation-delay: 0.48s;
+}
+
+@keyframes parrot-loadani-wave {
+  0%, 100% { height: 40%; }
+  50% { height: 100%; }
+}
+
+/* ---- pulse 脉冲 ---- */
+.parrot-load-ani__pulse {
+  border-radius: 50%;
+  animation: parrot-loadani-pulse 1s ease-in-out infinite;
+}
+
+@keyframes parrot-loadani-pulse {
+  0% { transform: scale(0.6); opacity: 0.3; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0.3; }
+}
+
+/* ---- 文字 ---- */
+.parrot-load-ani__text {
+  font-size: 24rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+</style>

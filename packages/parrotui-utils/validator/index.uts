@@ -1,0 +1,338 @@
+// Parrot UI Validator 表单验证工具
+// 提供常用的表单验证规则和校验方法
+
+// ==================== 类型定义 ====================
+
+/**
+ * 校验规则配置
+ */
+export interface ValidateRule {
+  // 是否必填
+  required?: boolean
+  // 校验失败提示信息
+  message?: string
+  // 最小长度
+  min?: number
+  // 最大长度
+  max?: number
+  // 正则表达式字符串
+  pattern?: string
+  // 预设类型校验：'phone' | 'email' | 'idCard' | 'url' | 'number' | 'chinese'
+  type?: string
+  // 自定义校验函数
+  validator?: ((value: string) => boolean) | null
+}
+
+/**
+ * 校验结果
+ */
+export interface ValidateResult {
+  // 是否校验通过
+  valid: boolean
+  // 校验失败时的提示信息
+  message: string
+}
+
+// ==================== 核心校验方法 ====================
+
+/**
+ * 校验单个值
+ * 按规则数组顺序依次校验，遇到第一个不通过的规则即返回失败
+ * @param value - 待校验的值
+ * @param rules - 校验规则数组
+ * @returns 校验结果
+ */
+export function validate(value: string, rules: ValidateRule[]): ValidateResult {
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i]
+
+    // 1. 必填校验
+    if (rule.required === true) {
+      if (value.length === 0 || value.trim().length === 0) {
+        return {
+          valid: false,
+          message: rule.message ?? '此项为必填项'
+        } as ValidateResult
+      }
+    }
+
+    // 如果值为空且非必填，跳过后续校验
+    if (value.length === 0) {
+      continue
+    }
+
+    // 2. 最小长度校验
+    if (rule.min != null && rule.min! > 0) {
+      if (value.length < rule.min!) {
+        return {
+          valid: false,
+          message: rule.message ?? `长度不能少于${rule.min!}个字符`
+        } as ValidateResult
+      }
+    }
+
+    // 3. 最大长度校验
+    if (rule.max != null && rule.max! > 0) {
+      if (value.length > rule.max!) {
+        return {
+          valid: false,
+          message: rule.message ?? `长度不能超过${rule.max!}个字符`
+        } as ValidateResult
+      }
+    }
+
+    // 4. 正则表达式校验
+    if (rule.pattern != null && rule.pattern!.length > 0) {
+      const regex = new RegExp(rule.pattern!)
+      if (!regex.test(value)) {
+        return {
+          valid: false,
+          message: rule.message ?? '格式不正确'
+        } as ValidateResult
+      }
+    }
+
+    // 5. 预设类型校验
+    if (rule.type != null && rule.type!.length > 0) {
+      let typeValid = false
+      const ruleType = rule.type!
+
+      if (ruleType === 'phone') {
+        typeValid = isPhone(value)
+      } else if (ruleType === 'email') {
+        typeValid = isEmail(value)
+      } else if (ruleType === 'idCard') {
+        typeValid = isIdCard(value)
+      } else if (ruleType === 'url') {
+        typeValid = isUrl(value)
+      } else if (ruleType === 'number') {
+        typeValid = isNumber(value)
+      } else if (ruleType === 'chinese') {
+        typeValid = isChinese(value)
+      } else {
+        // 未知类型默认通过
+        typeValid = true
+      }
+
+      if (!typeValid) {
+        let defaultMsg = '格式不正确'
+        if (ruleType === 'phone') {
+          defaultMsg = '请输入正确的手机号'
+        } else if (ruleType === 'email') {
+          defaultMsg = '请输入正确的邮箱地址'
+        } else if (ruleType === 'idCard') {
+          defaultMsg = '请输入正确的身份证号'
+        } else if (ruleType === 'url') {
+          defaultMsg = '请输入正确的 URL 地址'
+        } else if (ruleType === 'number') {
+          defaultMsg = '请输入数字'
+        } else if (ruleType === 'chinese') {
+          defaultMsg = '请输入中文'
+        }
+
+        return {
+          valid: false,
+          message: rule.message ?? defaultMsg
+        } as ValidateResult
+      }
+    }
+
+    // 6. 自定义校验函数
+    if (rule.validator != null) {
+      const customValid = rule.validator!(value)
+      if (!customValid) {
+        return {
+          valid: false,
+          message: rule.message ?? '校验未通过'
+        } as ValidateResult
+      }
+    }
+  }
+
+  // 全部规则通过
+  return {
+    valid: true,
+    message: ''
+  } as ValidateResult
+}
+
+// ==================== 内置校验函数 ====================
+
+/**
+ * 手机号校验
+ * 支持中国大陆 11 位手机号（1 开头，第二位 3-9）
+ * @param value - 待校验的字符串
+ * @returns 是否为有效手机号
+ */
+export function isPhone(value: string): boolean {
+  if (value.length !== 11) {
+    return false
+  }
+  const regex = new RegExp('^1[3-9]\\d{9}$')
+  return regex.test(value)
+}
+
+/**
+ * 邮箱校验
+ * @param value - 待校验的字符串
+ * @returns 是否为有效邮箱
+ */
+export function isEmail(value: string): boolean {
+  if (value.length === 0) {
+    return false
+  }
+  const regex = new RegExp('^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$')
+  return regex.test(value)
+}
+
+/**
+ * 身份证号校验
+ * 支持 15 位和 18 位身份证号
+ * @param value - 待校验的字符串
+ * @returns 是否为有效身份证号
+ */
+export function isIdCard(value: string): boolean {
+  if (value.length === 0) {
+    return false
+  }
+
+  // 15 位身份证：全数字
+  if (value.length === 15) {
+    const regex15 = new RegExp('^\\d{15}$')
+    return regex15.test(value)
+  }
+
+  // 18 位身份证：17 位数字 + 1 位校验码（数字或 X/x）
+  if (value.length === 18) {
+    const regex18 = new RegExp('^\\d{17}[\\dXx]$')
+    if (!regex18.test(value)) {
+      return false
+    }
+
+    // 校验码验证
+    const weights: number[] = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
+    const checkCodes: string[] = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
+
+    let sum = 0
+    for (let i = 0; i < 17; i++) {
+      const charStr = value.charAt(i)
+      const num = parseInt(charStr)
+      if (isNaN(num)) {
+        return false
+      }
+      sum += num * weights[i]
+    }
+
+    const remainder = sum % 11
+    const expectedCode = checkCodes[remainder]
+    const actualCode = value.charAt(17).toUpperCase()
+
+    return expectedCode === actualCode
+  }
+
+  return false
+}
+
+/**
+ * URL 校验
+ * 支持 http 和 https 协议
+ * @param value - 待校验的字符串
+ * @returns 是否为有效 URL
+ */
+export function isUrl(value: string): boolean {
+  if (value.length === 0) {
+    return false
+  }
+  const regex = new RegExp('^https?:\\/\\/[\\w\\-]+(\\.[\\w\\-]+)+([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?$')
+  return regex.test(value)
+}
+
+/**
+ * 纯数字校验
+ * @param value - 待校验的字符串
+ * @returns 是否为纯数字
+ */
+export function isNumber(value: string): boolean {
+  if (value.length === 0) {
+    return false
+  }
+  const regex = new RegExp('^\\d+$')
+  return regex.test(value)
+}
+
+/**
+ * 纯中文校验
+ * @param value - 待校验的字符串
+ * @returns 是否为纯中文
+ */
+export function isChinese(value: string): boolean {
+  if (value.length === 0) {
+    return false
+  }
+  const regex = new RegExp('^[\\u4e00-\\u9fa5]+$')
+  return regex.test(value)
+}
+
+/**
+ * 密码强度校验
+ * 要求至少包含数字和字母的组合
+ * @param value - 待校验的密码
+ * @param minLen - 最小长度，默认 6
+ * @param maxLen - 最大长度，默认 20
+ * @returns 是否为有效密码
+ */
+export function isPassword(value: string, minLen: number = 6, maxLen: number = 20): boolean {
+  if (value.length === 0) {
+    return false
+  }
+
+  // 长度校验
+  if (value.length < minLen || value.length > maxLen) {
+    return false
+  }
+
+  // 必须包含至少一个数字
+  const hasNumber = new RegExp('\\d')
+  if (!hasNumber.test(value)) {
+    return false
+  }
+
+  // 必须包含至少一个字母
+  const hasLetter = new RegExp('[a-zA-Z]')
+  if (!hasLetter.test(value)) {
+    return false
+  }
+
+  return true
+}
+
+// ==================== 便捷批量校验 ====================
+
+/**
+ * 批量校验表单字段
+ * @param fields - 字段名与值的映射
+ * @param fieldRules - 字段名与校验规则的映射
+ * @returns 第一个校验失败的结果，全部通过返回 valid: true
+ */
+export function validateFields(
+  fields: UTSJSONObject,
+  fieldRules: Map<string, ValidateRule[]>
+): ValidateResult {
+  const keys = Array.from(fieldRules.keys())
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    const value = (fields[key] as string) ?? ''
+    const rules = fieldRules.get(key)
+    if (rules != null) {
+      const result = validate(value, rules)
+      if (!result.valid) {
+        return result
+      }
+    }
+  }
+
+  return {
+    valid: true,
+    message: ''
+  } as ValidateResult
+}

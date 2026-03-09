@@ -1,0 +1,145 @@
+<template>
+	<view
+		class="parrot-icon-button"
+		:class="[
+			`parrot-icon-button--${type}`,
+			`parrot-icon-button--${size}`,
+			`parrot-icon-button--${shape}`,
+			disabled ? 'parrot-icon-button--disabled' : '',
+			plain ? 'parrot-icon-button--plain' : ''
+		]"
+		:style="buttonStyle"
+		@click="handleClick"
+	>
+		<parrot-icon :name="icon" :size="iconSizeVal" :color="computedColor" />
+		<text v-if="badge" class="parrot-icon-button__badge">{{ badge }}</text>
+		<view v-if="dot" class="parrot-icon-button__dot"></view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	icon?: string
+	type?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
+	size?: 'small' | 'normal' | 'large'
+	shape?: 'circle' | 'square' | 'round'
+	disabled?: boolean
+	plain?: boolean
+	badge?: string | number
+	dot?: boolean
+	color?: string
+	background?: string
+}>(), {
+	icon: '',
+	type: 'default',
+	size: 'normal',
+	shape: 'circle',
+	disabled: false,
+	plain: false,
+	badge: '',
+	dot: false,
+	color: '',
+	background: '',
+})
+
+const emit = defineEmits<{ click: [event: Event] }>()
+
+const typeColorMap: Record<string, string> = {
+	primary: '#1a7eff',
+	success: '#41a906',
+	warning: '#e6a23c',
+	danger: '#f56c6c',
+	info: '#6c6f78',
+	default: '#333333',
+}
+
+const iconSizeVal = computed(() => {
+	const sizeMap: Record<string, number> = { small: 16, normal: 20, large: 24 }
+	return sizeMap[props.size] || 20
+})
+
+const computedColor = computed(() => {
+	if (props.color) return props.color
+	if (props.plain) return typeColorMap[props.type] || '#333333'
+	return props.type === 'default' ? '#333333' : '#ffffff'
+})
+
+const buttonStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.background) style.backgroundColor = props.background
+	if (props.disabled) style.opacity = '0.6'
+	return style
+})
+
+function handleClick(e: Event) {
+	if (!props.disabled) emit('click', e)
+}
+</script>
+
+<style lang="scss">
+.parrot-icon-button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s;
+	border: 1px solid transparent;
+
+	&--small { width: 56rpx; height: 56rpx; }
+	&--normal { width: 72rpx; height: 72rpx; }
+	&--large { width: 88rpx; height: 88rpx; }
+
+	&--circle { border-radius: 50%; }
+	&--square { border-radius: 8rpx; }
+	&--round { border-radius: 16rpx; }
+
+	&--primary { background-color: #1a7eff; }
+	&--success { background-color: #41a906; }
+	&--warning { background-color: #e6a23c; }
+	&--danger { background-color: #f56c6c; }
+	&--info { background-color: #6c6f78; }
+	&--default { background-color: #f5f5f5; border-color: #e5e5e5; }
+
+	&--plain {
+		background-color: transparent !important;
+		&.parrot-icon-button--primary { border-color: #1a7eff; }
+		&.parrot-icon-button--success { border-color: #41a906; }
+		&.parrot-icon-button--warning { border-color: #e6a23c; }
+		&.parrot-icon-button--danger { border-color: #f56c6c; }
+		&.parrot-icon-button--info { border-color: #6c6f78; }
+	}
+
+	&--disabled { cursor: not-allowed; }
+
+	&:active:not(.parrot-icon-button--disabled) { transform: scale(0.92); }
+}
+
+.parrot-icon-button__badge {
+	position: absolute;
+	top: -8rpx;
+	right: -8rpx;
+	min-width: 28rpx;
+	height: 28rpx;
+	padding: 0 6rpx;
+	font-size: 18rpx;
+	color: #ffffff;
+	background-color: #f56c6c;
+	border-radius: 28rpx;
+	text-align: center;
+	line-height: 28rpx;
+}
+
+.parrot-icon-button__dot {
+	position: absolute;
+	top: 2rpx;
+	right: 2rpx;
+	width: 14rpx;
+	height: 14rpx;
+	border-radius: 50%;
+	background-color: #f56c6c;
+}
+</style>

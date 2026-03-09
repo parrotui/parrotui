@@ -1,0 +1,176 @@
+<template>
+	<view class="parrot-digital-roller" :style="containerStyle">
+		<view v-for="(digit, index) in digitList" :key="index" class="parrot-digital-roller__column" :style="columnStyle">
+			<!-- 数字滚动列，通过 translateY 实现滚动动画 -->
+			<view class="parrot-digital-roller__track" :style="trackStyle(digit)">
+				<view
+					v-for="num in numberList"
+					:key="num"
+					class="parrot-digital-roller__item"
+					:style="itemStyle"
+				>
+					<text class="parrot-digital-roller__text" :style="textStyle">{{ num }}</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDigitalRoller 数字滚轮
+ * @description 数字滚轮动画效果，将数值拆分为各位数字，每位用 translateY 动画模拟滚动到目标值
+ * @property {number} value - 要显示的数字
+ * @property {number} minValue - 最小值
+ * @property {number} maxValue - 最大值
+ * @property {number} fontSize - 字体大小 rpx
+ * @property {string} color - 字体颜色
+ * @property {string} background - 背景颜色
+ * @property {number} duration - 动画时长 ms
+ * @property {number} itemHeight - 每位数字高度 rpx
+ * @event {Function} change - 值变化时触发
+ */
+import { computed, watch, ref } from 'vue'
+
+interface Props {
+	/** 要显示的数字 */
+	value ?: number
+	/** 最小值 */
+	minValue ?: number
+	/** 最大值 */
+	maxValue ?: number
+	/** 字体大小 rpx */
+	fontSize ?: number
+	/** 字体颜色 */
+	color ?: string
+	/** 背景颜色 */
+	background ?: string
+	/** 动画时长 ms */
+	duration ?: number
+	/** 每位数字高度 rpx */
+	itemHeight ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	value: 0,
+	minValue: 0,
+	maxValue: 999999,
+	fontSize: 56,
+	color: '#333333',
+	background: '#f5f7fa',
+	duration: 500,
+	itemHeight: 80,
+})
+
+const emit = defineEmits<{
+	(e: 'change', value: number): void
+}>()
+
+/** 0-9 固定数字列表 */
+const numberList : number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+/** 当前显示的值（约束在 min-max 范围内） */
+const displayValue = ref(clampValue(props.value))
+
+/** 限制数值范围 */
+function clampValue(val : number) : number {
+	const minVal = props.minValue ?? 0
+	const maxVal = props.maxValue ?? 999999
+	if (val < minVal) return minVal
+	if (val > maxVal) return maxVal
+	return Math.floor(val)
+}
+
+/** 监听 value 变化 */
+watch(
+	() : number => props.value ?? 0,
+	(newVal : number) => {
+		const clamped = clampValue(newVal)
+		displayValue.value = clamped
+		emit('change', clamped)
+	}
+)
+
+/** 将数字拆分为各位数字数组 */
+const digitList = computed(() : number[] => {
+	const val = displayValue.value
+	const str = val.toString()
+	const digits : number[] = []
+	for (let i = 0; i < str.length; i++) {
+		const charCode = str.charCodeAt(i) - 48
+		digits.push(charCode)
+	}
+	/* 至少保留一位 */
+	if (digits.length === 0) {
+		digits.push(0)
+	}
+	return digits
+})
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	const bg = props.background ?? '#f5f7fa'
+	const h = props.itemHeight ?? 80
+	return `background:${bg};height:${h}rpx;`
+})
+
+/** 每列样式 */
+const columnStyle = computed(() : string => {
+	const h = props.itemHeight ?? 80
+	return `height:${h}rpx;`
+})
+
+/** 滚动轨道样式，根据目标数字计算 translateY 偏移 */
+function trackStyle(digit : number) : string {
+	const h = props.itemHeight ?? 80
+	const d = props.duration ?? 500
+	const offsetY = -(digit * h)
+	return `transform:translateY(${offsetY}rpx);transition-duration:${d}ms;transition-property:transform;transition-timing-function:ease-in-out;`
+}
+
+/** 每个数字项样式 */
+const itemStyle = computed(() : string => {
+	const h = props.itemHeight ?? 80
+	return `height:${h}rpx;`
+})
+
+/** 文字样式 */
+const textStyle = computed(() : string => {
+	const size = props.fontSize ?? 56
+	const c = props.color ?? '#333333'
+	return `font-size:${size}rpx;color:${c};`
+})
+</script>
+
+<style scoped>
+.parrot-digital-roller {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	overflow: hidden;
+	border-radius: 12rpx;
+}
+
+.parrot-digital-roller__column {
+	overflow: hidden;
+}
+
+.parrot-digital-roller__track {
+	display: flex;
+	flex-direction: column;
+}
+
+.parrot-digital-roller__item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-left: 4rpx;
+	padding-right: 4rpx;
+}
+
+.parrot-digital-roller__text {
+	font-weight: 700;
+	text-align: center;
+	line-height: 1;
+}
+</style>

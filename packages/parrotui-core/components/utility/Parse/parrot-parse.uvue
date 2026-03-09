@@ -1,0 +1,177 @@
+<template>
+	<!-- Parse 富文本解析：使用 rich-text 渲染 HTML 内容，支持图片预览和链接点击 -->
+	<view class="parrot-parse">
+		<view v-if="hasContent" class="parrot-parse__content">
+			<rich-text
+				class="parrot-parse__rich-text"
+				:nodes="parsedContent"
+				:selectable="props.selectable"
+				:image-menu-prevent="props.imageMenuPrevent"
+				@itemclick="handleItemClick"
+			/>
+		</view>
+		<view v-if="!hasContent" class="parrot-parse__empty">
+			<text class="parrot-parse__empty-text">暂无内容</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-parse 富文本解析
+ * 使用 uni-app 的 rich-text 组件渲染 HTML 内容。
+ * 支持图片点击预览和链接点击拦截。
+ *
+ * @prop content           HTML 内容字符串
+ * @prop selectable        是否可选择复制，默认 false
+ * @prop imageMenuPrevent  是否禁止长按图片弹出菜单，默认 false
+ * @prop lazyLoad          图片是否懒加载，默认 true
+ *
+ * @event navigate 链接点击事件，参数为 href 地址
+ * @event imgTap   图片点击事件，参数为 src 地址
+ */
+import { ref, computed, watch } from 'vue'
+
+interface Props {
+	/** HTML 内容字符串 */
+	content ?: string
+	/** 是否可选择复制 */
+	selectable ?: boolean
+	/** 是否禁止长按图片弹出菜单 */
+	imageMenuPrevent ?: boolean
+	/** 图片是否懒加载 */
+	lazyLoad ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	content: '',
+	selectable: false,
+	imageMenuPrevent: false,
+	lazyLoad: true,
+})
+
+const emit = defineEmits<{
+	navigate: [href : string]
+	imgTap: [src : string]
+}>()
+
+/** 收集到的图片列表（用于预览） */
+const imageList = ref<string[]>([])
+
+/** 是否有内容 */
+const hasContent = computed(() : boolean => {
+	const c = props.content ?? ''
+	return c.length > 0
+})
+
+/** 处理后的 HTML 内容 */
+const parsedContent = computed(() : string => {
+	let html = props.content ?? ''
+	if (html.length === 0) return ''
+
+	/* 收集图片地址 */
+	const images : string[] = []
+	let searchStart = 0
+	while (searchStart < html.length) {
+		const imgStart = html.indexOf('<img', searchStart)
+		if (imgStart === -1) break
+		const srcStart = html.indexOf('src="', imgStart)
+		if (srcStart === -1) break
+		const srcValueStart = srcStart + 5
+		const srcEnd = html.indexOf('"', srcValueStart)
+		if (srcEnd === -1) break
+		const src = html.substring(srcValueStart, srcEnd)
+		if (src.length > 0) {
+			images.push(src)
+		}
+		searchStart = srcEnd + 1
+	}
+	imageList.value = images
+
+	/* 给图片添加最大宽度限制样式，防止溢出 */
+	html = html.replace(/<img/g, '<img style="max-width:100%;height:auto;"')
+
+	return html
+})
+
+/** 处理 rich-text 节点点击事件 */
+function handleItemClick(e : any) {
+	if (e == null) return
+
+	/* 获取节点信息 */
+	const detail = e.detail as UTSJSONObject | null
+	if (detail == null) return
+
+	const node = detail['node'] as UTSJSONObject | null
+	if (node == null) return
+
+	const nodeName = node['name'] as string | null
+
+	/* 处理链接点击 */
+	if (nodeName == 'a') {
+		const attrs = node['attrs'] as UTSJSONObject | null
+		if (attrs != null) {
+			const href = attrs['href'] as string | null
+			if (href != null && href.length > 0) {
+				emit('navigate', href)
+			}
+		}
+		return
+	}
+
+	/* 处理图片点击 */
+	if (nodeName == 'img') {
+		const attrs = node['attrs'] as UTSJSONObject | null
+		if (attrs != null) {
+			const src = attrs['src'] as string | null
+			if (src != null && src.length > 0) {
+				emit('imgTap', src)
+				/* 图片预览 */
+				previewImage(src)
+			}
+		}
+		return
+	}
+}
+
+/** 预览图片 */
+function previewImage(current : string) {
+	const urls = imageList.value
+	if (urls.length === 0) return
+	uni.previewImage({
+		current: current,
+		urls: urls,
+	})
+}
+</script>
+
+<style scoped>
+.parrot-parse {
+	width: 100%;
+}
+
+.parrot-parse__content {
+	width: 100%;
+	overflow: hidden;
+}
+
+.parrot-parse__rich-text {
+	width: 100%;
+	font-size: 28rpx;
+	color: #333333;
+	line-height: 1.8;
+}
+
+.parrot-parse__empty {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 40rpx 0;
+}
+
+.parrot-parse__empty-text {
+	font-size: 26rpx;
+	color: #909399;
+}
+</style>

@@ -1,0 +1,138 @@
+<template>
+	<!-- HorizontalScroll 横向滚动：水平滚动容器，支持间距控制和滚动指示器 -->
+	<view class="parrot-horizontal-scroll">
+		<!-- 横向滚动区域 -->
+		<scroll-view
+			class="parrot-horizontal-scroll__scroller"
+			direction="horizontal"
+			:show-scrollbar="false"
+			:scroll-with-animation="true"
+			@scroll="onScroll"
+		>
+			<view class="parrot-horizontal-scroll__inner" :style="innerStyle">
+				<slot />
+			</view>
+		</scroll-view>
+
+		<!-- 滚动指示器 -->
+		<view v-if="showIndicator" class="parrot-horizontal-scroll__indicator-wrap">
+			<view class="parrot-horizontal-scroll__indicator-track">
+				<view
+					class="parrot-horizontal-scroll__indicator-bar"
+					:style="indicatorBarStyle"
+				></view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-horizontal-scroll 横向滚动
+ * 水平滚动容器，使用 scroll-view direction=horizontal，
+ * 支持自定义间距和滚动指示器。
+ *
+ * @prop gap            子元素间距 rpx，默认 16
+ * @prop padding        容器内边距，默认 '0 24rpx'
+ * @prop showIndicator  是否显示滚动指示器，默认 false
+ *
+ * @event scroll  滚动事件
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	/** 子元素间距 rpx */
+	gap ?: number
+	/** 容器内边距 */
+	padding ?: string
+	/** 是否显示滚动指示器 */
+	showIndicator ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	gap: 16,
+	padding: '0 24rpx',
+	showIndicator: false,
+})
+
+const emit = defineEmits<{
+	scroll: [event: any]
+}>()
+
+/** 滚动进度（0~1） */
+const scrollProgress = ref<number>(0)
+
+/** 内部容器样式 */
+const innerStyle = computed(() : string => {
+	const parts : string[] = [
+		`padding:${props.padding ?? '0 24rpx'}`,
+	]
+	const g = props.gap ?? 16
+	if (g > 0) parts.push(`gap:${g}rpx`)
+	return parts.join(';')
+})
+
+/** 指示器滑块样式 */
+const indicatorBarStyle = computed(() : string => {
+	// 滑块占 30%，位置根据滚动进度计算
+	const left = scrollProgress.value * 70
+	return `left:${left}%`
+})
+
+/** 滚动事件处理 */
+function onScroll(e : any) {
+	emit('scroll', e)
+	// 尝试计算滚动进度
+	if (e && e.detail) {
+		const detail = e.detail as any
+		const scrollLeft = (detail.scrollLeft ?? 0) as number
+		const scrollWidth = (detail.scrollWidth ?? 1) as number
+		const clientWidth = (detail.clientWidth ?? 1) as number
+		const maxScroll = scrollWidth - clientWidth
+		if (maxScroll > 0) {
+			scrollProgress.value = scrollLeft / maxScroll
+		}
+	}
+}
+</script>
+
+<style scoped>
+.parrot-horizontal-scroll {
+	width: 100%;
+}
+.parrot-horizontal-scroll__scroller {
+	width: 100%;
+	flex-direction: row;
+}
+.parrot-horizontal-scroll__inner {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+/* ---- 滚动指示器 ---- */
+.parrot-horizontal-scroll__indicator-wrap {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	padding: 16rpx 0;
+}
+.parrot-horizontal-scroll__indicator-track {
+	width: 80rpx;
+	height: 6rpx;
+	border-radius: 3rpx;
+	background-color: #ebeef5;
+	position: relative;
+	overflow: hidden;
+}
+.parrot-horizontal-scroll__indicator-bar {
+	position: absolute;
+	top: 0;
+	width: 30%;
+	height: 100%;
+	border-radius: 3rpx;
+	background-color: #1a7eff;
+	transition: left 0.15s;
+}
+</style>

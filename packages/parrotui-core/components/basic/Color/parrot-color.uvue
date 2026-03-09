@@ -3,12 +3,23 @@
 		class="parrot-color"
 		:class="[
 			colorClass,
-			block ? 'parrot-color--block' : ''
+			block ? 'parrot-color--block' : '',
+			circle ? 'parrot-color--circle' : '',
+			swatch ? 'parrot-color--swatch' : '',
+			theme ? `parrot-color--${theme}` : '',
+			bordered ? 'parrot-color--bordered' : ''
 		]"
 		:style="colorStyle"
 		@click="handleClick"
 	>
-		<slot></slot>
+		<!-- 色板模式：显示颜色色块和标签 -->
+		<view v-if="swatch" class="parrot-color__swatch">
+			<view class="parrot-color__swatch-block" :style="swatchBlockStyle"></view>
+			<text v-if="label" class="parrot-color__swatch-label">{{ label }}</text>
+			<text v-if="showValue" class="parrot-color__swatch-value">{{ displayValue }}</text>
+		</view>
+		<!-- 普通模式 -->
+		<slot v-else></slot>
 	</view>
 </template>
 
@@ -22,8 +33,24 @@ interface Props {
 	color?: string
 	// 背景色
 	background?: string
+	// 使用主题色系（token 颜色）
+	theme?: '' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'default' | 'muted'
+	// 色阶（配合 theme 使用，如 50-900）
+	shade?: string
+	// 透明度 0~1
+	opacity?: number
 	// 是否块级元素
 	block?: boolean
+	// 是否圆形
+	circle?: boolean
+	// 是否为色板展示模式
+	swatch?: boolean
+	// 色板标签
+	label?: string
+	// 是否显示颜色值
+	showValue?: boolean
+	// 是否带边框
+	bordered?: boolean
 	// 宽度
 	width?: string
 	// 高度
@@ -42,7 +69,15 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
 	color: '',
 	background: '',
+	theme: '',
+	shade: '',
+	opacity: 1,
 	block: false,
+	circle: false,
+	swatch: false,
+	label: '',
+	showValue: false,
+	bordered: false,
 	width: '',
 	height: '',
 	borderRadius: '',
@@ -56,16 +91,47 @@ const emit = defineEmits<{
 	click: [event: Event]
 }>()
 
+// Token 颜色映射
+const themeColorMap: Record<string, string> = {
+	primary: '#1a7eff',
+	secondary: '#7c3aed',
+	success: '#41a906',
+	warning: '#e6a23c',
+	danger: '#f56c6c',
+	info: '#6c6f78',
+	default: '#303133',
+	muted: '#c0c4cc',
+}
+
+// 解析最终颜色
+const resolvedColor = computed(() => {
+	if (props.color) return props.color
+	if (props.theme) {
+		return themeColorMap[props.theme] || props.theme
+	}
+	return ''
+})
+
+// 解析最终背景色
+const resolvedBg = computed(() => {
+	if (props.background) return props.background
+	if (props.theme) {
+		return themeColorMap[props.theme] || ''
+	}
+	return ''
+})
+
+// 显示的颜色值
+const displayValue = computed(() => {
+	return resolvedBg.value || resolvedColor.value || ''
+})
+
 // 计算颜色类名
 const colorClass = computed(() => {
 	const classes: string[] = ['parrot-color']
 	
 	if (props.customClass) {
 		classes.push(props.customClass)
-	}
-	
-	if (props.block) {
-		classes.push('parrot-color--block')
 	}
 	
 	return classes.join(' ')
@@ -75,16 +141,18 @@ const colorClass = computed(() => {
 const colorStyle = computed(() => {
 	const style: CSSProperties = {}
 	
-	// 颜色相关样式
-	if (props.color) {
-		style.color = props.color
+	if (resolvedColor.value) {
+		style.color = resolvedColor.value
 	}
 	
-	if (props.background) {
-		style.backgroundColor = props.background
+	if (resolvedBg.value && !props.swatch) {
+		style.backgroundColor = resolvedBg.value
 	}
 	
-	// 尺寸样式
+	if (props.opacity < 1) {
+		style.opacity = props.opacity.toString()
+	}
+	
 	if (props.width) {
 		style.width = props.width
 	}
@@ -97,7 +165,6 @@ const colorStyle = computed(() => {
 		style.borderRadius = props.borderRadius
 	}
 	
-	// 间距样式
 	if (props.margin) {
 		style.margin = props.margin
 	}
@@ -106,6 +173,16 @@ const colorStyle = computed(() => {
 		style.padding = props.padding
 	}
 	
+	return style
+})
+
+// 色板色块样式
+const swatchBlockStyle = computed(() => {
+	const style: CSSProperties = {}
+	style.backgroundColor = resolvedBg.value || resolvedColor.value || '#cccccc'
+	if (props.opacity < 1) {
+		style.opacity = props.opacity.toString()
+	}
 	return style
 })
 
@@ -125,70 +202,75 @@ const handleClick = (event: Event) => {
 		width: 100%;
 	}
 	
-	// 常用颜色变量
+	// 圆形
+	&--circle {
+		border-radius: 50%;
+		overflow: hidden;
+	}
+	
+	// 带边框
+	&--bordered {
+		border: 1px solid #e4e7ed;
+	}
+	
+	// 主题色快捷类名（使用 token 颜色）
 	&--primary {
-		color: #007aff;
-	}
-	
-	&--success {
-		color: #4cd964;
-	}
-	
-	&--warning {
-		color: #ffcc00;
-	}
-	
-	&--danger {
-		color: #ff3b30;
-	}
-	
-	&--info {
-		color: #5ac8fa;
-	}
-	
-	&--default {
-		color: #333333;
+		color: #1a7eff;
 	}
 	
 	&--secondary {
-		color: #888888;
+		color: #7c3aed;
+	}
+	
+	&--success {
+		color: #41a906;
+	}
+	
+	&--warning {
+		color: #e6a23c;
+	}
+	
+	&--danger {
+		color: #f56c6c;
+	}
+	
+	&--info {
+		color: #6c6f78;
+	}
+	
+	&--default {
+		color: #303133;
 	}
 	
 	&--muted {
-		color: #bbbbbb;
+		color: #c0c4cc;
 	}
-	
-	// 背景色变量
-	&--bg-primary {
-		background-color: #007aff;
-	}
-	
-	&--bg-success {
-		background-color: #4cd964;
-	}
-	
-	&--bg-warning {
-		background-color: #ffcc00;
-	}
-	
-	&--bg-danger {
-		background-color: #ff3b30;
-	}
-	
-	&--bg-info {
-		background-color: #5ac8fa;
-	}
-	
-	&--bg-default {
-		background-color: #f8f8f8;
-	}
-	
-	&--bg-secondary {
-		background-color: #eeeeee;
-	}
-	
-	&--bg-muted {
-		background-color: #dddddd;
-	}
+}
+
+// 色板模式
+.parrot-color__swatch {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.parrot-color__swatch-block {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 8rpx;
+	border: 1px solid rgba(0,0,0,0.08);
+}
+
+.parrot-color__swatch-label {
+	font-size: 22rpx;
+	color: #303133;
+	margin-top: 8rpx;
+}
+
+.parrot-color__swatch-value {
+	font-size: 18rpx;
+	color: #909399;
+	margin-top: 4rpx;
+	font-family: monospace;
 }
 </style>

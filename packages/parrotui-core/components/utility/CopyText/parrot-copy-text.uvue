@@ -1,0 +1,127 @@
+<template>
+	<view class="parrot-copy-text" @longpress="handleCopy">
+		<text class="parrot-copy-text__content" :style="textStyle">{{ text }}</text>
+
+		<!-- 复制成功提示气泡 -->
+		<view v-if="tipVisible" class="parrot-copy-text__tip" :style="tipStyle">
+			<text class="parrot-copy-text__tip-text">{{ tipText }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-copy-text 长按复制文本组件
+ * 长按文本内容触发 uni.setClipboardData 复制到剪贴板，并可选地弹出 Toast 提示。
+ * 适用于订单号、链接、邀请码等需要快速复制的文本场景。
+ *
+ * @prop text     要显示和复制的文本内容，默认 ''
+ * @prop color    文本颜色，默认 #303133
+ * @prop fontSize 文本字号 rpx，默认 28
+ * @prop showTip  是否显示复制成功提示，默认 true
+ * @prop tipText  提示文字，默认 '已复制'
+ *
+ * @event copy    复制成功时触发，参数为复制的文本
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	/** 要复制的文本内容 */
+	text ?: string
+	/** 文本颜色 */
+	color ?: string
+	/** 文本字号 rpx */
+	fontSize ?: number
+	/** 是否显示提示 */
+	showTip ?: boolean
+	/** 提示文字 */
+	tipText ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	text: '',
+	color: '#303133',
+	fontSize: 28,
+	showTip: true,
+	tipText: '已复制',
+})
+
+const emit = defineEmits<{
+	(e: 'copy', text: string): void
+}>()
+
+/** 提示气泡显示状态 */
+const tipVisible = ref<boolean>(false)
+let tipTimer : number | null = null
+
+/** 文本样式 */
+const textStyle = computed(() : string => {
+	return `color:${props.color ?? '#303133'};font-size:${props.fontSize ?? 28}rpx;`
+})
+
+/** 提示气泡样式 */
+const tipStyle = computed(() : string => {
+	return 'z-index:999;'
+})
+
+/** 长按复制处理 */
+function handleCopy() {
+	const content = props.text ?? ''
+	if (!content) return
+
+	uni.setClipboardData({
+		data: content,
+		showToast: false,
+		success: () => {
+			emit('copy', content)
+			if (props.showTip) {
+				showTipBubble()
+			}
+		},
+	})
+}
+
+/** 显示提示气泡 */
+function showTipBubble() {
+	if (tipTimer != null) {
+		clearTimeout(tipTimer!)
+		tipTimer = null
+	}
+	tipVisible.value = true
+	tipTimer = setTimeout(() => {
+		tipVisible.value = false
+		tipTimer = null
+	}, 1500) as unknown as number
+}
+</script>
+
+<style scoped>
+.parrot-copy-text {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.parrot-copy-text__content {
+	line-height: 1.5;
+}
+
+.parrot-copy-text__tip {
+	position: absolute;
+	top: -64rpx;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: rgba(0, 0, 0, 0.75);
+	border-radius: 8rpx;
+	padding: 8rpx 20rpx;
+	white-space: nowrap;
+}
+
+.parrot-copy-text__tip-text {
+	font-size: 22rpx;
+	color: #ffffff;
+	line-height: 1.4;
+	text-align: center;
+}
+</style>

@@ -1,0 +1,409 @@
+<template>
+	<!-- AI 辅助输入：输入框 + 智能建议浮层 -->
+	<view class="parrot-ai-assist">
+		<!-- 输入框 -->
+		<view class="parrot-ai-assist__field">
+			<input
+				class="parrot-ai-assist__inner"
+				:value="inputValue"
+				:placeholder="inputPlaceholder"
+				:disabled="loading"
+				@input="onInput"
+				@focus="onFocus"
+				@blur="onBlur"
+			/>
+			<!-- AI 图标 -->
+			<view class="parrot-ai-assist__badge">
+				<text class="parrot-ai-assist__badge-text">AI</text>
+			</view>
+		</view>
+
+		<!-- 建议浮层 -->
+		<view
+			v-if="isPanelVisible"
+			class="parrot-ai-assist__panel"
+			:class="position === 'top' ? 'parrot-ai-assist__panel--top' : 'parrot-ai-assist__panel--bottom'"
+		>
+			<!-- 加载状态 -->
+			<view v-if="loading" class="parrot-ai-assist__loading">
+				<view class="parrot-ai-assist__loading-bar">
+					<view class="parrot-ai-assist__loading-shimmer" :style="loadingShimmerStyle" />
+				</view>
+				<text class="parrot-ai-assist__loading-text">{{ placeholder }}{{ animDots }}</text>
+			</view>
+
+			<!-- 建议列表 -->
+			<view v-if="!loading && displayList.length > 0" class="parrot-ai-assist__list">
+				<view
+					v-for="(item, idx) in displayList"
+					:key="idx"
+					class="parrot-ai-assist__item"
+					:class="idx === displayList.length - 1 ? '' : 'parrot-ai-assist__item--border'"
+					@tap="onAccept(item)"
+				>
+					<text class="parrot-ai-assist__item-icon">✨</text>
+					<text class="parrot-ai-assist__item-text">{{ item }}</text>
+				</view>
+			</view>
+
+			<!-- 空状态 -->
+			<view v-if="!loading && displayList.length === 0 && inputValue.length > 0" class="parrot-ai-assist__empty">
+				<text class="parrot-ai-assist__empty-text">暂无建议</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-ai-assist AI 辅助输入
+ * 实验性组件 —— 输入框 + 下方/上方建议浮层
+ *
+ * 输入时触发 requestSuggestions 事件，父组件返回建议列表。
+ * 建议列表悬浮显示，点击即采纳。loading 状态显示占位动画。
+ *
+ * @prop suggestions  建议列表 JSON 数组字符串
+ * @prop loading      是否正在获取建议
+ * @prop trigger      触发方式：input / focus / manual
+ * @prop position     浮层位置：top / bottom
+ * @prop maxItems     最多显示的建议数
+ * @prop placeholder  加载占位文字
+ */
+
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+
+interface Props {
+	/** 建议列表 JSON 数组 */
+	suggestions ?: string
+	/** 是否正在获取建议 */
+	loading ?: boolean
+	/** 触发方式 */
+	trigger ?: string
+	/** 浮层位置 */
+	position ?: string
+	/** 最多显示条数 */
+	maxItems ?: number
+	/** 加载占位文字 */
+	placeholder ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	suggestions: '[]',
+	loading: false,
+	trigger: 'input',
+	position: 'bottom',
+	maxItems: 5,
+	placeholder: 'AI 正在思考...',
+})
+
+const emit = defineEmits<{
+	/** 请求建议 */
+	requestSuggestions: [query: string]
+	/** 采纳建议 */
+	accept: [suggestion: string]
+	/** 关闭建议面板 */
+	dismiss: []
+	/** 输入值变化 */
+	input: [value: string]
+}>()
+
+/* ---------- 内部状态 ---------- */
+const inputValue = ref<string>('')
+const isPanelVisible = ref<boolean>(false)
+const isFocused = ref<boolean>(false)
+const animDots = ref<string>('')
+const shimmerX = ref<number>(-100)
+
+let dotsTimer = -1
+let shimmerTimer = -1
+let blurTimer = -1
+
+/* ---------- 计算属性 ---------- */
+
+/** 输入框 placeholder */
+const inputPlaceholder = computed(() : string => {
+	if (props.loading) return '等待 AI 响应...'
+	return '输入关键词获取 AI 建议'
+})
+
+/** 解析建议列表 */
+const displayList = computed(() : string[] => {
+	const str = props.suggestions ?? '[]'
+	if (str.length <= 2) return [] as string[]
+	return parseStringArray(str, props.maxItems ?? 5)
+})
+
+/** 加载光影样式 */
+const loadingShimmerStyle = computed(() : string => {
+	return `transform:translateX(${shimmerX.value}%);`
+})
+
+/* ---------- 工具函数 ---------- */
+
+/** 手动解析简单 JSON 字符串数组 ["a","b","c"] */
+function parseStringArray(jsonStr : string, max : number) : string[] {
+	const result : string[] = []
+	const str = jsonStr.trim()
+	if (str.length <= 2) return result
+	/* 去除首尾方括号 */
+	const inner = str.substring(1, str.length - 1)
+	const parts = inner.split(',')
+	for (let i = 0; i < parts.length; i++) {
+		if (result.length >= max) break
+		let item = parts[i].trim()
+		/* 去除前后引号 */
+		if (item.length >= 2) {
+			const first = item.charAt(0)
+			const last = item.charAt(item.length - 1)
+			if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+				item = item.substring(1, item.length - 1)
+			}
+		}
+		if (item.length > 0) {
+			result.push(item)
+		}
+	}
+	return result
+}
+
+/* ---------- 动画控制 ---------- */
+
+/** 启动加载动画（点点 + 光影） */
+function startLoadingAnim() {
+	let dotCount = 0
+	dotsTimer = setInterval(() => {
+		dotCount = (dotCount + 1) % 4
+		let dots = ''
+		for (let i = 0; i < dotCount; i++) {
+			dots += '.'
+		}
+		animDots.value = dots
+	}, 400)
+
+	shimmerX.value = -100
+	shimmerTimer = setInterval(() => {
+		shimmerX.value = shimmerX.value + 5
+		if (shimmerX.value > 100) {
+			shimmerX.value = -100
+		}
+	}, 30)
+}
+
+/** 停止加载动画 */
+function stopLoadingAnim() {
+	if (dotsTimer >= 0) { clearInterval(dotsTimer); dotsTimer = -1 }
+	if (shimmerTimer >= 0) { clearInterval(shimmerTimer); shimmerTimer = -1 }
+	animDots.value = ''
+}
+
+/* ---------- 事件处理 ---------- */
+
+function onInput(e : InputEvent) {
+	const val = e.detail.value
+	inputValue.value = val
+	emit('input', val)
+
+	if (props.trigger === 'input' && val.length > 0) {
+		isPanelVisible.value = true
+		emit('requestSuggestions', val)
+	}
+	if (val.length === 0) {
+		isPanelVisible.value = false
+	}
+}
+
+function onFocus(_e : any) {
+	isFocused.value = true
+	/* 清除失焦延迟关闭 */
+	if (blurTimer >= 0) {
+		clearTimeout(blurTimer)
+		blurTimer = -1
+	}
+	if (props.trigger === 'focus') {
+		isPanelVisible.value = true
+		emit('requestSuggestions', inputValue.value)
+	}
+}
+
+function onBlur(_e : any) {
+	isFocused.value = false
+	/* 延迟关闭面板，给点击建议项留出时间 */
+	blurTimer = setTimeout(() => {
+		isPanelVisible.value = false
+		emit('dismiss')
+	}, 250)
+}
+
+function onAccept(suggestion : string) {
+	inputValue.value = suggestion
+	isPanelVisible.value = false
+	emit('accept', suggestion)
+	emit('input', suggestion)
+}
+
+/* ---------- 监听 loading 状态 ---------- */
+
+watch(
+	() : boolean => props.loading ?? false,
+	(isLoading : boolean) => {
+		if (isLoading) {
+			isPanelVisible.value = true
+			startLoadingAnim()
+		} else {
+			stopLoadingAnim()
+		}
+	}
+)
+
+/* ---------- 生命周期 ---------- */
+
+onMounted(() => {
+	if (props.loading) {
+		startLoadingAnim()
+	}
+})
+
+onUnmounted(() => {
+	stopLoadingAnim()
+	if (blurTimer >= 0) { clearTimeout(blurTimer); blurTimer = -1 }
+})
+</script>
+
+<style scoped>
+.parrot-ai-assist {
+	position: relative;
+}
+
+/* ---------- 输入框 ---------- */
+.parrot-ai-assist__field {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background-color: #ffffff;
+	border-radius: 12rpx;
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #dcdfe6;
+	padding: 0 24rpx;
+	height: 72rpx;
+}
+
+.parrot-ai-assist__inner {
+	flex: 1;
+	background: transparent;
+	border: none;
+	color: #303133;
+	font-size: 28rpx;
+}
+
+.parrot-ai-assist__badge {
+	margin-left: 12rpx;
+	padding: 4rpx 12rpx;
+	background-color: #e8f3ff;
+	border-radius: 8rpx;
+	flex-shrink: 0;
+}
+
+.parrot-ai-assist__badge-text {
+	font-size: 20rpx;
+	color: #1a7eff;
+	font-weight: 600;
+}
+
+/* ---------- 建议浮层 ---------- */
+.parrot-ai-assist__panel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	background-color: #ffffff;
+	border-radius: 12rpx;
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #e4e7ed;
+	box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+}
+
+.parrot-ai-assist__panel--bottom {
+	top: 80rpx;
+}
+
+.parrot-ai-assist__panel--top {
+	bottom: 80rpx;
+}
+
+/* ---------- 加载状态 ---------- */
+.parrot-ai-assist__loading {
+	padding: 24rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.parrot-ai-assist__loading-bar {
+	width: 100%;
+	height: 8rpx;
+	background-color: #f2f3f5;
+	border-radius: 4rpx;
+	overflow: hidden;
+	margin-bottom: 16rpx;
+}
+
+.parrot-ai-assist__loading-shimmer {
+	width: 40%;
+	height: 100%;
+	background-color: #1a7eff;
+	border-radius: 4rpx;
+	opacity: 0.5;
+}
+
+.parrot-ai-assist__loading-text {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+/* ---------- 建议列表 ---------- */
+.parrot-ai-assist__list {
+	/* 容器 */
+}
+
+.parrot-ai-assist__item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 20rpx 24rpx;
+}
+
+.parrot-ai-assist__item--border {
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #f2f3f5;
+}
+
+.parrot-ai-assist__item-icon {
+	font-size: 24rpx;
+	margin-right: 12rpx;
+	flex-shrink: 0;
+}
+
+.parrot-ai-assist__item-text {
+	font-size: 26rpx;
+	color: #303133;
+	flex: 1;
+	line-height: 1.5;
+}
+
+/* ---------- 空状态 ---------- */
+.parrot-ai-assist__empty {
+	padding: 32rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-ai-assist__empty-text {
+	font-size: 24rpx;
+	color: #c0c4cc;
+}
+</style>

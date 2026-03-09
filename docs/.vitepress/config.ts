@@ -28,6 +28,16 @@ const zhSidebar = {
         { text: '国际化 i18n', link: '/zh/guide/i18n' },
       ],
     },
+    {
+      text: '架构参考',
+      collapsed: false,
+      items: [
+        { text: '架构概览',         link: '/zh/guide/architecture' },
+        { text: 'Composables API', link: '/zh/guide/composables' },
+        { text: '指令工具',         link: '/zh/guide/directives' },
+        { text: '工具函数',         link: '/zh/guide/utils' },
+      ],
+    },
   ],
   '/zh/components/': [
     {
@@ -165,6 +175,16 @@ const enSidebar = {
         { text: 'Theming',       link: '/en/guide/theming' },
       ],
     },
+    {
+      text: 'Architecture',
+      collapsed: false,
+      items: [
+        { text: 'Overview',       link: '/en/guide/architecture' },
+        { text: 'Composables',    link: '/en/guide/composables' },
+        { text: 'Directives',     link: '/en/guide/directives' },
+        { text: 'Utils',          link: '/en/guide/utils' },
+      ],
+    },
   ],
   '/en/components/': [
     {
@@ -240,7 +260,7 @@ export default defineConfig({
         nav: [
           { text: '指南',           link: '/guide/introduction',   activeMatch: '/guide/' },
           { text: '组件',           link: '/components/button',    activeMatch: '/components/' },
-          { text: 'Design Tokens', link: '/guide/tokens' },
+          { text: '架构',           link: '/guide/architecture' },
           { text: '更新日志',       link: '/guide/changelog' },
         ],
         sidebar: {
@@ -277,7 +297,7 @@ export default defineConfig({
         nav: [
           { text: '指南',           link: '/zh-HK/guide/introduction',   activeMatch: '/zh-HK/guide/' },
           { text: '元件',           link: '/zh-HK/components/button',    activeMatch: '/zh-HK/components/' },
-          { text: 'Design Tokens', link: '/zh-HK/guide/tokens' },
+          { text: '架構',           link: '/zh-HK/guide/architecture' },
           { text: '更新日誌',       link: '/zh-HK/guide/changelog' },
         ],
         sidebar: zhTWSidebar,
@@ -305,7 +325,7 @@ export default defineConfig({
         nav: [
           { text: 'Guide',          link: '/en/guide/introduction',  activeMatch: '/en/guide/' },
           { text: 'Components',     link: '/en/components/button',   activeMatch: '/en/components/' },
-          { text: 'Design Tokens',  link: '/en/guide/tokens' },
+          { text: 'Architecture',   link: '/en/guide/architecture' },
           { text: 'Changelog',      link: '/en/guide/changelog' },
         ],
         sidebar: enSidebar,

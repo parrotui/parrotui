@@ -1,0 +1,467 @@
+<template>
+	<!-- ImageCropper 图片裁剪：movable-area 拖拽缩放 + canvas 导出裁剪区域 -->
+	<view class="parrot-image-cropper" :style="containerStyle">
+		<!-- 可移动缩放的图片区域 -->
+		<movable-area class="parrot-image-cropper__area" :style="areaStyle">
+			<movable-view
+				class="parrot-image-cropper__mover"
+				:style="moverStyle"
+				direction="all"
+				:out-of-bounds="true"
+				:scale="true"
+				:scale-min="0.5"
+				:scale-max="3"
+				@change="onMoveChange"
+				@scale="onScaleChange"
+			>
+				<image
+					v-if="imageSrc !== ''"
+					class="parrot-image-cropper__image"
+					:src="imageSrc"
+					mode="widthFix"
+					:style="imageStyle"
+					@load="onImageLoad"
+					@error="onImageError"
+				/>
+			</movable-view>
+		</movable-area>
+
+		<!-- 裁剪遮罩层（不绑定触摸事件，事件穿透到下层 movable-area） -->
+		<view class="parrot-image-cropper__overlay" :style="containerStyle">
+			<!-- 上部半透明遮罩 -->
+			<view class="parrot-image-cropper__mask" :style="maskTopStyle" />
+			<!-- 中部区域：左遮罩 + 裁剪框 + 右遮罩 -->
+			<view class="parrot-image-cropper__mid" :style="midRowStyle">
+				<view class="parrot-image-cropper__mask" :style="maskSideStyle" />
+				<!-- 裁剪框（透明中心 + 四角高亮） -->
+				<view class="parrot-image-cropper__frame" :style="frameStyle">
+					<view class="parrot-image-cropper__corner parrot-image-cropper__corner--tl" />
+					<view class="parrot-image-cropper__corner parrot-image-cropper__corner--tr" />
+					<view class="parrot-image-cropper__corner parrot-image-cropper__corner--bl" />
+					<view class="parrot-image-cropper__corner parrot-image-cropper__corner--br" />
+				</view>
+				<view class="parrot-image-cropper__mask" :style="maskSideStyle" />
+			</view>
+			<!-- 下部半透明遮罩 -->
+			<view class="parrot-image-cropper__mask" :style="maskBottomStyle" />
+		</view>
+
+		<!-- 隐藏的 canvas，用于导出裁剪结果 -->
+		<canvas
+			canvas-id="parrotCropCanvas"
+			class="parrot-image-cropper__canvas"
+			:style="canvasStyle"
+		/>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-image-cropper 图片裁剪组件
+ * 基于 movable-area + movable-view 实现图片拖拽、双指缩放，
+ * 裁剪框固定在中央，外围半透明遮罩，四角高亮装饰。
+ * 调用 crop() 方法通过 canvas 导出裁剪区域图片。
+ *
+ * @prop src         图片源地址
+ * @prop width       组件宽度 rpx，默认 600
+ * @prop height      组件高度 rpx，默认 600
+ * @prop cropWidth   裁剪框宽度 rpx，默认 400
+ * @prop cropHeight  裁剪框高度 rpx，默认 400
+ * @prop ratio       宽高比（如 '1:1', '4:3'），设置后覆盖 cropHeight
+ * @prop quality     输出质量 0~1，默认 0.8
+ * @prop outputSize  输出尺寸 px，0 表示原尺寸
+ *
+ * @event ready              图片加载完成
+ * @event cropped            裁剪完成，参数 {tempFilePath}
+ * @event error              错误，参数 errMsg 字符串
+ *
+ * @expose crop()            执行裁剪并触发 cropped 事件
+ */
+import { ref, computed, getCurrentInstance } from 'vue'
+
+interface Props {
+	/** 图片源地址 */
+	src ?: string
+	/** 组件宽度 rpx */
+	width ?: number
+	/** 组件高度 rpx */
+	height ?: number
+	/** 裁剪框宽度 rpx */
+	cropWidth ?: number
+	/** 裁剪框高度 rpx */
+	cropHeight ?: number
+	/** 宽高比，如 '1:1', '4:3'，设置后覆盖 cropHeight */
+	ratio ?: string
+	/** 输出图片质量 0~1 */
+	quality ?: number
+	/** 输出尺寸 px，0 表示使用裁剪框对应像素尺寸 */
+	outputSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	src: '',
+	width: 600,
+	height: 600,
+	cropWidth: 400,
+	cropHeight: 400,
+	ratio: '',
+	quality: 0.8,
+	outputSize: 0,
+})
+
+const emit = defineEmits<{
+	(e : 'ready') : void
+	(e : 'cropped', result : UTSJSONObject) : void
+	(e : 'error', err : string) : void
+}>()
+
+/** 组件实例 */
+const instance = getCurrentInstance()
+
+/** 图片地址 */
+const imageSrc = computed(() : string => {
+	return props.src ?? ''
+})
+
+/** 图片原始宽度 */
+const natW = ref<number>(0)
+
+/** 图片原始高度 */
+const natH = ref<number>(0)
+
+/** 当前 movable-view 偏移量 x（px） */
+const posX = ref<number>(0)
+
+/** 当前 movable-view 偏移量 y（px） */
+const posY = ref<number>(0)
+
+/** 当前缩放比例 */
+const scaleVal = ref<number>(1)
+
+/* ==================== 裁剪框尺寸计算 ==================== */
+
+/** 实际裁剪框宽度（rpx） */
+const actualCropW = computed(() : number => {
+	return props.cropWidth ?? 400
+})
+
+/** 实际裁剪框高度（rpx），受 ratio 影响 */
+const actualCropH = computed(() : number => {
+	const r = props.ratio ?? ''
+	if (r !== '') {
+		const parts = r.split(':')
+		if (parts.length >= 2) {
+			const rw = parseFloat(parts[0])
+			const rh = parseFloat(parts[1])
+			if (rw > 0 && rh > 0) {
+				return Math.round((props.cropWidth ?? 400) * rh / rw)
+			}
+		}
+	}
+	return props.cropHeight ?? 400
+})
+
+/** 裁剪框距顶部偏移（rpx） */
+const topOffset = computed(() : number => {
+	return ((props.height ?? 600) - actualCropH.value) / 2
+})
+
+/** 裁剪框距左侧偏移（rpx） */
+const leftOffset = computed(() : number => {
+	return ((props.width ?? 600) - actualCropW.value) / 2
+})
+
+/* ==================== 样式计算 ==================== */
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	const w = props.width ?? 600
+	const h = props.height ?? 600
+	return `width:${w}rpx;height:${h}rpx`
+})
+
+/** movable-area 样式 */
+const areaStyle = computed(() : string => {
+	const w = props.width ?? 600
+	const h = props.height ?? 600
+	return `width:${w}rpx;height:${h}rpx`
+})
+
+/** movable-view 样式 */
+const moverStyle = computed(() : string => {
+	const w = props.width ?? 600
+	const h = props.height ?? 600
+	return `width:${w}rpx;height:${h}rpx`
+})
+
+/** 图片样式 */
+const imageStyle = computed(() : string => {
+	const w = props.width ?? 600
+	return `width:${w}rpx`
+})
+
+/** 上部遮罩样式 */
+const maskTopStyle = computed(() : string => {
+	const w = props.width ?? 600
+	return `width:${w}rpx;height:${topOffset.value}rpx`
+})
+
+/** 下部遮罩样式 */
+const maskBottomStyle = computed(() : string => {
+	const w = props.width ?? 600
+	return `width:${w}rpx;height:${topOffset.value}rpx`
+})
+
+/** 中间行样式 */
+const midRowStyle = computed(() : string => {
+	const w = props.width ?? 600
+	return `width:${w}rpx;height:${actualCropH.value}rpx`
+})
+
+/** 左右遮罩样式 */
+const maskSideStyle = computed(() : string => {
+	return `width:${leftOffset.value}rpx;height:${actualCropH.value}rpx`
+})
+
+/** 裁剪框样式 */
+const frameStyle = computed(() : string => {
+	return `width:${actualCropW.value}rpx;height:${actualCropH.value}rpx`
+})
+
+/** canvas 样式（隐藏在屏幕外） */
+const canvasStyle = computed(() : string => {
+	return `position:fixed;left:-2000rpx;top:0;width:${actualCropW.value}rpx;height:${actualCropH.value}rpx`
+})
+
+/* ==================== 事件处理 ==================== */
+
+/** movable-view 位置变化 */
+function onMoveChange(e : UniMovableViewChangeEvent) {
+	posX.value = e.detail.x
+	posY.value = e.detail.y
+}
+
+/** movable-view 缩放变化 */
+function onScaleChange(e : UniMovableViewScaleEvent) {
+	scaleVal.value = e.detail.scale
+	posX.value = e.detail.x
+	posY.value = e.detail.y
+}
+
+/** 图片加载完成 */
+function onImageLoad(e : any) {
+	const detail = (e as UTSJSONObject)['detail'] as UTSJSONObject | null
+	if (detail != null) {
+		const w = detail['width'] as number | null
+		const h = detail['height'] as number | null
+		if (w != null) natW.value = w
+		if (h != null) natH.value = h
+	}
+	emit('ready')
+}
+
+/** 图片加载失败 */
+function onImageError(e : any) {
+	emit('error', '图片加载失败')
+}
+
+/* ==================== 裁剪方法 ==================== */
+
+/**
+ * 执行裁剪
+ * 先通过 getImageInfo 获取本地路径，再 canvas 绘制裁剪区域并导出
+ */
+function crop() {
+	const srcPath = props.src ?? ''
+	if (srcPath === '') {
+		emit('error', '图片地址为空')
+		return
+	}
+
+	uni.getImageInfo({
+		src: srcPath,
+		success: (info) => {
+			doCrop(info.path)
+		},
+		fail: () => {
+			emit('error', '获取图片信息失败')
+		}
+	})
+}
+
+/** 实际裁剪绘制逻辑 */
+function doCrop(localPath : string) {
+	const ctx = uni.createCanvasContext('parrotCropCanvas', instance?.proxy)
+
+	/* 裁剪框像素尺寸 */
+	const cropWPx = uni.upx2px(actualCropW.value)
+	const cropHPx = uni.upx2px(actualCropH.value)
+	const containerWPx = uni.upx2px(props.width ?? 600)
+
+	/* 裁剪框左上角在容器中的像素位置 */
+	const cropXPx = uni.upx2px(leftOffset.value)
+	const cropYPx = uni.upx2px(topOffset.value)
+
+	/* 图片显示尺寸（px）：宽度 = 容器宽度 × 缩放比，高度按原始比例计算 */
+	const imgDrawW = containerWPx * scaleVal.value
+	let imgDrawH = imgDrawW
+	if (natW.value > 0 && natH.value > 0) {
+		imgDrawH = imgDrawW * (natH.value / natW.value)
+	}
+
+	/* 图片在 canvas 坐标系中的偏移（canvas 原点 = 裁剪框左上角） */
+	const drawX = posX.value - cropXPx
+	const drawY = posY.value - cropYPx
+
+	/* 清除画布并绘制 */
+	ctx.clearRect(0, 0, cropWPx, cropHPx)
+	ctx.drawImage(localPath, drawX, drawY, imgDrawW, imgDrawH)
+	ctx.draw(false, () => {
+		/* 计算输出尺寸 */
+		const outSize = props.outputSize ?? 0
+		let destW = cropWPx
+		let destH = cropHPx
+		if (outSize > 0) {
+			destW = outSize
+			destH = Math.round(outSize * cropHPx / cropWPx)
+		}
+
+		uni.canvasToTempFilePath({
+			canvasId: 'parrotCropCanvas',
+			x: 0,
+			y: 0,
+			width: cropWPx,
+			height: cropHPx,
+			destWidth: destW,
+			destHeight: destH,
+			fileType: 'png',
+			quality: props.quality ?? 0.8,
+			success: (res) => {
+				const result = new UTSJSONObject()
+				result['tempFilePath'] = res.tempFilePath
+				emit('cropped', result)
+			},
+			fail: (err) => {
+				emit('error', err.errMsg ?? '裁剪导出失败')
+			}
+		}, instance?.proxy)
+	})
+}
+
+/* 暴露裁剪方法 */
+defineExpose({
+	crop,
+})
+</script>
+
+<style scoped>
+/* ---- 容器 ---- */
+.parrot-image-cropper {
+	position: relative;
+	overflow: hidden;
+	background-color: #000000;
+}
+
+/* ---- movable-area ---- */
+.parrot-image-cropper__area {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1;
+}
+
+/* ---- movable-view ---- */
+.parrot-image-cropper__mover {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ---- 图片 ---- */
+.parrot-image-cropper__image {
+	display: block;
+}
+
+/* ---- 遮罩层 ---- */
+.parrot-image-cropper__overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+}
+
+/* ---- 半透明遮罩块 ---- */
+.parrot-image-cropper__mask {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ---- 中间行（左遮罩 + 裁剪框 + 右遮罩） ---- */
+.parrot-image-cropper__mid {
+	display: flex;
+	flex-direction: row;
+}
+
+/* ---- 裁剪框 ---- */
+.parrot-image-cropper__frame {
+	position: relative;
+	border-width: 2rpx;
+	border-style: solid;
+	border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* ---- 四角高亮边角（通用） ---- */
+.parrot-image-cropper__corner {
+	position: absolute;
+	width: 36rpx;
+	height: 36rpx;
+	border-color: #ffffff;
+	border-style: solid;
+}
+
+/* 左上角 */
+.parrot-image-cropper__corner--tl {
+	left: -4rpx;
+	top: -4rpx;
+	border-top-width: 6rpx;
+	border-left-width: 6rpx;
+	border-bottom-width: 0;
+	border-right-width: 0;
+}
+
+/* 右上角 */
+.parrot-image-cropper__corner--tr {
+	right: -4rpx;
+	top: -4rpx;
+	border-top-width: 6rpx;
+	border-right-width: 6rpx;
+	border-bottom-width: 0;
+	border-left-width: 0;
+}
+
+/* 左下角 */
+.parrot-image-cropper__corner--bl {
+	left: -4rpx;
+	bottom: -4rpx;
+	border-bottom-width: 6rpx;
+	border-left-width: 6rpx;
+	border-top-width: 0;
+	border-right-width: 0;
+}
+
+/* 右下角 */
+.parrot-image-cropper__corner--br {
+	right: -4rpx;
+	bottom: -4rpx;
+	border-bottom-width: 6rpx;
+	border-right-width: 6rpx;
+	border-top-width: 0;
+	border-left-width: 0;
+}
+
+/* ---- 隐藏 canvas ---- */
+.parrot-image-cropper__canvas {
+	position: fixed;
+}
+</style>

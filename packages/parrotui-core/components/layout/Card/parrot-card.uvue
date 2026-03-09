@@ -49,7 +49,7 @@
 <script setup lang="uts">
 import { computed } from 'vue'
 import type { CSSProperties } from 'vue'
-import ParrotText from '../../../基础组件/Text/parrot-text/parrot-text.uvue'
+import ParrotText from '../../basic/Text/parrot-text.uvue'
 
 // 定义 props
 interface Props {

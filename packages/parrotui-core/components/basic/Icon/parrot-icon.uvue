@@ -3,7 +3,11 @@
 		class="parrot-icon"
 		:class="[
 			customClass,
-			spin ? 'parrot-icon--spin' : ''
+			spin ? 'parrot-icon--spin' : '',
+			animated === 'pulse' ? 'parrot-icon--pulse' : '',
+			animated === 'bounce' ? 'parrot-icon--bounce' : '',
+			flip === 'horizontal' ? 'parrot-icon--flip-h' : '',
+			flip === 'vertical' ? 'parrot-icon--flip-v' : ''
 		]"
 		:style="iconStyle"
 		@click="handleClick"
@@ -24,6 +28,11 @@
 		
 		<!-- 插槽内容 -->
 		<slot></slot>
+		
+		<!-- 角标 -->
+		<view v-if="dot || badge" class="parrot-icon__badge" :class="[dot ? 'parrot-icon__badge--dot' : '']" :style="badgeStyle">
+			<text v-if="!dot && badge" class="parrot-icon__badge-text">{{ displayBadge }}</text>
+		</view>
 	</view>
 </template>
 
@@ -39,10 +48,28 @@ interface Props {
 	size?: number | string
 	// 图标颜色
 	color?: string
-	// 是否旋转
+	// 是否旋转（持续旋转）
 	spin?: boolean
+	// 旋转角度（静态旋转，单位 deg）
+	rotate?: number
+	// 动画类型
+	animated?: '' | 'spin' | 'pulse' | 'bounce'
+	// 翻转方向
+	flip?: '' | 'horizontal' | 'vertical'
+	// 角标内容（数字或文字）
+	badge?: string | number
+	// 角标最大值（超出显示 xx+）
+	badgeMax?: number
+	// 角标类型
+	badgeType?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
+	// 是否显示小圆点（优先于 badge）
+	dot?: boolean
+	// 小圆点颜色
+	dotColor?: string
 	// 自定义类名
 	customClass?: string
+	// 图标前缀（支持多图标库，如 'iconfont'、'material-icons'）
+	prefix?: string
 	// 字体族
 	fontFamily?: string
 	// Unicode 值
@@ -61,7 +88,16 @@ const props = withDefaults(defineProps<Props>(), {
 	size: 24,
 	color: '',
 	spin: false,
+	rotate: 0,
+	animated: '',
+	flip: '',
+	badge: '',
+	badgeMax: 99,
+	badgeType: 'danger',
+	dot: false,
+	dotColor: '',
 	customClass: '',
+	prefix: '',
 	fontFamily: 'parrot-icon',
 	unicode: '',
 	margin: '0',
@@ -86,7 +122,6 @@ const unicodeValue = computed(() => {
 	}
 	
 	if (/^\\u[0-9a-fA-F]{4}$/.test(props.name)) {
-		// 将 \uXXXX 转换为实际字符
 		try {
 			const codePoint = parseInt(props.name.slice(2), 16)
 			return String.fromCodePoint(codePoint)
@@ -96,6 +131,34 @@ const unicodeValue = computed(() => {
 	}
 	
 	return props.name
+})
+
+// 角标显示内容
+const displayBadge = computed(() => {
+	if (typeof props.badge === 'number') {
+		return props.badge > props.badgeMax ? props.badgeMax + '+' : props.badge.toString()
+	}
+	return props.badge.toString()
+})
+
+// 角标颜色映射
+const badgeColorMap: Record<string, string> = {
+	primary: '#1a7eff',
+	success: '#41a906',
+	warning: '#e6a23c',
+	danger: '#f56c6c',
+	info: '#6c6f78',
+}
+
+// 角标样式
+const badgeStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.dot && props.dotColor) {
+		style.backgroundColor = props.dotColor
+	} else if (!props.dot) {
+		style.backgroundColor = badgeColorMap[props.badgeType] || '#f56c6c'
+	}
+	return style
 })
 
 // 计算图标样式
@@ -114,6 +177,11 @@ const iconStyle = computed(() => {
 		style.lineHeight = props.lineHeight
 	}
 	
+	// 静态旋转
+	if (props.rotate !== 0) {
+		style.transform = 'rotate(' + props.rotate + 'deg)'
+	}
+	
 	return style
 })
 
@@ -121,7 +189,6 @@ const iconStyle = computed(() => {
 const unicodeStyle = computed(() => {
 	const style: CSSProperties = {}
 	
-	// 处理大小
 	let sizeValue = props.size
 	if (typeof sizeValue === 'number') {
 		sizeValue = `${sizeValue}rpx`
@@ -132,7 +199,8 @@ const unicodeStyle = computed(() => {
 		style.color = props.color
 	}
 	
-	style.fontFamily = props.fontFamily
+	const family = props.prefix ? props.prefix : props.fontFamily
+	style.fontFamily = family
 	
 	return style
 })
@@ -141,7 +209,6 @@ const unicodeStyle = computed(() => {
 const fontStyle = computed(() => {
 	const style: CSSProperties = {}
 	
-	// 处理大小
 	let sizeValue = props.size
 	if (typeof sizeValue === 'number') {
 		sizeValue = `${sizeValue}rpx`
@@ -152,7 +219,8 @@ const fontStyle = computed(() => {
 		style.color = props.color
 	}
 	
-	style.fontFamily = props.fontFamily
+	const family = props.prefix ? props.prefix : props.fontFamily
+	style.fontFamily = family
 	
 	return style
 })
@@ -165,19 +233,71 @@ const handleClick = (event: Event) => {
 
 <style lang="scss">
 .parrot-icon {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	
-	// 旋转动画
+	// 持续旋转
 	&--spin {
 		animation: parrot-icon-spin 1s linear infinite;
+	}
+	
+	// 脉冲动画
+	&--pulse {
+		animation: parrot-icon-pulse 1.5s ease-in-out infinite;
+	}
+	
+	// 弹跳动画
+	&--bounce {
+		animation: parrot-icon-bounce 1s ease infinite;
+	}
+	
+	// 水平翻转
+	&--flip-h {
+		transform: scaleX(-1);
+	}
+	
+	// 垂直翻转
+	&--flip-v {
+		transform: scaleY(-1);
 	}
 }
 
 .parrot-icon__unicode,
 .parrot-icon__font {
 	display: block;
+}
+
+// 角标
+.parrot-icon__badge {
+	position: absolute;
+	top: -8rpx;
+	right: -8rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28rpx;
+	height: 28rpx;
+	padding: 0 6rpx;
+	border-radius: 28rpx;
+	background-color: #f56c6c;
+	box-sizing: border-box;
+}
+
+.parrot-icon__badge--dot {
+	min-width: 14rpx;
+	width: 14rpx;
+	height: 14rpx;
+	padding: 0;
+	border-radius: 50%;
+}
+
+.parrot-icon__badge-text {
+	font-size: 18rpx;
+	color: #ffffff;
+	line-height: 1;
+	white-space: nowrap;
 }
 
 // 旋转动画
@@ -190,6 +310,34 @@ const handleClick = (event: Event) => {
 	}
 }
 
+// 脉冲动画
+@keyframes parrot-icon-pulse {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.5;
+		transform: scale(0.85);
+	}
+}
+
+// 弹跳动画
+@keyframes parrot-icon-bounce {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	25% {
+		transform: translateY(-6rpx);
+	}
+	50% {
+		transform: translateY(0);
+	}
+	75% {
+		transform: translateY(-3rpx);
+	}
+}
+
 // 常用图标字体定义
 .parrot-icon {
 	font-family: "parrot-icon" !important;
@@ -198,12 +346,4 @@ const handleClick = (event: Event) => {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
-
-// 如果使用阿里巴巴图标库或其他图标字体，可以在这里定义
-// @font-face {
-//   font-family: "parrot-icon";
-//   src: url('~@/static/fonts/iconfont.woff2?t=1678901234') format('woff2'),
-//        url('~@/static/fonts/iconfont.woff?t=1678901234') format('woff'),
-//        url('~@/static/fonts/iconfont.ttf?t=1678901234') format('truetype');
-// }
 </style>

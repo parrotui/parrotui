@@ -1,0 +1,106 @@
+<template>
+	<view
+		class="parrot-drag"
+		:style="dragStyle"
+		@touchstart="onTouchStart"
+		@touchmove="onTouchMove"
+		@touchend="onTouchEnd"
+	>
+		<slot />
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+
+/** 组件属性 */
+interface Props {
+	/** 拖拽方向: all / horizontal / vertical */
+	direction ?: string
+	/** 是否禁用拖拽 */
+	disabled ?: boolean
+	/** 是否限制在父容器内 */
+	boundary ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	direction: 'all',
+	disabled: false,
+	boundary: true,
+})
+
+const emit = defineEmits<{
+	(e : 'dragStart', position : UTSJSONObject) : void
+	(e : 'dragMove', position : UTSJSONObject) : void
+	(e : 'dragEnd', position : UTSJSONObject) : void
+}>()
+
+/** 当前偏移量 px */
+const offsetX = ref<number>(0)
+const offsetY = ref<number>(0)
+/** 触摸起始坐标 px */
+const touchStartX = ref<number>(0)
+const touchStartY = ref<number>(0)
+/** 拖动起始时的偏移量 */
+const startOffsetX = ref<number>(0)
+const startOffsetY = ref<number>(0)
+/** 是否正在拖动 */
+const dragging = ref<boolean>(false)
+
+/** 容器样式 */
+const dragStyle = computed(() : string => {
+	return `transform:translate(${offsetX.value}px,${offsetY.value}px)`
+})
+
+/** 构建位置对象 */
+function buildPosition() : UTSJSONObject {
+	const pos = new UTSJSONObject()
+	pos['x'] = offsetX.value
+	pos['y'] = offsetY.value
+	return pos
+}
+
+/** 触摸开始 */
+function onTouchStart(e : TouchEvent) : void {
+	if (props.disabled) return
+	dragging.value = true
+	const touch = e.touches[0]
+	touchStartX.value = touch.screenX
+	touchStartY.value = touch.screenY
+	startOffsetX.value = offsetX.value
+	startOffsetY.value = offsetY.value
+	emit('dragStart', buildPosition())
+}
+
+/** 触摸移动 */
+function onTouchMove(e : TouchEvent) : void {
+	if (!dragging.value) return
+	if (props.disabled) return
+	const touch = e.touches[0]
+	const diffX = touch.screenX - touchStartX.value
+	const diffY = touch.screenY - touchStartY.value
+	/* 根据方向限制 */
+	if (props.direction === 'all' || props.direction === 'horizontal') {
+		offsetX.value = startOffsetX.value + diffX
+	}
+	if (props.direction === 'all' || props.direction === 'vertical') {
+		offsetY.value = startOffsetY.value + diffY
+	}
+	emit('dragMove', buildPosition())
+}
+
+/** 触摸结束 */
+function onTouchEnd(_ : TouchEvent) : void {
+	if (!dragging.value) return
+	dragging.value = false
+	emit('dragEnd', buildPosition())
+}
+
+defineExpose({})
+</script>
+
+<style>
+.parrot-drag {
+	display: inline-flex;
+}
+</style>

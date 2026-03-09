@@ -1,0 +1,225 @@
+<template>
+	<!-- Cascader 级联选择器：多级 Tab 切换列表选择 -->
+	<view v-if="visible" class="parrot-cascader-wrap" @tap.stop="handleClose">
+		<view class="parrot-cascader__mask" :class="[maskShow ? 'parrot-cascader__mask--show' : '']"></view>
+		<view class="parrot-cascader__popup" :class="[contentShow ? 'parrot-cascader__popup--show' : '']" @tap.stop>
+			<!-- 标题栏 -->
+			<view class="parrot-cascader__header">
+				<text class="parrot-cascader__close" @tap="handleClose">✕</text>
+				<text class="parrot-cascader__title">{{ title }}</text>
+			</view>
+			<!-- 级别 Tabs -->
+			<view class="parrot-cascader__tabs">
+				<view
+					v-for="(tab, tIdx) in tabs"
+					:key="tIdx"
+					class="parrot-cascader__tab"
+					:class="[tIdx === activeTab ? 'parrot-cascader__tab--active' : '']"
+					@tap="switchTab(tIdx)"
+				>
+					<text class="parrot-cascader__tab-text" :class="[tIdx === activeTab ? 'parrot-cascader__tab-text--active' : '']">{{ tab.label ?? '请选择' }}</text>
+				</view>
+			</view>
+			<!-- 选项列表 -->
+			<scroll-view class="parrot-cascader__list" scroll-y="true">
+				<view
+					v-for="(item, idx) in currentOptions"
+					:key="idx"
+					class="parrot-cascader__option"
+					:class="[isOptionSelected(item) ? 'parrot-cascader__option--active' : '', item.disabled ? 'parrot-cascader__option--disabled' : '']"
+					@tap="handleSelectOption(item)"
+				>
+					<text class="parrot-cascader__option-text" :class="[isOptionSelected(item) ? 'parrot-cascader__option-text--active' : '']">{{ item[fieldLabel] ?? '' }}</text>
+					<text v-if="isOptionSelected(item)" class="parrot-cascader__check">✓</text>
+				</view>
+			</scroll-view>
+			<view class="parrot-cascader__safe"></view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-cascader 级联选择器
+ * 多级联动选择，Tab 切换层级 + 列表选择。
+ *
+ * @prop show          是否显示
+ * @prop modelValue    当前值（值数组）
+ * @prop options       树形数据
+ * @prop fieldNames    字段映射 { label, value, children }
+ * @prop title         标题
+ * @prop placeholder   未选择文字
+ *
+ * @event update:modelValue  值变更
+ * @event change             选择变化
+ * @event finish             选择完成（叶子节点）
+ * @event update:show        显示状态
+ */
+import { ref, watch, computed } from 'vue'
+
+interface Props {
+	show ?: boolean
+	modelValue ?: string[]
+	options ?: any[]
+	fieldNames ?: any
+	title ?: string
+	placeholder ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	show: false,
+	modelValue: () : string[] => [] as string[],
+	options: () : any[] => [] as any[],
+	title: '请选择',
+	placeholder: '请选择',
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: string[]]
+	change: [value: string[]]
+	finish: [value: string[], selectedOptions: any[]]
+	'update:show': [show: boolean]
+}>()
+
+const visible = ref<boolean>(false)
+const maskShow = ref<boolean>(false)
+const contentShow = ref<boolean>(false)
+const activeTab = ref<number>(0)
+const selectedValues = ref<string[]>([])
+const selectedOptions = ref<any[]>([])
+
+// 字段名
+const fieldLabel = computed(() : string => {
+	return props.fieldNames?.label ?? 'label'
+})
+const fieldValue = computed(() : string => {
+	return props.fieldNames?.value ?? 'value'
+})
+const fieldChildren = computed(() : string => {
+	return props.fieldNames?.children ?? 'children'
+})
+
+// Tab 列表
+const tabs = computed(() : any[] => {
+	const list : any[] = []
+	for (let i = 0; i < selectedOptions.value.length; i++) {
+		list.push({ label: selectedOptions.value[i][fieldLabel.value] ?? '' })
+	}
+	list.push({ label: props.placeholder ?? '请选择' })
+	return list
+})
+
+// 当前层级的选项
+const currentOptions = computed(() : any[] => {
+	let opts = props.options ?? ([] as any[])
+	for (let i = 0; i < activeTab.value; i++) {
+		const selected = selectedOptions.value[i]
+		if (selected && selected[fieldChildren.value]) {
+			opts = selected[fieldChildren.value]
+		} else {
+			return [] as any[]
+		}
+	}
+	return opts
+})
+
+function isOptionSelected(item : any) : boolean {
+	const val = item[fieldValue.value] ?? ''
+	return selectedValues.value.includes(val)
+}
+
+watch(() => props.show, (val) => {
+	if (val) {
+		initFromModelValue()
+		openPopup()
+	} else {
+		closePopup()
+	}
+}, { immediate: true })
+
+function initFromModelValue() {
+	const vals = props.modelValue ?? ([] as string[])
+	selectedValues.value = [...vals]
+	// 根据值恢复选中的选项
+	selectedOptions.value = []
+	let opts = props.options ?? ([] as any[])
+	for (let i = 0; i < vals.length; i++) {
+		const found = opts.find((o : any) => (o[fieldValue.value] ?? '') === vals[i])
+		if (found) {
+			selectedOptions.value.push(found)
+			opts = found[fieldChildren.value] ?? ([] as any[])
+		} else {
+			break
+		}
+	}
+	activeTab.value = selectedOptions.value.length
+}
+
+function handleSelectOption(item : any) {
+	if (item.disabled) return
+	const val = item[fieldValue.value] ?? ''
+	// 截断当前级别之后的选择
+	selectedValues.value = selectedValues.value.slice(0, activeTab.value)
+	selectedOptions.value = selectedOptions.value.slice(0, activeTab.value)
+	selectedValues.value.push(val)
+	selectedOptions.value.push(item)
+
+	const children = item[fieldChildren.value]
+	if (children && children.length > 0) {
+		// 有子级，跳转到下一级
+		activeTab.value = selectedValues.value.length
+	} else {
+		// 叶子节点，选择完成
+		emit('update:modelValue', [...selectedValues.value])
+		emit('change', [...selectedValues.value])
+		emit('finish', [...selectedValues.value], [...selectedOptions.value])
+		emit('update:show', false)
+		closePopup()
+	}
+}
+
+function switchTab(index : number) {
+	if (index < selectedOptions.value.length) {
+		activeTab.value = index
+	}
+}
+
+function openPopup() {
+	visible.value = true
+	setTimeout(() => { maskShow.value = true; contentShow.value = true }, 16)
+}
+
+function closePopup() {
+	maskShow.value = false; contentShow.value = false
+	setTimeout(() => { visible.value = false }, 300)
+}
+
+function handleClose() {
+	emit('update:show', false)
+	closePopup()
+}
+</script>
+
+<style scoped>
+.parrot-cascader-wrap { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; }
+.parrot-cascader__mask { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0); transition: background 0.3s; }
+.parrot-cascader__mask--show { background: rgba(0,0,0,0.45); }
+.parrot-cascader__popup { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 32rpx 32rpx 0 0; max-height: 80%; transform: translateY(100%); transition: transform 0.3s; display: flex; flex-direction: column; }
+.parrot-cascader__popup--show { transform: translateY(0); }
+.parrot-cascader__header { display: flex; flex-direction: row; align-items: center; padding: 24rpx 32rpx; }
+.parrot-cascader__close { font-size: 32rpx; color: #909399; margin-right: 16rpx; }
+.parrot-cascader__title { flex: 1; font-size: 30rpx; font-weight: 600; color: #303133; text-align: center; }
+.parrot-cascader__tabs { display: flex; flex-direction: row; padding: 0 32rpx; border-bottom-width: 1rpx; border-bottom-style: solid; border-bottom-color: #ebeef5; }
+.parrot-cascader__tab { padding: 16rpx 24rpx; }
+.parrot-cascader__tab--active { border-bottom-width: 4rpx; border-bottom-style: solid; border-bottom-color: #1a7eff; }
+.parrot-cascader__tab-text { font-size: 28rpx; color: #909399; }
+.parrot-cascader__tab-text--active { color: #1a7eff; font-weight: 600; }
+.parrot-cascader__list { flex: 1; max-height: 600rpx; }
+.parrot-cascader__option { display: flex; flex-direction: row; align-items: center; padding: 24rpx 32rpx; }
+.parrot-cascader__option--active { background-color: rgba(26,126,255,0.06); }
+.parrot-cascader__option--disabled { opacity: 0.4; }
+.parrot-cascader__option-text { flex: 1; font-size: 28rpx; color: #303133; }
+.parrot-cascader__option-text--active { color: #1a7eff; }
+.parrot-cascader__check { font-size: 28rpx; color: #1a7eff; }
+.parrot-cascader__safe { height: env(safe-area-inset-bottom); }
+</style>

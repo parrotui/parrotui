@@ -1,0 +1,436 @@
+<template>
+	<!-- CubicBezier 贝塞尔曲线编辑器：canvas 绘制 + 控制点拖拽 -->
+	<view class="parrot-cubic-bezier" :style="containerStyle">
+		<!-- 绘图 canvas -->
+		<canvas
+			canvas-id="parrotBezierCanvas"
+			class="parrot-cubic-bezier__canvas"
+			:style="canvasStyle"
+			@touchstart="onTouchStart"
+			@touchmove="onTouchMove"
+			@touchend="onTouchEnd"
+		/>
+		<!-- 底部贝塞尔参数文本 -->
+		<view class="parrot-cubic-bezier__footer">
+			<text class="parrot-cubic-bezier__text">{{ bezierText }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-cubic-bezier 贝塞尔曲线编辑器
+ * 使用 canvas 绘制三次贝塞尔曲线预览，两个控制点支持拖拽调整。
+ * 底部实时显示 cubic-bezier(x1, y1, x2, y2) 参数文本。
+ *
+ * @prop width             画布宽度 rpx，默认 600
+ * @prop height            画布高度 rpx，默认 600
+ * @prop controlPoints     控制点 JSON 字符串，默认两个控制点
+ * @prop lineColor         曲线颜色，默认 #1a7eff
+ * @prop lineWidth         曲线线宽，默认 4
+ * @prop controlPointColor 控制点颜色，默认 #ff6b6b
+ * @prop controlPointSize  控制点直径 rpx，默认 20
+ * @prop gridColor         网格颜色，默认 #ebeef5
+ * @prop showGrid          是否显示网格，默认 true
+ *
+ * @event change  控制点变化时触发，参数为 JSON 字符串
+ */
+import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+
+interface Props {
+	/** 画布宽度 rpx */
+	width ?: number
+	/** 画布高度 rpx */
+	height ?: number
+	/** 控制点 JSON 字符串 */
+	controlPoints ?: string
+	/** 曲线颜色 */
+	lineColor ?: string
+	/** 曲线线宽 */
+	lineWidth ?: number
+	/** 控制点颜色 */
+	controlPointColor ?: string
+	/** 控制点直径 rpx */
+	controlPointSize ?: number
+	/** 网格颜色 */
+	gridColor ?: string
+	/** 是否显示网格 */
+	showGrid ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	width: 600,
+	height: 600,
+	controlPoints: '[{"x":0.25,"y":0.1},{"x":0.25,"y":1}]',
+	lineColor: '#1a7eff',
+	lineWidth: 4,
+	controlPointColor: '#ff6b6b',
+	controlPointSize: 20,
+	gridColor: '#ebeef5',
+	showGrid: true,
+})
+
+const emit = defineEmits<{
+	(e : 'change', points : string) : void
+}>()
+
+/** 组件实例 */
+const instance = getCurrentInstance()
+
+/** 控制点 1 坐标（归一化 0~1） */
+const cp1x = ref<number>(0.25)
+const cp1y = ref<number>(0.1)
+
+/** 控制点 2 坐标（归一化 0~1） */
+const cp2x = ref<number>(0.25)
+const cp2y = ref<number>(1)
+
+/** 当前拖拽的控制点：0=无, 1=cp1, 2=cp2 */
+const dragging = ref<number>(0)
+
+/** canvas 在页面中的偏移位置 */
+let canvasOffsetLeft : number = 0
+let canvasOffsetTop : number = 0
+
+/** 绘图区域内边距（px） */
+let paddingPx : number = 0
+
+/** 绘图区域宽高（px） */
+let drawW : number = 0
+let drawH : number = 0
+
+/** 画布像素宽高 */
+let canvasWPx : number = 0
+let canvasHPx : number = 0
+
+/* ==================== 样式计算 ==================== */
+
+/** 外层容器样式 */
+const containerStyle = computed(() : string => {
+	const w = props.width ?? 600
+	return `width:${w}rpx`
+})
+
+/** canvas 样式 */
+const canvasStyle = computed(() : string => {
+	const w = props.width ?? 600
+	const h = props.height ?? 600
+	return `width:${w}rpx;height:${h}rpx`
+})
+
+/** 底部贝塞尔参数文本 */
+const bezierText = computed(() : string => {
+	const x1 = formatNum(cp1x.value)
+	const y1 = formatNum(cp1y.value)
+	const x2 = formatNum(cp2x.value)
+	const y2 = formatNum(cp2y.value)
+	return `cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})`
+})
+
+/* ==================== 工具函数 ==================== */
+
+/** 格式化数值为两位小数字符串 */
+function formatNum(n : number) : string {
+	return (Math.round(n * 100) / 100).toFixed(2)
+}
+
+/** 将归一化坐标 x 转为 canvas 像素 x */
+function toCanvasX(nx : number) : number {
+	return paddingPx + nx * drawW
+}
+
+/** 将归一化坐标 y 转为 canvas 像素 y（y 轴翻转） */
+function toCanvasY(ny : number) : number {
+	return paddingPx + (1 - ny) * drawH
+}
+
+/** 将 canvas 像素 x 转为归一化坐标 */
+function toNormX(cx : number) : number {
+	if (drawW <= 0) return 0
+	let v = (cx - paddingPx) / drawW
+	if (v < 0) v = 0
+	if (v > 1) v = 1
+	return v
+}
+
+/** 将 canvas 像素 y 转为归一化坐标（y 轴翻转） */
+function toNormY(cy : number) : number {
+	if (drawH <= 0) return 0
+	let v = 1 - (cy - paddingPx) / drawH
+	/* 允许超出 0~1 范围以支持回弹效果 */
+	if (v < -0.5) v = -0.5
+	if (v > 1.5) v = 1.5
+	return v
+}
+
+/** 计算两点距离的平方 */
+function distSq(x1 : number, y1 : number, x2 : number, y2 : number) : number {
+	return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
+}
+
+/* ==================== 解析初始控制点 ==================== */
+
+/** 从 props 解析控制点 */
+function parseControlPoints() {
+	try {
+		const arr = JSON.parse(props.controlPoints ?? '[]') as UTSJSONObject[]
+		if (arr.length >= 2) {
+			const p1 = arr[0]
+			const p2 = arr[1]
+			const x1 = p1['x'] as number | null
+			const y1 = p1['y'] as number | null
+			const x2 = p2['x'] as number | null
+			const y2 = p2['y'] as number | null
+			if (x1 != null) cp1x.value = x1
+			if (y1 != null) cp1y.value = y1
+			if (x2 != null) cp2x.value = x2
+			if (y2 != null) cp2y.value = y2
+		}
+	} catch (_e) {
+		/* 解析失败使用默认值 */
+	}
+}
+
+/* ==================== Canvas 绘制 ==================== */
+
+/** 完整重绘 canvas */
+function drawCanvas() {
+	const ctx = uni.createCanvasContext('parrotBezierCanvas', instance?.proxy)
+
+	/* 清除画布 */
+	ctx.clearRect(0, 0, canvasWPx, canvasHPx)
+
+	/* 背景白色 */
+	ctx.setFillStyle('#ffffff')
+	ctx.fillRect(0, 0, canvasWPx, canvasHPx)
+
+	/* ---- 网格 ---- */
+	if (props.showGrid !== false) {
+		ctx.setStrokeStyle(props.gridColor ?? '#ebeef5')
+		ctx.setLineWidth(1)
+		for (let i = 0; i <= 4; i++) {
+			const gx = paddingPx + (i / 4.0) * drawW
+			const gy = paddingPx + (i / 4.0) * drawH
+			/* 垂直线 */
+			ctx.beginPath()
+			ctx.moveTo(gx, paddingPx)
+			ctx.lineTo(gx, paddingPx + drawH)
+			ctx.stroke()
+			/* 水平线 */
+			ctx.beginPath()
+			ctx.moveTo(paddingPx, gy)
+			ctx.lineTo(paddingPx + drawW, gy)
+			ctx.stroke()
+		}
+	}
+
+	/* 起点和终点坐标 */
+	const startX = toCanvasX(0)
+	const startY = toCanvasY(0)
+	const endX = toCanvasX(1)
+	const endY = toCanvasY(1)
+
+	/* 控制点 canvas 坐标 */
+	const c1x = toCanvasX(cp1x.value)
+	const c1y = toCanvasY(cp1y.value)
+	const c2x = toCanvasX(cp2x.value)
+	const c2y = toCanvasY(cp2y.value)
+
+	/* ---- 控制线（起点→CP1，终点→CP2） ---- */
+	ctx.setStrokeStyle(props.controlPointColor ?? '#ff6b6b')
+	ctx.setLineWidth(1)
+	/* 起点到 CP1 */
+	ctx.beginPath()
+	ctx.moveTo(startX, startY)
+	ctx.lineTo(c1x, c1y)
+	ctx.stroke()
+	/* 终点到 CP2 */
+	ctx.beginPath()
+	ctx.moveTo(endX, endY)
+	ctx.lineTo(c2x, c2y)
+	ctx.stroke()
+
+	/* ---- 对角线参考线（从起点到终点） ---- */
+	ctx.setStrokeStyle(props.gridColor ?? '#ebeef5')
+	ctx.setLineWidth(1)
+	ctx.beginPath()
+	ctx.moveTo(startX, startY)
+	ctx.lineTo(endX, endY)
+	ctx.stroke()
+
+	/* ---- 贝塞尔曲线 ---- */
+	ctx.setStrokeStyle(props.lineColor ?? '#1a7eff')
+	ctx.setLineWidth(props.lineWidth ?? 4)
+	ctx.beginPath()
+	ctx.moveTo(startX, startY)
+	ctx.bezierCurveTo(c1x, c1y, c2x, c2y, endX, endY)
+	ctx.stroke()
+
+	/* ---- 控制点圆形 ---- */
+	const cpRadius = uni.upx2px(props.controlPointSize ?? 20) / 2
+	ctx.setFillStyle(props.controlPointColor ?? '#ff6b6b')
+	/* CP1 */
+	ctx.beginPath()
+	ctx.arc(c1x, c1y, cpRadius, 0, 2 * Math.PI)
+	ctx.fill()
+	/* CP2 */
+	ctx.beginPath()
+	ctx.arc(c2x, c2y, cpRadius, 0, 2 * Math.PI)
+	ctx.fill()
+
+	/* ---- 起点、终点小圆 ---- */
+	ctx.setFillStyle(props.lineColor ?? '#1a7eff')
+	ctx.beginPath()
+	ctx.arc(startX, startY, 4, 0, 2 * Math.PI)
+	ctx.fill()
+	ctx.beginPath()
+	ctx.arc(endX, endY, 4, 0, 2 * Math.PI)
+	ctx.fill()
+
+	/* 提交绘制 */
+	ctx.draw()
+}
+
+/* ==================== 触摸事件 ==================== */
+
+/** 触摸开始：判断是否按中控制点 */
+function onTouchStart(e : TouchEvent) {
+	if (e.touches.length === 0) return
+	const touch = e.touches[0]
+	const localX = touch.clientX - canvasOffsetLeft
+	const localY = touch.clientY - canvasOffsetTop
+
+	/* 控制点命中半径（px） */
+	const hitRadius = uni.upx2px(props.controlPointSize ?? 20) + 10
+	const hitRadiusSq = hitRadius * hitRadius
+
+	/* 控制点 canvas 坐标 */
+	const c1x = toCanvasX(cp1x.value)
+	const c1y = toCanvasY(cp1y.value)
+	const c2x = toCanvasX(cp2x.value)
+	const c2y = toCanvasY(cp2y.value)
+
+	const d1 = distSq(localX, localY, c1x, c1y)
+	const d2 = distSq(localX, localY, c2x, c2y)
+
+	if (d1 <= hitRadiusSq && d1 <= d2) {
+		dragging.value = 1
+	} else if (d2 <= hitRadiusSq) {
+		dragging.value = 2
+	} else {
+		dragging.value = 0
+	}
+}
+
+/** 触摸移动：拖拽控制点 */
+function onTouchMove(e : TouchEvent) {
+	if (dragging.value === 0) return
+	if (e.touches.length === 0) return
+
+	const touch = e.touches[0]
+	const localX = touch.clientX - canvasOffsetLeft
+	const localY = touch.clientY - canvasOffsetTop
+
+	const nx = toNormX(localX)
+	const ny = toNormY(localY)
+
+	if (dragging.value === 1) {
+		cp1x.value = nx
+		cp1y.value = ny
+	} else if (dragging.value === 2) {
+		cp2x.value = nx
+		cp2y.value = ny
+	}
+
+	/* 重绘并触发变更事件 */
+	drawCanvas()
+	emitChange()
+}
+
+/** 触摸结束 */
+function onTouchEnd(e : TouchEvent) {
+	if (dragging.value !== 0) {
+		emitChange()
+	}
+	dragging.value = 0
+}
+
+/** 触发 change 事件 */
+function emitChange() {
+	const p1 = new UTSJSONObject()
+	p1['x'] = Math.round(cp1x.value * 100) / 100
+	p1['y'] = Math.round(cp1y.value * 100) / 100
+	const p2 = new UTSJSONObject()
+	p2['x'] = Math.round(cp2x.value * 100) / 100
+	p2['y'] = Math.round(cp2y.value * 100) / 100
+	const arr : UTSJSONObject[] = [p1, p2]
+	emit('change', JSON.stringify(arr))
+}
+
+/* ==================== 初始化 ==================== */
+
+/** 获取 canvas 位置并计算绘图参数 */
+function initCanvas() {
+	canvasWPx = uni.upx2px(props.width ?? 600)
+	canvasHPx = uni.upx2px(props.height ?? 600)
+	paddingPx = uni.upx2px(40)
+	drawW = canvasWPx - 2 * paddingPx
+	drawH = canvasHPx - 2 * paddingPx
+
+	/* 获取 canvas 在页面中的位置 */
+	const query = uni.createSelectorQuery().in(instance?.proxy)
+	query.select('.parrot-cubic-bezier__canvas').boundingClientRect(data => {
+		if (data != null) {
+			const rect = data as UTSJSONObject
+			canvasOffsetLeft = (rect['left'] as number | null) ?? 0
+			canvasOffsetTop = (rect['top'] as number | null) ?? 0
+		}
+		/* 首次绘制 */
+		drawCanvas()
+	}).exec()
+}
+
+onMounted(() => {
+	parseControlPoints()
+	/* 延迟以确保 canvas 节点就绪 */
+	setTimeout(() => {
+		initCanvas()
+	}, 150)
+})
+</script>
+
+<style scoped>
+/* ---- 容器 ---- */
+.parrot-cubic-bezier {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: #ffffff;
+	border-radius: 12rpx;
+	overflow: hidden;
+}
+
+/* ---- canvas ---- */
+.parrot-cubic-bezier__canvas {
+	display: block;
+}
+
+/* ---- 底部文本区域 ---- */
+.parrot-cubic-bezier__footer {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 20rpx 24rpx;
+	background-color: #f5f7fa;
+}
+
+/* ---- 贝塞尔参数文本 ---- */
+.parrot-cubic-bezier__text {
+	font-size: 24rpx;
+	color: #606266;
+	font-family: monospace;
+	line-height: 1.4;
+}
+</style>

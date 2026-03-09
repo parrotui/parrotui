@@ -1,0 +1,189 @@
+<template>
+	<!-- Panel 面板：卡片式内容容器，支持标题、描述、折叠、磨砂玻璃 -->
+	<view
+		class="parrot-panel"
+		:class="[
+			card ? 'parrot-panel--card' : '',
+			glass ? 'parrot-panel--glass' : '',
+		]"
+		:style="panelStyle"
+	>
+		<!-- 头部区域 -->
+		<view
+			v-if="title || hasHeaderSlot"
+			class="parrot-panel__header"
+			:class="[collapsible ? 'parrot-panel__header--clickable' : '']"
+			@tap="onHeaderTap"
+		>
+			<slot name="header">
+				<view class="parrot-panel__header-text">
+					<text class="parrot-panel__title">{{ title }}</text>
+					<text v-if="description" class="parrot-panel__desc">{{ description }}</text>
+				</view>
+			</slot>
+			<!-- 折叠箭头 -->
+			<text
+				v-if="collapsible"
+				class="parrot-panel__arrow"
+				:class="[isOpen ? 'parrot-panel__arrow--open' : '']"
+			>▾</text>
+		</view>
+
+		<!-- 内容区域 -->
+		<view v-if="isOpen" class="parrot-panel__body" :style="bodyStyle">
+			<slot />
+		</view>
+
+		<!-- 底部区域 -->
+		<view v-if="hasFooterSlot && isOpen" class="parrot-panel__footer">
+			<slot name="footer" />
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-panel 面板
+ * 卡片式内容容器，支持标题描述、可折叠、磨砂玻璃效果。
+ *
+ * @prop title        标题文字
+ * @prop description  描述文字
+ * @prop padding      内容区域内边距，默认 '24rpx'
+ * @prop card         是否卡片模式（带圆角阴影），默认 false
+ * @prop collapsible  是否可折叠，默认 false
+ * @prop defaultOpen  默认是否展开，默认 true
+ * @prop glass        磨砂玻璃效果，默认 false
+ *
+ * @event toggle  折叠状态切换
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	/** 标题文字 */
+	title ?: string
+	/** 描述文字 */
+	description ?: string
+	/** 内容区域内边距 */
+	padding ?: string
+	/** 是否卡片模式 */
+	card ?: boolean
+	/** 是否可折叠 */
+	collapsible ?: boolean
+	/** 默认展开 */
+	defaultOpen ?: boolean
+	/** 磨砂玻璃效果 */
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	title: '',
+	description: '',
+	padding: '24rpx',
+	card: false,
+	collapsible: false,
+	defaultOpen: true,
+	glass: false,
+})
+
+const emit = defineEmits<{
+	toggle: [open: boolean]
+}>()
+
+/** 是否展开（非折叠模式下始终展开） */
+const isOpen = ref<boolean>(props.collapsible ? (props.defaultOpen ?? true) : true)
+
+/** 是否有 header 插槽内容（简单标记，通过 title 判断） */
+const hasHeaderSlot = ref<boolean>(false)
+/** 是否有 footer 插槽内容（简单标记，通过外部传入判断） */
+const hasFooterSlot = ref<boolean>(false)
+
+/** 面板外层样式 */
+const panelStyle = computed(() : string => {
+	return ''
+})
+
+/** 内容区域样式 */
+const bodyStyle = computed(() : string => {
+	return `padding:${props.padding ?? '24rpx'}`
+})
+
+/** 点击头部 */
+function onHeaderTap() {
+	if (!props.collapsible) return
+	isOpen.value = !isOpen.value
+	emit('toggle', isOpen.value)
+}
+</script>
+
+<style scoped>
+.parrot-panel {
+	width: 100%;
+	background-color: #ffffff;
+	overflow: hidden;
+}
+
+/* ---- 卡片模式 ---- */
+.parrot-panel--card {
+	border-radius: 16rpx;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+	margin-bottom: 24rpx;
+}
+
+/* ---- 磨砂玻璃 ---- */
+.parrot-panel--glass {
+	background: rgba(255, 255, 255, 0.72) !important;
+	border: 1.5rpx solid rgba(255, 255, 255, 0.4);
+	box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+/* ---- 头部 ---- */
+.parrot-panel__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 24rpx 24rpx 12rpx;
+}
+.parrot-panel__header--clickable {
+	/* 提示可点击 */
+}
+.parrot-panel__header-text {
+	flex: 1;
+}
+.parrot-panel__title {
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #303133;
+	line-height: 1.4;
+}
+.parrot-panel__desc {
+	font-size: 24rpx;
+	color: #909399;
+	margin-top: 4rpx;
+	line-height: 1.4;
+}
+
+/* ---- 折叠箭头 ---- */
+.parrot-panel__arrow {
+	font-size: 24rpx;
+	color: #909399;
+	margin-left: 8rpx;
+	transition: transform 0.3s;
+	flex-shrink: 0;
+}
+.parrot-panel__arrow--open {
+	transform: rotate(180deg);
+}
+
+/* ---- 内容 ---- */
+.parrot-panel__body {
+	/* padding 由 bodyStyle 控制 */
+}
+
+/* ---- 底部 ---- */
+.parrot-panel__footer {
+	padding: 12rpx 24rpx 24rpx;
+	border-top-width: 1rpx;
+	border-top-style: solid;
+	border-top-color: #ebeef5;
+}
+</style>

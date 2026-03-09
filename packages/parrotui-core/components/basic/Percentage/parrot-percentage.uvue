@@ -1,0 +1,68 @@
+<template>
+	<text
+		class="parrot-percentage"
+		:class="[
+			size ? `parrot-percentage--${size}` : '',
+			trend === 'up' ? 'parrot-percentage--up' : '',
+			trend === 'down' ? 'parrot-percentage--down' : ''
+		]"
+		:style="percentageStyle"
+	>
+		<text v-if="trend === 'up'" class="parrot-percentage__arrow">↑</text>
+		<text v-if="trend === 'down'" class="parrot-percentage__arrow">↓</text>
+		{{ formattedValue }}%
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	value?: number
+	precision?: number
+	size?: 'sm' | 'md' | 'lg'
+	trend?: '' | 'up' | 'down'
+	color?: string
+	bold?: boolean
+}>(), {
+	value: 0,
+	precision: 1,
+	size: 'md',
+	trend: '',
+	color: '',
+	bold: false,
+})
+
+const formattedValue = computed(() => {
+	return props.value.toFixed(props.precision)
+})
+
+const percentageStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.color) style.color = props.color
+	if (props.bold) style.fontWeight = 'bold'
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-percentage {
+	display: inline-flex;
+	align-items: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	color: #303133;
+
+	&--sm { font-size: 24rpx; }
+	&--md { font-size: 28rpx; }
+	&--lg { font-size: 36rpx; }
+
+	&--up { color: #f56c6c; }
+	&--down { color: #41a906; }
+}
+
+.parrot-percentage__arrow {
+	margin-right: 4rpx;
+	font-size: 0.85em;
+}
+</style>

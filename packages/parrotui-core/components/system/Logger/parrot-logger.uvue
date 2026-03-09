@@ -1,0 +1,518 @@
+<template>
+	<view class="parrot-logger">
+		<!-- ========== 浮动入口按钮（可拖动） ========== -->
+		<view
+			v-if="!visible"
+			class="parrot-logger__fab"
+			:style="fabStyle"
+			@touchstart="onFabTouchStart"
+			@touchmove="onFabTouchMove"
+			@touchend="onFabTouchEnd"
+			@tap="handleOpen"
+		>
+			<text class="parrot-logger__fab-icon">🐛</text>
+			<view v-if="errorCount > 0" class="parrot-logger__fab-badge">
+				<text class="parrot-logger__fab-badge-text">{{ errorBadge }}</text>
+			</view>
+		</view>
+
+		<!-- ========== 展开面板 ========== -->
+		<view v-if="visible" class="parrot-logger__panel">
+			<!-- 面板顶部栏 -->
+			<view class="parrot-logger__panel-header">
+				<text class="parrot-logger__panel-title">调试日志</text>
+				<text class="parrot-logger__panel-count">{{ filteredLogs.length }} 条</text>
+				<view class="parrot-logger__panel-close" @tap="handleClose">
+					<text class="parrot-logger__close-icon">✕</text>
+				</view>
+			</view>
+
+			<!-- 级别筛选 Tab -->
+			<view class="parrot-logger__tabs">
+				<view
+					v-for="(tab, idx) in levelTabs"
+					:key="idx"
+					class="parrot-logger__tab"
+					:class="currentLevel === tab.value ? 'parrot-logger__tab--active' : ''"
+					@tap="switchLevel(tab.value)"
+				>
+					<text
+						class="parrot-logger__tab-text"
+						:style="currentLevel === tab.value ? 'color:#1a7eff;font-weight:600;' : 'color:#909399;'"
+					>{{ tab.label }}</text>
+				</view>
+			</view>
+
+			<!-- 搜索框 -->
+			<view class="parrot-logger__search">
+				<input
+					class="parrot-logger__search-input"
+					placeholder="搜索日志内容"
+					:value="searchText"
+					@input="onSearchInput"
+				/>
+			</view>
+
+			<!-- 日志列表 -->
+			<scroll-view class="parrot-logger__log-list" scroll-y>
+				<view v-if="filteredLogs.length > 0">
+					<view
+						v-for="(entry, index) in filteredLogs"
+						:key="index"
+						class="parrot-logger__entry"
+						@tap="handleEntryTap(entry)"
+					>
+						<!-- 左侧级别色条 -->
+						<view class="parrot-logger__entry-bar" :style="getBarStyle(entry)" />
+						<!-- 内容主体 -->
+						<view class="parrot-logger__entry-body">
+							<view class="parrot-logger__entry-meta">
+								<text class="parrot-logger__entry-time">{{ logStr(entry, 'time') }}</text>
+								<text
+									v-if="logStr(entry, 'tag') !== ''"
+									class="parrot-logger__entry-tag"
+								>{{ logStr(entry, 'tag') }}</text>
+							</view>
+							<text class="parrot-logger__entry-content" :style="getContentStyle(entry)">{{ logStr(entry, 'content') }}</text>
+						</view>
+					</view>
+				</view>
+				<view v-if="filteredLogs.length === 0" class="parrot-logger__log-empty">
+					<text class="parrot-logger__log-empty-text">暂无日志</text>
+				</view>
+			</scroll-view>
+
+			<!-- 底部操作栏 -->
+			<view class="parrot-logger__actions">
+				<view class="parrot-logger__action-item" @tap="handleClear">
+					<text class="parrot-logger__action-text">🗑️ 清空</text>
+				</view>
+				<view class="parrot-logger__action-divider" />
+				<view class="parrot-logger__action-item" @tap="handleExport">
+					<text class="parrot-logger__action-text">📋 复制</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-logger 日志面板
+ * 浮动入口按钮（可拖动）+ 展开面板（级别筛选 Tab + 搜索 + 日志列表 + 清空/复制）
+ *
+ * @prop logs        日志条目 JSON 数组
+ * @prop visible     面板是否可见
+ * @prop level       默认筛选级别
+ * @prop maxEntries  最大条目数
+ * @prop draggable   FAB 是否可拖动
+ */
+import { ref, computed } from 'vue'
+
+/** 级别 Tab 配置 */
+interface LevelTab {
+	label : string
+	value : string
+}
+
+interface Props {
+	/** 日志条目 JSON 数组 */
+	logs ?: string
+	/** 面板是否可见 */
+	visible ?: boolean
+	/** 默认级别筛选 all/info/warn/error */
+	level ?: string
+	/** 最大保留条目数 */
+	maxEntries ?: number
+	/** 浮动按钮是否可拖动 */
+	draggable ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	logs: '',
+	visible: false,
+	level: 'all',
+	maxEntries: 500,
+	draggable: true,
+})
+
+const emit = defineEmits<{
+	(e : 'update:visible', val : boolean) : void
+	(e : 'clear') : void
+	(e : 'export') : void
+	(e : 'entryTap', entry : string) : void
+}>()
+
+/* ==================== 级别 Tab ==================== */
+const levelTabs : LevelTab[] = [
+	{ label: '全部', value: 'all' } as LevelTab,
+	{ label: '信息', value: 'info' } as LevelTab,
+	{ label: '警告', value: 'warn' } as LevelTab,
+	{ label: '错误', value: 'error' } as LevelTab,
+]
+
+const currentLevel = ref<string>(props.level ?? 'all')
+const searchText = ref<string>('')
+
+/* ==================== 日志解析 ==================== */
+const parsedLogs = computed(() : UTSJSONObject[] => {
+	const str = props.logs ?? ''
+	if (str == '') return [] as UTSJSONObject[]
+	try {
+		const arr = JSON.parse(str) as UTSJSONObject[]
+		const max = props.maxEntries ?? 500
+		if (arr.length > max) return arr.slice(0, max)
+		return arr
+	} catch (e) {
+		return [] as UTSJSONObject[]
+	}
+})
+
+/** 根据级别和搜索关键字过滤日志 */
+const filteredLogs = computed(() : UTSJSONObject[] => {
+	let list = parsedLogs.value
+	// 级别过滤
+	const lv = currentLevel.value
+	if (lv != 'all') {
+		list = list.filter((item : UTSJSONObject) : boolean => {
+			return logStr(item, 'level') == lv
+		})
+	}
+	// 搜索关键字过滤
+	const keyword = searchText.value
+	if (keyword != '') {
+		list = list.filter((item : UTSJSONObject) : boolean => {
+			const content = logStr(item, 'content')
+			return content.indexOf(keyword) >= 0
+		})
+	}
+	return list
+})
+
+/** 错误计数（FAB 角标） */
+const errorCount = computed(() : number => {
+	return parsedLogs.value.filter((item : UTSJSONObject) : boolean => {
+		return logStr(item, 'level') == 'error'
+	}).length
+})
+
+const errorBadge = computed(() : string => {
+	const c = errorCount.value
+	return c > 99 ? '99+' : `${c}`
+})
+
+function logStr(item : UTSJSONObject, key : string) : string {
+	const v = item[key]
+	return v != null ? `${v}` : ''
+}
+
+/* ==================== 级别颜色 ==================== */
+function getBarStyle(item : UTSJSONObject) : string {
+	const lv = logStr(item, 'level')
+	if (lv == 'error') return 'background-color:#f56c6c;'
+	if (lv == 'warn') return 'background-color:#e6a23c;'
+	return 'background-color:#1a7eff;'
+}
+
+function getContentStyle(item : UTSJSONObject) : string {
+	const lv = logStr(item, 'level')
+	if (lv == 'error') return 'color:#f56c6c;'
+	if (lv == 'warn') return 'color:#e65100;'
+	return 'color:#e0e0e0;'
+}
+
+/* ==================== FAB 拖动 ==================== */
+const fabTop = ref<number>(400)
+const fabRight = ref<number>(20)
+let dragStartX = 0
+let dragStartY = 0
+let dragStartTop = 0
+let dragStartRight = 0
+let isDragging = false
+
+const fabStyle = computed(() : string => {
+	return `position:fixed;top:${fabTop.value}rpx;right:${fabRight.value}rpx;z-index:9999;`
+})
+
+function onFabTouchStart(e : TouchEvent) {
+	if (!props.draggable) return
+	const t = e.touches[0]
+	dragStartX = t != null ? t.clientX : 0
+	dragStartY = t != null ? t.clientY : 0
+	dragStartTop = fabTop.value
+	dragStartRight = fabRight.value
+	isDragging = false
+}
+
+function onFabTouchMove(e : TouchEvent) {
+	if (!props.draggable) return
+	const t = e.touches[0]
+	const curX = t != null ? t.clientX : 0
+	const curY = t != null ? t.clientY : 0
+	const deltaX = (curX - dragStartX) * 2  // px → rpx 粗略换算
+	const deltaY = (curY - dragStartY) * 2
+	if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+		isDragging = true
+	}
+	fabTop.value = dragStartTop + deltaY
+	fabRight.value = dragStartRight - deltaX // right 方向相反
+}
+
+function onFabTouchEnd() {
+	// 吸附到屏幕边缘（防止拖出屏幕）
+	if (fabRight.value < 0) fabRight.value = 20
+	if (fabRight.value > 650) fabRight.value = 650
+	if (fabTop.value < 80) fabTop.value = 80
+}
+
+/* ==================== 事件处理 ==================== */
+function handleOpen() {
+	if (isDragging) return
+	emit('update:visible', true)
+}
+
+function handleClose() {
+	emit('update:visible', false)
+}
+
+function switchLevel(lv : string) {
+	currentLevel.value = lv
+}
+
+function onSearchInput(e : InputEvent) {
+	searchText.value = (e as any).detail.value as string
+}
+
+function handleClear() {
+	emit('clear')
+}
+
+function handleExport() {
+	emit('export')
+}
+
+function handleEntryTap(entry : UTSJSONObject) {
+	emit('entryTap', JSON.stringify(entry))
+}
+</script>
+
+<style scoped>
+/* ========== FAB 浮动按钮 ========== */
+.parrot-logger__fab {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 48rpx;
+	background-color: #303133;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-logger__fab-icon {
+	font-size: 40rpx;
+}
+
+.parrot-logger__fab-badge {
+	position: absolute;
+	top: -6rpx;
+	right: -6rpx;
+	min-width: 32rpx;
+	height: 32rpx;
+	border-radius: 16rpx;
+	background-color: #f56c6c;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 8rpx;
+}
+
+.parrot-logger__fab-badge-text {
+	font-size: 20rpx;
+	color: #ffffff;
+	line-height: 1;
+}
+
+/* ========== 面板 ========== */
+.parrot-logger__panel {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	top: 40%;
+	background-color: #1e1e1e;
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	border-top-left-radius: 24rpx;
+	border-top-right-radius: 24rpx;
+}
+
+/* ========== 面板头部 ========== */
+.parrot-logger__panel-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 24rpx 28rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #333333;
+}
+
+.parrot-logger__panel-title {
+	font-size: 30rpx;
+	color: #e0e0e0;
+	font-weight: 600;
+}
+
+.parrot-logger__panel-count {
+	font-size: 22rpx;
+	color: #666666;
+	margin-left: 16rpx;
+	flex: 1;
+}
+
+.parrot-logger__panel-close {
+	width: 56rpx;
+	height: 56rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.parrot-logger__close-icon {
+	font-size: 28rpx;
+	color: #909399;
+}
+
+/* ========== 级别筛选 Tab ========== */
+.parrot-logger__tabs {
+	display: flex;
+	flex-direction: row;
+	padding: 16rpx 28rpx;
+	gap: 16rpx;
+}
+
+.parrot-logger__tab {
+	padding: 8rpx 24rpx;
+	border-radius: 20rpx;
+}
+
+.parrot-logger__tab--active {
+	background-color: rgba(26, 126, 255, 0.15);
+}
+
+.parrot-logger__tab-text {
+	font-size: 24rpx;
+}
+
+/* ========== 搜索框 ========== */
+.parrot-logger__search {
+	padding: 0 28rpx 12rpx 28rpx;
+}
+
+.parrot-logger__search-input {
+	height: 64rpx;
+	background-color: #2a2a2a;
+	border-radius: 12rpx;
+	padding: 0 24rpx;
+	font-size: 24rpx;
+	color: #e0e0e0;
+}
+
+/* ========== 日志列表 ========== */
+.parrot-logger__log-list {
+	flex: 1;
+	padding: 0 28rpx;
+}
+
+.parrot-logger__entry {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	padding: 12rpx 0;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #2a2a2a;
+}
+
+.parrot-logger__entry-bar {
+	width: 6rpx;
+	height: 40rpx;
+	border-radius: 3rpx;
+	margin-right: 16rpx;
+	margin-top: 4rpx;
+	flex-shrink: 0;
+}
+
+.parrot-logger__entry-body {
+	flex: 1;
+}
+
+.parrot-logger__entry-meta {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 12rpx;
+	margin-bottom: 4rpx;
+}
+
+.parrot-logger__entry-time {
+	font-size: 20rpx;
+	color: #666666;
+}
+
+.parrot-logger__entry-tag {
+	font-size: 18rpx;
+	color: #909399;
+	background-color: #2a2a2a;
+	padding: 2rpx 12rpx;
+	border-radius: 8rpx;
+}
+
+.parrot-logger__entry-content {
+	font-size: 24rpx;
+	line-height: 1.5;
+}
+
+.parrot-logger__log-empty {
+	padding: 60rpx 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-logger__log-empty-text {
+	font-size: 24rpx;
+	color: #666666;
+}
+
+/* ========== 底部操作栏 ========== */
+.parrot-logger__actions {
+	display: flex;
+	flex-direction: row;
+	border-top-width: 1rpx;
+	border-top-style: solid;
+	border-top-color: #333333;
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.parrot-logger__action-item {
+	flex: 1;
+	height: 88rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-logger__action-divider {
+	width: 1rpx;
+	background-color: #333333;
+	margin: 16rpx 0;
+}
+
+.parrot-logger__action-text {
+	font-size: 26rpx;
+	color: #e0e0e0;
+}
+</style>

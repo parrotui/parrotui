@@ -1,0 +1,272 @@
+<template>
+	<!-- Calendar 日历：单选/范围/多选日期面板 -->
+	<view class="parrot-calendar" :class="[glass ? 'parrot-calendar--glass' : '']">
+		<!-- 月份切换 -->
+		<view class="parrot-calendar__header">
+			<view class="parrot-calendar__arrow" @tap="prevMonth"><text class="parrot-calendar__arrow-text">‹</text></view>
+			<text class="parrot-calendar__month-title">{{ currentYear }}年{{ padZero(currentMonth) }}月</text>
+			<view class="parrot-calendar__arrow" @tap="nextMonth"><text class="parrot-calendar__arrow-text">›</text></view>
+		</view>
+		<!-- 星期头 -->
+		<view class="parrot-calendar__weekdays">
+			<text v-for="w in weekdays" :key="w" class="parrot-calendar__weekday">{{ w }}</text>
+		</view>
+		<!-- 日期网格 -->
+		<view class="parrot-calendar__body">
+			<view v-for="(row, rIdx) in calendarRows" :key="rIdx" class="parrot-calendar__row">
+				<view
+					v-for="(cell, cIdx) in row"
+					:key="cIdx"
+					class="parrot-calendar__cell"
+					:class="[
+						cell.isToday ? 'parrot-calendar__cell--today' : '',
+						cell.isSelected ? 'parrot-calendar__cell--selected' : '',
+						cell.inRange ? 'parrot-calendar__cell--in-range' : '',
+						cell.isRangeStart ? 'parrot-calendar__cell--range-start' : '',
+						cell.isRangeEnd ? 'parrot-calendar__cell--range-end' : '',
+						cell.disabled ? 'parrot-calendar__cell--disabled' : '',
+						!cell.currentMonth ? 'parrot-calendar__cell--other' : '',
+					]"
+					@tap="handleSelect(cell)"
+				>
+					<text class="parrot-calendar__day" :class="[cell.isSelected ? 'parrot-calendar__day--selected' : '']">{{ cell.day }}</text>
+				</view>
+			</view>
+		</view>
+		<!-- 确认按钮（范围选择时） -->
+		<view v-if="showConfirm && mode === 'range'" class="parrot-calendar__footer">
+			<view class="parrot-calendar__confirm-btn" @tap="handleConfirm">
+				<text class="parrot-calendar__confirm-text">{{ confirmText }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-calendar 日历
+ * 月历面板，支持单选、范围选择、多选日期。
+ *
+ * @prop modelValue    当前值（单选 string，范围 [start,end]，多选 string[]）
+ * @prop mode          模式：single/range/multiple
+ * @prop minDate       最小日期 YYYY-MM-DD
+ * @prop maxDate       最大日期 YYYY-MM-DD
+ * @prop showConfirm   是否显示确认按钮
+ * @prop confirmText   确认按钮文字
+ * @prop glass         磨砂玻璃
+ *
+ * @event update:modelValue  值变更
+ * @event confirm            确认选择
+ * @event select             点击日期
+ */
+import { ref, computed, watch } from 'vue'
+
+interface CalendarCell {
+	year : number
+	month : number
+	day : number
+	dateStr : string
+	currentMonth : boolean
+	isToday : boolean
+	isSelected : boolean
+	inRange : boolean
+	isRangeStart : boolean
+	isRangeEnd : boolean
+	disabled : boolean
+}
+
+interface Props {
+	modelValue ?: string | string[]
+	mode ?: string
+	minDate ?: string
+	maxDate ?: string
+	showConfirm ?: boolean
+	confirmText ?: string
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	mode: 'single',
+	showConfirm: true,
+	confirmText: '确定',
+	glass: false,
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: any]
+	confirm: [value: any]
+	select: [date: string]
+}>()
+
+const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+
+const now = new Date()
+const currentYear = ref<number>(now.getFullYear())
+const currentMonth = ref<number>(now.getMonth() + 1)
+const rangeStart = ref<string>('')
+const rangeEnd = ref<string>('')
+
+function padZero(n : number) : string {
+	return n < 10 ? `0${n}` : `${n}`
+}
+
+function toDateStr(y : number, m : number, d : number) : string {
+	return `${y}-${padZero(m)}-${padZero(d)}`
+}
+
+const todayStr = toDateStr(now.getFullYear(), now.getMonth() + 1, now.getDate())
+
+const calendarRows = computed(() : CalendarCell[][] => {
+	const y = currentYear.value
+	const m = currentMonth.value
+	const firstDay = new Date(y, m - 1, 1).getDay()
+	const daysInMonth = new Date(y, m, 0).getDate()
+	const prevMonth = m === 1 ? 12 : m - 1
+	const prevYear = m === 1 ? y - 1 : y
+	const prevDays = new Date(prevYear, prevMonth, 0).getDate()
+
+	const cells : CalendarCell[] = []
+	// 上月尾部
+	for (let i = firstDay - 1; i >= 0; i--) {
+		const d = prevDays - i
+		cells.push(createCell(prevYear, prevMonth, d, false))
+	}
+	// 当月
+	for (let d = 1; d <= daysInMonth; d++) {
+		cells.push(createCell(y, m, d, true))
+	}
+	// 下月头部补齐到 42 格
+	const nextMonth = m === 12 ? 1 : m + 1
+	const nextYear = m === 12 ? y + 1 : y
+	let remaining = 42 - cells.length
+	for (let d = 1; d <= remaining; d++) {
+		cells.push(createCell(nextYear, nextMonth, d, false))
+	}
+
+	// 分行
+	const rows : CalendarCell[][] = []
+	for (let i = 0; i < cells.length; i += 7) {
+		rows.push(cells.slice(i, i + 7))
+	}
+	return rows
+})
+
+function createCell(y : number, m : number, d : number, currentMonth : boolean) : CalendarCell {
+	const dateStr = toDateStr(y, m, d)
+	const isSelected = checkSelected(dateStr)
+	const inRange = checkInRange(dateStr)
+	const isRangeStart = rangeStart.value === dateStr
+	const isRangeEnd = rangeEnd.value === dateStr
+	const disabled = checkDisabled(dateStr)
+	return {
+		year: y, month: m, day: d, dateStr,
+		currentMonth, isToday: dateStr === todayStr,
+		isSelected, inRange, isRangeStart, isRangeEnd, disabled,
+	}
+}
+
+function checkSelected(dateStr : string) : boolean {
+	const val = props.modelValue
+	if (val == null) return false
+	if (props.mode === 'multiple' && Array.isArray(val)) {
+		return (val as string[]).includes(dateStr)
+	}
+	if (props.mode === 'range') {
+		return dateStr === rangeStart.value || dateStr === rangeEnd.value
+	}
+	return val === dateStr
+}
+
+function checkInRange(dateStr : string) : boolean {
+	if (props.mode !== 'range') return false
+	if (!rangeStart.value || !rangeEnd.value) return false
+	return dateStr > rangeStart.value && dateStr < rangeEnd.value
+}
+
+function checkDisabled(dateStr : string) : boolean {
+	if (props.minDate && dateStr < props.minDate) return true
+	if (props.maxDate && dateStr > props.maxDate) return true
+	return false
+}
+
+function handleSelect(cell : CalendarCell) {
+	if (cell.disabled || !cell.currentMonth) return
+	const dateStr = cell.dateStr
+	emit('select', dateStr)
+
+	if (props.mode === 'single') {
+		emit('update:modelValue', dateStr)
+		emit('confirm', dateStr)
+	} else if (props.mode === 'range') {
+		if (!rangeStart.value || rangeEnd.value) {
+			rangeStart.value = dateStr
+			rangeEnd.value = ''
+		} else {
+			if (dateStr < rangeStart.value) {
+				rangeEnd.value = rangeStart.value
+				rangeStart.value = dateStr
+			} else {
+				rangeEnd.value = dateStr
+			}
+			emit('update:modelValue', [rangeStart.value, rangeEnd.value])
+		}
+	} else if (props.mode === 'multiple') {
+		const current = Array.isArray(props.modelValue) ? [...(props.modelValue as string[])] : [] as string[]
+		const idx = current.indexOf(dateStr)
+		if (idx > -1) {
+			current.splice(idx, 1)
+		} else {
+			current.push(dateStr)
+		}
+		emit('update:modelValue', current)
+	}
+}
+
+function handleConfirm() {
+	emit('confirm', props.modelValue)
+}
+
+function prevMonth() {
+	if (currentMonth.value === 1) {
+		currentMonth.value = 12
+		currentYear.value--
+	} else {
+		currentMonth.value--
+	}
+}
+
+function nextMonth() {
+	if (currentMonth.value === 12) {
+		currentMonth.value = 1
+		currentYear.value++
+	} else {
+		currentMonth.value++
+	}
+}
+</script>
+
+<style scoped>
+.parrot-calendar { background: #ffffff; border-radius: 16rpx; overflow: hidden; }
+.parrot-calendar--glass { background: rgba(255,255,255,0.18) !important; border: 1.5rpx solid rgba(255,255,255,0.35); }
+.parrot-calendar__header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 24rpx 32rpx; }
+.parrot-calendar__arrow { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; }
+.parrot-calendar__arrow-text { font-size: 40rpx; color: #606266; }
+.parrot-calendar__month-title { font-size: 30rpx; font-weight: 600; color: #303133; }
+.parrot-calendar__weekdays { display: flex; flex-direction: row; padding: 0 8rpx; }
+.parrot-calendar__weekday { flex: 1; text-align: center; font-size: 24rpx; color: #909399; padding: 12rpx 0; }
+.parrot-calendar__body { padding: 0 8rpx; }
+.parrot-calendar__row { display: flex; flex-direction: row; }
+.parrot-calendar__cell { flex: 1; display: flex; align-items: center; justify-content: center; height: 80rpx; }
+.parrot-calendar__cell--other { opacity: 0.3; }
+.parrot-calendar__cell--disabled { opacity: 0.25; }
+.parrot-calendar__cell--today .parrot-calendar__day { color: #1a7eff; }
+.parrot-calendar__cell--selected { background-color: #1a7eff; border-radius: 50%; }
+.parrot-calendar__cell--in-range { background-color: rgba(26,126,255,0.1); }
+.parrot-calendar__cell--range-start { background-color: #1a7eff; border-radius: 40rpx 0 0 40rpx; }
+.parrot-calendar__cell--range-end { background-color: #1a7eff; border-radius: 0 40rpx 40rpx 0; }
+.parrot-calendar__day { font-size: 28rpx; color: #303133; }
+.parrot-calendar__day--selected { color: #ffffff; }
+.parrot-calendar__footer { padding: 24rpx 32rpx; }
+.parrot-calendar__confirm-btn { height: 80rpx; background-color: #1a7eff; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; }
+.parrot-calendar__confirm-text { font-size: 30rpx; color: #ffffff; }
+</style>

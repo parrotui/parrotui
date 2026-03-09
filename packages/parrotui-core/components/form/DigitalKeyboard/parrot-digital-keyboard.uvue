@@ -1,0 +1,345 @@
+<template>
+	<view v-if="show" class="parrot-digital-keyboard">
+		<!-- 遮罩层 -->
+		<view class="parrot-digital-keyboard__overlay" @tap="handleClose" />
+
+		<!-- 键盘主体 -->
+		<view class="parrot-digital-keyboard__wrapper" :style="wrapperStyle">
+			<!-- 顶部标题栏 -->
+			<view v-if="title !== ''" class="parrot-digital-keyboard__header">
+				<text class="parrot-digital-keyboard__title">{{ title }}</text>
+				<text class="parrot-digital-keyboard__close" @tap="handleClose">完成</text>
+			</view>
+
+			<!-- default 默认模式: 3x4 宫格 -->
+			<view v-if="mode === 'default'" class="parrot-digital-keyboard__body">
+				<view v-for="(row, rowIndex) in defaultKeys" :key="rowIndex" class="parrot-digital-keyboard__row">
+					<view
+						v-for="(key, keyIndex) in row"
+						:key="keyIndex"
+						class="parrot-digital-keyboard__key"
+						:class="keyClass(key)"
+						@tap="handleKeyTap(key)"
+					>
+						<text v-if="key !== 'delete'" class="parrot-digital-keyboard__key-text">{{ key }}</text>
+						<text v-if="key === 'delete'" class="parrot-digital-keyboard__key-text parrot-digital-keyboard__key-text--delete">⌫</text>
+					</view>
+				</view>
+			</view>
+
+			<!-- rightColumn 模式: 左侧 3x4 + 右侧操作列 -->
+			<view v-if="mode === 'rightColumn'" class="parrot-digital-keyboard__body parrot-digital-keyboard__body--right-column">
+				<!-- 左侧数字区 -->
+				<view class="parrot-digital-keyboard__left">
+					<view v-for="(row, rowIndex) in rightColumnLeftKeys" :key="rowIndex" class="parrot-digital-keyboard__row">
+						<view
+							v-for="(key, keyIndex) in row"
+							:key="keyIndex"
+							class="parrot-digital-keyboard__key parrot-digital-keyboard__key--rc-left"
+							:class="keyClass(key)"
+							@tap="handleKeyTap(key)"
+						>
+							<text v-if="key !== 'delete'" class="parrot-digital-keyboard__key-text">{{ key }}</text>
+							<text v-if="key === 'delete'" class="parrot-digital-keyboard__key-text parrot-digital-keyboard__key-text--delete">⌫</text>
+						</view>
+					</view>
+				</view>
+				<!-- 右侧操作列 -->
+				<view class="parrot-digital-keyboard__right">
+					<view class="parrot-digital-keyboard__key parrot-digital-keyboard__key--delete-rc" @tap="handleDelete">
+						<text class="parrot-digital-keyboard__key-text parrot-digital-keyboard__key-text--delete">⌫</text>
+					</view>
+					<view class="parrot-digital-keyboard__key parrot-digital-keyboard__key--confirm" @tap="handleConfirm">
+						<text class="parrot-digital-keyboard__key-text parrot-digital-keyboard__key-text--confirm">{{ confirmText }}</text>
+					</view>
+				</view>
+			</view>
+
+			<!-- 底部安全区域 -->
+			<view v-if="safeArea" class="parrot-digital-keyboard__safe-area" />
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDigitalKeyboard 数字键盘
+ * @description 从底部弹出的数字键盘，支持默认模式和右侧栏模式，可配置随机排列、小数点禁用等
+ * @property {boolean} show - 是否显示键盘
+ * @property {string} mode - 键盘模式 default | rightColumn
+ * @property {boolean} dotDisabled - 是否禁用小数点
+ * @property {boolean} random - 是否随机排列按键
+ * @property {string} title - 顶部标题
+ * @property {string} confirmText - 确认按钮文字
+ * @property {boolean} safeArea - 是否适配底部安全区域
+ * @event {Function} update:show - 显示状态变化
+ * @event {Function} input - 按键输入
+ * @event {Function} delete - 删除
+ * @event {Function} confirm - 确认
+ * @event {Function} close - 关闭
+ */
+import { computed } from 'vue'
+
+interface Props {
+	/** 是否显示键盘 */
+	show ?: boolean
+	/** 键盘模式: default 默认 | rightColumn 右侧栏 */
+	mode ?: string
+	/** 是否禁用小数点 */
+	dotDisabled ?: boolean
+	/** 是否随机排列按键 */
+	random ?: boolean
+	/** 顶部标题 */
+	title ?: string
+	/** 确认按钮文字 */
+	confirmText ?: string
+	/** 是否适配底部安全区域 */
+	safeArea ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	show: false,
+	mode: 'default',
+	dotDisabled: false,
+	random: false,
+	title: '',
+	confirmText: '确定',
+	safeArea: true,
+})
+
+const emit = defineEmits<{
+	(e: 'update:show', value: boolean): void
+	(e: 'input', key: string): void
+	(e: 'delete'): void
+	(e: 'confirm'): void
+	(e: 'close'): void
+}>()
+
+/** 生成基础数字数组，可随机排列 */
+function getBaseNumbers() : string[] {
+	const nums : string[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+	if (props.random) {
+		/* 洗牌算法随机排列 */
+		let i = nums.length - 1
+		while (i > 0) {
+			const j = Math.floor(Math.random() * (i + 1))
+			const temp = nums[i]
+			nums[i] = nums[j]
+			nums[j] = temp
+			i--
+		}
+	}
+	return nums
+}
+
+/** default 模式下的按键二维数组 */
+const defaultKeys = computed(() : string[][] => {
+	const nums = getBaseNumbers()
+	const dotKey = props.dotDisabled ? '' : '.'
+	const rows : string[][] = [
+		[nums[0], nums[1], nums[2]],
+		[nums[3], nums[4], nums[5]],
+		[nums[6], nums[7], nums[8]],
+		[dotKey, nums[9], 'delete']
+	]
+	return rows
+})
+
+/** rightColumn 模式左侧按键二维数组 */
+const rightColumnLeftKeys = computed(() : string[][] => {
+	const nums = getBaseNumbers()
+	const dotKey = props.dotDisabled ? '' : '.'
+	const rows : string[][] = [
+		[nums[0], nums[1], nums[2]],
+		[nums[3], nums[4], nums[5]],
+		[nums[6], nums[7], nums[8]],
+		[dotKey, nums[9], '']
+	]
+	return rows
+})
+
+/** 键盘容器样式 */
+const wrapperStyle = computed(() : string => {
+	return 'background:#f5f7fa'
+})
+
+/** 按键 class 计算 */
+function keyClass(key : string) : string {
+	if (key === '') return 'parrot-digital-keyboard__key--empty'
+	if (key === 'delete') return 'parrot-digital-keyboard__key--delete'
+	if (key === '.') return 'parrot-digital-keyboard__key--dot'
+	return ''
+}
+
+/** 按键点击处理 */
+function handleKeyTap(key : string) {
+	if (key === '') return
+	if (key === 'delete') {
+		handleDelete()
+		return
+	}
+	emit('input', key)
+}
+
+/** 删除按键处理 */
+function handleDelete() {
+	emit('delete')
+}
+
+/** 确认按钮处理 */
+function handleConfirm() {
+	emit('confirm')
+	emit('update:show', false)
+}
+
+/** 关闭键盘 */
+function handleClose() {
+	emit('close')
+	emit('update:show', false)
+}
+</script>
+
+<style scoped>
+.parrot-digital-keyboard {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 999;
+}
+
+.parrot-digital-keyboard__overlay {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.parrot-digital-keyboard__wrapper {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #f5f7fa;
+	border-top-left-radius: 20rpx;
+	border-top-right-radius: 20rpx;
+}
+
+.parrot-digital-keyboard__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 20rpx 30rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #e8e8e8;
+}
+
+.parrot-digital-keyboard__title {
+	font-size: 28rpx;
+	color: #333333;
+	font-weight: 600;
+}
+
+.parrot-digital-keyboard__close {
+	font-size: 28rpx;
+	color: #1a7eff;
+}
+
+.parrot-digital-keyboard__body {
+	padding: 12rpx;
+}
+
+.parrot-digital-keyboard__body--right-column {
+	display: flex;
+	flex-direction: row;
+}
+
+.parrot-digital-keyboard__left {
+	flex: 3;
+}
+
+.parrot-digital-keyboard__right {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding-left: 6rpx;
+}
+
+.parrot-digital-keyboard__row {
+	display: flex;
+	flex-direction: row;
+}
+
+.parrot-digital-keyboard__key {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100rpx;
+	margin: 6rpx;
+	background-color: #ffffff;
+	border-radius: 12rpx;
+}
+
+.parrot-digital-keyboard__key--rc-left {
+	flex: 1;
+}
+
+.parrot-digital-keyboard__key--empty {
+	background-color: transparent;
+}
+
+.parrot-digital-keyboard__key--delete {
+	background-color: #e0e0e0;
+}
+
+.parrot-digital-keyboard__key--dot {
+	background-color: #ffffff;
+}
+
+.parrot-digital-keyboard__key--delete-rc {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 6rpx;
+	background-color: #e0e0e0;
+	border-radius: 12rpx;
+}
+
+.parrot-digital-keyboard__key--confirm {
+	flex: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 6rpx;
+	background-color: #1a7eff;
+	border-radius: 12rpx;
+}
+
+.parrot-digital-keyboard__key-text {
+	font-size: 40rpx;
+	color: #333333;
+	font-weight: 500;
+}
+
+.parrot-digital-keyboard__key-text--delete {
+	font-size: 36rpx;
+	color: #333333;
+}
+
+.parrot-digital-keyboard__key-text--confirm {
+	font-size: 30rpx;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.parrot-digital-keyboard__safe-area {
+	padding-bottom: 20rpx;
+}
+</style>

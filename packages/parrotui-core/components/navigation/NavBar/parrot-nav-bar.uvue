@@ -1,0 +1,236 @@
+<template>
+	<!-- NavBar 导航栏：自定义顶部导航，支持固定、安全区、glass -->
+	<view
+		class="parrot-nav-bar"
+		:class="[
+			fixed ? 'parrot-nav-bar--fixed' : '',
+			border ? 'parrot-nav-bar--border' : '',
+			glass ? 'parrot-nav-bar--glass' : '',
+		]"
+		:style="navStyle"
+	>
+		<!-- 状态栏占位 -->
+		<view v-if="safeAreaInsetTop" class="parrot-nav-bar__status" :style="statusBarStyle"></view>
+
+		<!-- 导航内容 -->
+		<view class="parrot-nav-bar__content">
+			<!-- 左侧 -->
+			<view class="parrot-nav-bar__left" @tap="handleClickLeft">
+				<text v-if="leftIcon" class="parrot-nav-bar__left-icon">{{ leftIcon }}</text>
+				<text v-if="leftText" class="parrot-nav-bar__left-text">{{ leftText }}</text>
+				<slot name="left"></slot>
+			</view>
+
+			<!-- 标题 -->
+			<view class="parrot-nav-bar__title-wrap" @tap="handleClickTitle">
+				<slot name="title">
+					<text class="parrot-nav-bar__title" :style="titleStyle">{{ title }}</text>
+				</slot>
+			</view>
+
+			<!-- 右侧 -->
+			<view class="parrot-nav-bar__right" @tap="handleClickRight">
+				<slot name="right">
+					<text v-if="rightIcon" class="parrot-nav-bar__right-icon">{{ rightIcon }}</text>
+					<text v-if="rightText" class="parrot-nav-bar__right-text">{{ rightText }}</text>
+				</slot>
+			</view>
+		</view>
+	</view>
+	<!-- 固定定位时的占位元素 -->
+	<view v-if="fixed && placeholder" class="parrot-nav-bar__placeholder" :style="placeholderStyle"></view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-nav-bar 导航栏
+ * 自定义顶部导航栏，内嵌状态栏占位，支持固定定位、标题、左右操作区。
+ *
+ * @prop title            标题
+ * @prop leftIcon         左侧图标
+ * @prop leftText         左侧文字
+ * @prop rightIcon        右侧图标
+ * @prop rightText        右侧文字
+ * @prop fixed            是否固定在顶部
+ * @prop placeholder      固定时是否生成占位元素
+ * @prop safeAreaInsetTop 是否留出状态栏高度
+ * @prop background       背景色
+ * @prop border           是否显示底部边框
+ * @prop glass            磨砂玻璃风格
+ * @prop titleColor       标题颜色
+ * @prop titleSize        标题字号 rpx
+ * @prop zIndex           层级
+ *
+ * @event clickLeft   点击左侧
+ * @event clickRight  点击右侧
+ * @event clickTitle  点击标题
+ */
+import { computed, ref } from 'vue'
+
+interface Props {
+	title ?: string
+	leftIcon ?: string
+	leftText ?: string
+	rightIcon ?: string
+	rightText ?: string
+	fixed ?: boolean
+	placeholder ?: boolean
+	safeAreaInsetTop ?: boolean
+	background ?: string
+	border ?: boolean
+	glass ?: boolean
+	titleColor ?: string
+	titleSize ?: number
+	zIndex ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	title: '',
+	fixed: false,
+	placeholder: true,
+	safeAreaInsetTop: true,
+	background: '#ffffff',
+	border: true,
+	glass: false,
+	titleColor: '#303133',
+	titleSize: 34,
+	zIndex: 100,
+})
+
+const emit = defineEmits<{
+	clickLeft: []
+	clickRight: []
+	clickTitle: []
+}>()
+
+const statusBarHeight = ref<number>(0)
+
+try {
+	const sysInfo = uni.getSystemInfoSync()
+	statusBarHeight.value = sysInfo.statusBarHeight ?? 0
+} catch (e) {
+	statusBarHeight.value = 44
+}
+
+const navStyle = computed(() : string => {
+	const parts : string[] = []
+	if (!props.glass) {
+		parts.push(`background:${props.background ?? '#ffffff'}`)
+	}
+	parts.push(`z-index:${props.zIndex ?? 100}`)
+	return parts.join(';')
+})
+
+const statusBarStyle = computed(() : string => {
+	return `height:${statusBarHeight.value}px`
+})
+
+const titleStyle = computed(() : string => {
+	return `color:${props.titleColor ?? '#303133'};font-size:${props.titleSize ?? 34}rpx`
+})
+
+// 固定时的占位高度 = 状态栏 + 内容栏(44px)
+const placeholderStyle = computed(() : string => {
+	const h = (props.safeAreaInsetTop ? statusBarHeight.value : 0) + 44
+	return `height:${h}px`
+})
+
+function handleClickLeft() {
+	emit('clickLeft')
+}
+
+function handleClickRight() {
+	emit('clickRight')
+}
+
+function handleClickTitle() {
+	emit('clickTitle')
+}
+</script>
+
+<style scoped>
+.parrot-nav-bar {
+	width: 100%;
+}
+.parrot-nav-bar--fixed {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+}
+.parrot-nav-bar--border {
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #ebeef5;
+}
+.parrot-nav-bar--glass {
+	background: rgba(255, 255, 255, 0.72) !important;
+	border-bottom: 1.5rpx solid rgba(255, 255, 255, 0.5);
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.parrot-nav-bar__status {
+	width: 100%;
+}
+
+.parrot-nav-bar__content {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 88rpx;
+	padding: 0 24rpx;
+	position: relative;
+}
+
+.parrot-nav-bar__left {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	min-width: 120rpx;
+}
+.parrot-nav-bar__left-icon {
+	font-size: 36rpx;
+	color: #303133;
+	margin-right: 8rpx;
+}
+.parrot-nav-bar__left-text {
+	font-size: 28rpx;
+	color: #606266;
+}
+
+.parrot-nav-bar__title-wrap {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+}
+.parrot-nav-bar__title {
+	font-size: 34rpx;
+	font-weight: 600;
+	color: #303133;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.parrot-nav-bar__right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	min-width: 120rpx;
+	justify-content: flex-end;
+}
+.parrot-nav-bar__right-icon {
+	font-size: 36rpx;
+	color: #303133;
+}
+.parrot-nav-bar__right-text {
+	font-size: 28rpx;
+	color: #606266;
+}
+
+.parrot-nav-bar__placeholder {
+	width: 100%;
+}
+</style>

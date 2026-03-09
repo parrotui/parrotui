@@ -1,0 +1,148 @@
+<template>
+	<view
+		class="parrot-code"
+		:class="[
+			inline ? 'parrot-code--inline' : 'parrot-code--block',
+			theme === 'dark' ? 'parrot-code--dark' : ''
+		]"
+		:style="codeStyle"
+	>
+		<view v-if="!inline && showLineNumbers" class="parrot-code__lines">
+			<text v-for="n in lineCount" :key="n" class="parrot-code__line-num">{{ n }}</text>
+		</view>
+		<text class="parrot-code__content" :selectable="true">
+			<slot>{{ code }}</slot>
+		</text>
+		<view v-if="!inline && copyable" class="parrot-code__copy" @click="handleCopy">
+			<text class="parrot-code__copy-text">复制</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	code?: string
+	inline?: boolean
+	theme?: 'light' | 'dark'
+	showLineNumbers?: boolean
+	copyable?: boolean
+	fontSize?: string
+	margin?: string
+}>(), {
+	code: '',
+	inline: false,
+	theme: 'light',
+	showLineNumbers: false,
+	copyable: false,
+	fontSize: '24rpx',
+	margin: '',
+})
+
+const emit = defineEmits<{ copy: [code: string] }>()
+
+const lineCount = computed(() => {
+	if (!props.code) return 0
+	return props.code.split('\n').length
+})
+
+const codeStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.fontSize) style.fontSize = props.fontSize
+	if (props.margin) style.margin = props.margin
+	return style
+})
+
+function handleCopy() {
+	if (typeof uni !== 'undefined' && props.code) {
+		uni.setClipboardData({
+			data: props.code,
+			success: () => {
+				uni.showToast({ title: '已复制', icon: 'none' })
+				emit('copy', props.code)
+			}
+		})
+	}
+}
+</script>
+
+<style lang="scss">
+.parrot-code {
+	font-family: 'Courier New', Consolas, monospace;
+
+	&--inline {
+		display: inline;
+		background-color: #f5f5f5;
+		color: #e6006c;
+		padding: 4rpx 12rpx;
+		border-radius: 6rpx;
+		font-size: 24rpx;
+	}
+
+	&--block {
+		position: relative;
+		display: flex;
+		flex-direction: row;
+		background-color: #f5f7fa;
+		border-radius: 8rpx;
+		padding: 24rpx;
+		overflow: auto;
+		margin: 16rpx 0;
+	}
+
+	&--dark {
+		background-color: #1e1e1e;
+	}
+
+	&--dark .parrot-code__content {
+		color: #d4d4d4;
+	}
+
+	&--dark .parrot-code__line-num {
+		color: #858585;
+	}
+}
+
+.parrot-code__lines {
+	display: flex;
+	flex-direction: column;
+	margin-right: 20rpx;
+	padding-right: 16rpx;
+	border-right: 1px solid #e4e7ed;
+}
+
+.parrot-code__line-num {
+	font-size: 22rpx;
+	color: #c0c4cc;
+	line-height: 1.6;
+	text-align: right;
+	min-width: 40rpx;
+}
+
+.parrot-code__content {
+	flex: 1;
+	color: #303133;
+	line-height: 1.6;
+	white-space: pre-wrap;
+}
+
+.parrot-code__copy {
+	position: absolute;
+	top: 12rpx;
+	right: 12rpx;
+	padding: 6rpx 16rpx;
+	background-color: rgba(0,0,0,0.06);
+	border-radius: 6rpx;
+}
+
+.parrot-code__copy-text {
+	font-size: 20rpx;
+	color: #909399;
+}
+
+.parrot-code__copy:active {
+	opacity: 0.7;
+}
+</style>

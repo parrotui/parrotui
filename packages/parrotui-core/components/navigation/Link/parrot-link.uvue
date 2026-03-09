@@ -1,0 +1,104 @@
+<template>
+	<!-- Link 超链接：文字链接，支持下划线、类型色、禁用 -->
+	<text
+		class="parrot-link"
+		:class="[
+			`parrot-link--${type ?? 'primary'}`,
+			underline ? 'parrot-link--underline' : '',
+			disabled ? 'parrot-link--disabled' : '',
+		]"
+		:style="linkStyle"
+		@tap="handleTap"
+	>{{ text }}<slot></slot></text>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-link 超链接
+ * 文字链接组件，支持多种类型颜色、下划线和点击跳转。
+ *
+ * @prop text       链接文字
+ * @prop url        跳转地址（uni.navigateTo）
+ * @prop type       类型：primary/success/warning/danger/default
+ * @prop underline  是否显示下划线
+ * @prop disabled   是否禁用
+ * @prop fontSize   字体大小 rpx
+ * @prop openType   跳转方式：navigate/redirect/reLaunch/switchTab/外部链接
+ *
+ * @event click  点击事件
+ */
+import { computed } from 'vue'
+
+interface Props {
+	text ?: string
+	url ?: string
+	type ?: string
+	underline ?: boolean
+	disabled ?: boolean
+	fontSize ?: number
+	openType ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	text: '',
+	type: 'primary',
+	underline: false,
+	disabled: false,
+	fontSize: 28,
+	openType: 'navigate',
+})
+
+const emit = defineEmits<{
+	click: []
+}>()
+
+const linkStyle = computed(() : string => {
+	return `font-size:${props.fontSize ?? 28}rpx`
+})
+
+function handleTap() {
+	if (props.disabled) return
+	emit('click')
+	if (!props.url) return
+	const openType = props.openType ?? 'navigate'
+	if (openType === 'navigate') {
+		uni.navigateTo({ url: props.url as string })
+	} else if (openType === 'redirect') {
+		uni.redirectTo({ url: props.url as string })
+	} else if (openType === 'reLaunch') {
+		uni.reLaunch({ url: props.url as string })
+	} else if (openType === 'switchTab') {
+		uni.switchTab({ url: props.url as string })
+	}
+}
+</script>
+
+<style scoped>
+.parrot-link {
+	line-height: 1.4;
+}
+
+.parrot-link--primary {
+	color: #1a7eff;
+}
+.parrot-link--success {
+	color: #41a906;
+}
+.parrot-link--warning {
+	color: #e6a23c;
+}
+.parrot-link--danger {
+	color: #f56c6c;
+}
+.parrot-link--default {
+	color: #606266;
+}
+
+.parrot-link--underline {
+	text-decoration: underline;
+}
+
+.parrot-link--disabled {
+	opacity: 0.45;
+}
+</style>

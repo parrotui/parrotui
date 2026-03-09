@@ -1,0 +1,232 @@
+// Parrot UI Utils 通用工具函数
+// 提供单位转换、防抖节流、深拷贝、日期格式化等常用工具
+
+// ==================== 单位转换 ====================
+
+/**
+ * rpx 转换为 px
+ * 根据当前设备屏幕宽度动态计算
+ * @param rpx - rpx 值
+ * @returns 转换后的 px 值
+ */
+export function rpx2px(rpx: number): number {
+  const systemInfo = uni.getSystemInfoSync()
+  const screenWidth = systemInfo.screenWidth
+  // uni-app 规范：750rpx = 屏幕宽度
+  return (rpx / 750) * screenWidth
+}
+
+/**
+ * px 转换为 rpx
+ * 根据当前设备屏幕宽度动态计算
+ * @param px - px 值
+ * @returns 转换后的 rpx 值
+ */
+export function px2rpx(px: number): number {
+  const systemInfo = uni.getSystemInfoSync()
+  const screenWidth = systemInfo.screenWidth
+  // uni-app 规范：750rpx = 屏幕宽度
+  return (px / screenWidth) * 750
+}
+
+// ==================== 防抖节流 ====================
+
+/**
+ * 防抖函数
+ * 在最后一次调用后等待 delay 毫秒才执行
+ * @param fn - 需要防抖的函数
+ * @param delay - 延迟时间（毫秒）
+ * @returns 经过防抖处理的函数
+ */
+export function debounce(fn: () => void, delay: number): () => void {
+  let timer: number = -1
+
+  return (): void => {
+    // 如果已有定时器，先清除
+    if (timer !== -1) {
+      clearTimeout(timer)
+    }
+    // 重新设置定时器
+    timer = setTimeout(() => {
+      fn()
+      timer = -1
+    }, delay)
+  }
+}
+
+/**
+ * 节流函数
+ * 在 delay 毫秒内只执行一次
+ * @param fn - 需要节流的函数
+ * @param delay - 间隔时间（毫秒）
+ * @returns 经过节流处理的函数
+ */
+export function throttle(fn: () => void, delay: number): () => void {
+  let lastTime: number = 0
+
+  return (): void => {
+    const now = Date.now()
+    if (now - lastTime >= delay) {
+      lastTime = now
+      fn()
+    }
+  }
+}
+
+// ==================== 对象操作 ====================
+
+/**
+ * 深拷贝对象（基于 JSON 序列化）
+ * 注意：不支持 Function、RegExp、Date 等特殊类型
+ * @param obj - 需要深拷贝的对象
+ * @returns 深拷贝后的新对象
+ */
+export function deepClone(obj: UTSJSONObject): UTSJSONObject {
+  const jsonStr = JSON.stringify(obj)
+  const result = JSON.parse<UTSJSONObject>(jsonStr)
+  if (result != null) {
+    return result
+  }
+  // 解析失败时返回空对象
+  return {} as UTSJSONObject
+}
+
+/**
+ * 判断是否为空对象
+ * @param obj - 需要判断的对象
+ * @returns 是否为空对象
+ */
+export function isEmptyObject(obj: UTSJSONObject): boolean {
+  return Object.keys(obj).length === 0
+}
+
+// ==================== 日期格式化 ====================
+
+/**
+ * 日期格式化
+ * 支持的格式占位符：yyyy（年）、MM（月）、dd（日）、HH（时）、mm（分）、ss（秒）
+ * @param date - Date 对象
+ * @param format - 格式化模板，如 'yyyy-MM-dd HH:mm:ss'
+ * @returns 格式化后的日期字符串
+ */
+export function formatDate(date: Date, format: string): string {
+  const year = date.getFullYear().toString()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+  const seconds = date.getSeconds()
+
+  let result = format
+
+  // 替换年份
+  result = result.replace('yyyy', year)
+
+  // 替换月份（补零）
+  const monthStr = month < 10 ? '0' + month.toString() : month.toString()
+  result = result.replace('MM', monthStr)
+
+  // 替换日期（补零）
+  const dayStr = day < 10 ? '0' + day.toString() : day.toString()
+  result = result.replace('dd', dayStr)
+
+  // 替换小时（补零）
+  const hoursStr = hours < 10 ? '0' + hours.toString() : hours.toString()
+  result = result.replace('HH', hoursStr)
+
+  // 替换分钟（补零）
+  const minutesStr = minutes < 10 ? '0' + minutes.toString() : minutes.toString()
+  result = result.replace('mm', minutesStr)
+
+  // 替换秒数（补零）
+  const secondsStr = seconds < 10 ? '0' + seconds.toString() : seconds.toString()
+  result = result.replace('ss', secondsStr)
+
+  return result
+}
+
+// ==================== ID 生成 ====================
+
+// 内部自增计数器，确保同一毫秒内的 ID 也不重复
+let _idCounter: number = 0
+
+/**
+ * 生成唯一 ID
+ * 格式：prefix + 时间戳 + 自增计数
+ * @param prefix - ID 前缀，默认为 'parrot'
+ * @returns 唯一 ID 字符串
+ */
+export function generateId(prefix: string = 'parrot'): string {
+  _idCounter++
+  const timestamp = Date.now().toString()
+  return prefix + '_' + timestamp + '_' + _idCounter.toString()
+}
+
+// ==================== 系统信息 ====================
+
+/**
+ * 获取系统信息的封装
+ * 返回常用的系统信息字段
+ * @returns 包含系统信息的对象
+ */
+export function getSystemInfo(): UTSJSONObject {
+  const info = uni.getSystemInfoSync()
+  const result: UTSJSONObject = {} as UTSJSONObject
+
+  // 屏幕相关
+  result['screenWidth'] = info.screenWidth
+  result['screenHeight'] = info.screenHeight
+  result['windowWidth'] = info.windowWidth
+  result['windowHeight'] = info.windowHeight
+  result['statusBarHeight'] = info.statusBarHeight ?? 0
+  result['pixelRatio'] = info.devicePixelRatio
+
+  // 设备相关
+  result['platform'] = info.osName ?? ''
+  result['system'] = info.osVersion ?? ''
+  result['brand'] = info.deviceBrand ?? ''
+  result['model'] = info.deviceModel ?? ''
+
+  // 应用相关
+  result['appVersion'] = info.appVersion ?? ''
+  result['appLanguage'] = info.appLanguage ?? ''
+
+  return result
+}
+
+/**
+ * 获取状态栏高度
+ * @returns 状态栏高度（px）
+ */
+export function getStatusBarHeight(): number {
+  const info = uni.getSystemInfoSync()
+  return info.statusBarHeight ?? 0
+}
+
+/**
+ * 判断当前平台
+ * @returns 平台标识字符串：'ios' | 'android' | 'harmony' | 'web' | 'mp' | 'unknown'
+ */
+export function getPlatform(): string {
+  const info = uni.getSystemInfoSync()
+  const platform = (info.osName ?? '').toLowerCase()
+
+  if (platform === 'ios') {
+    return 'ios'
+  } else if (platform === 'android') {
+    return 'android'
+  } else if (platform === 'harmonyos') {
+    return 'harmony'
+  }
+
+  // 编译条件判断
+  // #ifdef H5
+  return 'web'
+  // #endif
+
+  // #ifdef MP
+  return 'mp'
+  // #endif
+
+  return 'unknown'
+}

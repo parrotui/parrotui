@@ -1,0 +1,235 @@
+<template>
+	<!-- Message 消息提示：全局顶部/居中消息通知 -->
+	<view
+		v-if="visible"
+		class="parrot-message"
+		:class="[
+			`parrot-message--${type ?? 'info'}`,
+			`parrot-message--${position ?? 'top'}`,
+			showAni ? 'parrot-message--show' : '',
+			glass ? 'parrot-message--glass' : '',
+		]"
+		:style="messageStyle"
+	>
+		<!-- 图标 -->
+		<text v-if="iconText" class="parrot-message__icon">{{ iconText }}</text>
+		<!-- 文字 -->
+		<text class="parrot-message__text">{{ text }}</text>
+		<!-- 关闭按钮 -->
+		<view v-if="closable" class="parrot-message__close" @tap.stop="handleClose">
+			<text class="parrot-message__close-icon">✕</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-message 消息提示
+ * 全局消息通知，从顶部或居中滑入显示，支持自动关闭。
+ *
+ * @prop show       是否显示
+ * @prop type       消息类型：primary/success/warning/danger/info
+ * @prop text       消息内容
+ * @prop duration   自动关闭时间 ms，0 则不自动关闭
+ * @prop closable   是否可关闭
+ * @prop position   显示位置：top/center
+ * @prop glass      磨砂玻璃风格
+ * @prop icon       自定义图标文字
+ * @prop zIndex     层级
+ *
+ * @event close        关闭事件
+ * @event update:show  双向绑定
+ */
+import { computed, ref, watch } from 'vue'
+
+interface Props {
+	show ?: boolean
+	type ?: string
+	text ?: string
+	duration ?: number
+	closable ?: boolean
+	position ?: string
+	glass ?: boolean
+	icon ?: string
+	zIndex ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	show: false,
+	type: 'info',
+	text: '',
+	duration: 3000,
+	closable: false,
+	position: 'top',
+	glass: false,
+	zIndex: 3000,
+})
+
+const emit = defineEmits<{
+	close: []
+	'update:show': [show: boolean]
+}>()
+
+const visible = ref<boolean>(false)
+const showAni = ref<boolean>(false)
+let timer : ReturnType<typeof setTimeout> | null = null
+
+const iconMap : Record<string, string> = {
+	success: '✓',
+	warning: '⚠',
+	danger: '✕',
+	info: 'ℹ',
+	primary: 'ℹ',
+}
+
+const iconText = computed(() : string => {
+	if (props.icon) return props.icon as string
+	return iconMap[props.type ?? 'info'] ?? ''
+})
+
+const messageStyle = computed(() : string => {
+	return `z-index:${props.zIndex ?? 3000}`
+})
+
+watch(() => props.show, (val) => {
+	if (val) {
+		openMessage()
+	} else {
+		closeMessage()
+	}
+}, { immediate: true })
+
+function openMessage() {
+	visible.value = true
+	setTimeout(() => {
+		showAni.value = true
+	}, 16)
+	// 自动关闭
+	const dur = props.duration ?? 3000
+	if (dur > 0) {
+		clearTimer()
+		timer = setTimeout(() => {
+			handleClose()
+		}, dur)
+	}
+}
+
+function closeMessage() {
+	showAni.value = false
+	setTimeout(() => {
+		visible.value = false
+	}, 300)
+}
+
+function handleClose() {
+	clearTimer()
+	emit('update:show', false)
+	emit('close')
+	closeMessage()
+}
+
+function clearTimer() {
+	if (timer != null) {
+		clearTimeout(timer!)
+		timer = null
+	}
+}
+</script>
+
+<style scoped>
+.parrot-message {
+	position: fixed;
+	left: 32rpx;
+	right: 32rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 20rpx 28rpx;
+	border-radius: 16rpx;
+	transition: transform 0.3s, opacity 0.3s;
+	opacity: 0;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 位置 */
+.parrot-message--top {
+	top: 0;
+	transform: translateY(-100%);
+}
+.parrot-message--center {
+	top: 50%;
+	transform: translateY(-50%) scale(0.8);
+}
+
+/* 显示动画 */
+.parrot-message--show.parrot-message--top {
+	transform: translateY(0);
+	opacity: 1;
+	top: 24rpx;
+}
+.parrot-message--show.parrot-message--center {
+	transform: translateY(-50%) scale(1);
+	opacity: 1;
+}
+
+/* 类型色 */
+.parrot-message--primary {
+	background-color: #ecf5ff;
+	border-left-width: 6rpx;
+	border-left-style: solid;
+	border-left-color: #1a7eff;
+}
+.parrot-message--success {
+	background-color: #f0f9eb;
+	border-left-width: 6rpx;
+	border-left-style: solid;
+	border-left-color: #41a906;
+}
+.parrot-message--warning {
+	background-color: #fdf6ec;
+	border-left-width: 6rpx;
+	border-left-style: solid;
+	border-left-color: #e6a23c;
+}
+.parrot-message--danger {
+	background-color: #fef0f0;
+	border-left-width: 6rpx;
+	border-left-style: solid;
+	border-left-color: #f56c6c;
+}
+.parrot-message--info {
+	background-color: #f4f4f5;
+	border-left-width: 6rpx;
+	border-left-style: solid;
+	border-left-color: #909399;
+}
+
+/* 磨砂玻璃 */
+.parrot-message--glass {
+	background: rgba(255, 255, 255, 0.72) !important;
+	border: 1.5rpx solid rgba(255, 255, 255, 0.5) !important;
+}
+
+.parrot-message__icon {
+	font-size: 32rpx;
+	margin-right: 12rpx;
+}
+.parrot-message__text {
+	flex: 1;
+	font-size: 28rpx;
+	color: #303133;
+	line-height: 1.5;
+}
+.parrot-message__close {
+	margin-left: 16rpx;
+	width: 36rpx;
+	height: 36rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-message__close-icon {
+	font-size: 24rpx;
+	color: #909399;
+}
+</style>

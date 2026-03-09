@@ -1,0 +1,192 @@
+<template>
+	<!-- 虚拟滚动列表：仅渲染可视区域 + 缓冲区内的元素，支持大数据量列表 -->
+	<scroll-view
+		class="parrot-virtual-list"
+		scroll-y
+		:style="containerStyle"
+		:scroll-top="scrollTopValue"
+		@scroll="onScroll"
+		@scrolltolower="onReachBottom"
+		@scrolltoupper="onReachTop"
+	>
+		<!-- 顶部占位，模拟未渲染区域的高度 -->
+		<view :style="topSpacerStyle" />
+		<!-- 可视项 -->
+		<view
+			v-for="idx in visibleIndices"
+			:key="idx"
+			class="parrot-virtual-list__item"
+			:style="itemWrapStyle"
+		>
+			<slot :index="idx" :style="itemSlotStyle" />
+		</view>
+		<!-- 底部占位 -->
+		<view :style="bottomSpacerStyle" />
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-virtual-list 虚拟滚动列表
+ * 实验性组件 —— 基于 scroll-view，仅渲染可视区域 + buffer 范围内的元素
+ *
+ * 通过上下 padding（spacer）模拟完整列表高度，大幅降低 DOM 数量。
+ * 内部维护 startIndex / endIndex，暴露给 slot 作用域供父组件使用。
+ *
+ * @prop itemCount  总数据量
+ * @prop itemHeight 每项高度 rpx
+ * @prop buffer     缓冲区额外渲染行数
+ * @prop height     容器高度 rpx
+ * @prop overscan   额外过扫描行数
+ */
+
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+interface Props {
+	/** 总数据量 */
+	itemCount ?: number
+	/** 每项高度 rpx */
+	itemHeight ?: number
+	/** 缓冲区额外渲染行数 */
+	buffer ?: number
+	/** 容器高度 rpx */
+	height ?: number
+	/** 额外过扫描行数 */
+	overscan ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	itemCount: 0,
+	itemHeight: 100,
+	buffer: 5,
+	height: 800,
+	overscan: 3,
+})
+
+const emit = defineEmits<{
+	scroll: [scrollTop: number]
+	reachTop: []
+	reachBottom: []
+}>()
+
+/* ---------- 内部状态 ---------- */
+const startIndex = ref<number>(0)
+const endIndex = ref<number>(0)
+const scrollTopValue = ref<number>(0)
+
+/** rpx 到 px 换算系数，由 onMounted 中获取 */
+let pxPerRpx = 0.5
+
+/* ---------- 计算属性 ---------- */
+
+/** 容器样式 */
+const containerStyle = computed(() : string => {
+	return `height:${props.height ?? 800}rpx;`
+})
+
+/** 顶部占位高度 */
+const topSpacerStyle = computed(() : string => {
+	const h = startIndex.value * (props.itemHeight ?? 100)
+	return `height:${h}rpx;`
+})
+
+/** 底部占位高度 */
+const bottomSpacerStyle = computed(() : string => {
+	const total = (props.itemCount ?? 0) * (props.itemHeight ?? 100)
+	const rendered = endIndex.value * (props.itemHeight ?? 100)
+	const h = total - rendered
+	return `height:${Math.max(0, h)}rpx;`
+})
+
+/** 每项外层包裹样式 */
+const itemWrapStyle = computed(() : string => {
+	return `height:${props.itemHeight ?? 100}rpx;overflow:hidden;`
+})
+
+/** 传递给 slot 的样式字符串 */
+const itemSlotStyle = computed(() : string => {
+	return `height:${props.itemHeight ?? 100}rpx;`
+})
+
+/** 当前可见的索引数组 */
+const visibleIndices = computed(() : number[] => {
+	const result : number[] = []
+	const s = startIndex.value
+	const e = endIndex.value
+	for (let i = s; i < e; i++) {
+		result.push(i)
+	}
+	return result
+})
+
+/* ---------- 可视范围计算 ---------- */
+
+/** 根据滚动距离（px）更新可视范围 */
+function updateRange(scrollTopPx : number) {
+	if (pxPerRpx <= 0) return
+	const itemHPx = (props.itemHeight ?? 100) * pxPerRpx
+	const containerHPx = (props.height ?? 800) * pxPerRpx
+	const totalBuf = (props.buffer ?? 5) + (props.overscan ?? 3)
+	const count = props.itemCount ?? 0
+
+	let start = Math.floor(scrollTopPx / itemHPx) - totalBuf
+	if (start < 0) start = 0
+
+	const visibleCount = Math.ceil(containerHPx / itemHPx)
+	let end = start + visibleCount + 2 * totalBuf
+	if (end > count) end = count
+
+	startIndex.value = start
+	endIndex.value = end
+}
+
+/* ---------- 事件处理 ---------- */
+
+function onScroll(e : any) {
+	const st = e.detail.scrollTop as number
+	updateRange(st)
+	emit('scroll', st)
+}
+
+function onReachTop() {
+	emit('reachTop')
+}
+
+function onReachBottom() {
+	emit('reachBottom')
+}
+
+/* ---------- 对外暴露方法 ---------- */
+
+/** 滚动到指定索引位置 */
+function scrollTo(index : number) {
+	const target = Math.floor(index * (props.itemHeight ?? 100) * pxPerRpx)
+	/* 强制触发变更：先设为偏移值再设为目标值 */
+	scrollTopValue.value = target + 1
+	setTimeout(() => {
+		scrollTopValue.value = target
+	}, 0)
+}
+
+defineExpose({
+	scrollTo,
+})
+
+/* ---------- 生命周期 ---------- */
+
+onMounted(() => {
+	const info = uni.getSystemInfoSync()
+	pxPerRpx = info.screenWidth / 750
+	updateRange(0)
+})
+</script>
+
+<style scoped>
+.parrot-virtual-list {
+	/* scroll-view 基础样式 */
+}
+
+.parrot-virtual-list__item {
+	/* 由 itemWrapStyle 动态控制高度 */
+}
+</style>

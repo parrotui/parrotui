@@ -1,0 +1,169 @@
+<template>
+  <!-- Landscape 压屏窗/横屏弹窗：用于全屏广告/活动弹窗展示 -->
+  <view
+    v-if="show"
+    class="parrot-landscape"
+  >
+    <!-- 遮罩层 -->
+    <view class="parrot-landscape__overlay" @tap="onOverlayTap"></view>
+
+    <!-- 内容区域 -->
+    <view class="parrot-landscape__content">
+      <!-- 图片主体 -->
+      <view v-if="src != null && src !== ''" class="parrot-landscape__image-wrap">
+        <image
+          class="parrot-landscape__image"
+          :src="src"
+          mode="aspectFit"
+        />
+      </view>
+
+      <!-- 插槽（自定义内容） -->
+      <view v-if="src == null || src === ''" class="parrot-landscape__slot">
+        <slot></slot>
+      </view>
+    </view>
+
+    <!-- 关闭按钮 -->
+    <view v-if="showClose" class="parrot-landscape__close" @tap.stop="onClose">
+      <view class="parrot-landscape__close-btn">
+        <text class="parrot-landscape__close-icon">✕</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-landscape 压屏窗/横屏弹窗
+ * 全屏弹出的广告/活动图展示组件，支持图片或自定义内容。
+ *
+ * @prop show           是否显示，默认 false
+ * @prop src            图片地址
+ * @prop closeOnOverlay 点击遮罩是否关闭，默认 true
+ * @prop showClose      是否显示关闭按钮，默认 true
+ *
+ * @event close        关闭事件
+ * @event update:show  双向绑定 show
+ */
+import { computed } from 'vue'
+
+interface Props {
+  show ?: boolean
+  src ?: string
+  closeOnOverlay ?: boolean
+  showClose ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  show: false,
+  closeOnOverlay: true,
+  showClose: true,
+})
+
+const emit = defineEmits<{
+  close: []
+  'update:show': [value : boolean]
+}>()
+
+/** 关闭弹窗 */
+function onClose() {
+  emit('close')
+  emit('update:show', false)
+}
+
+/** 点击遮罩 */
+function onOverlayTap() {
+  if (props.closeOnOverlay !== false) {
+    onClose()
+  }
+}
+</script>
+
+<style scoped>
+/* ---- 全屏容器 ---- */
+.parrot-landscape {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 遮罩层 */
+.parrot-landscape__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+/* 内容区域 */
+.parrot-landscape__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 80%;
+  max-height: 70%;
+}
+
+/* 图片容器 */
+.parrot-landscape__image-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+/* 图片 */
+.parrot-landscape__image {
+  width: 580rpx;
+  height: 800rpx;
+  border-radius: 20rpx;
+}
+
+/* 自定义内容插槽 */
+.parrot-landscape__slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 关闭按钮 */
+.parrot-landscape__close {
+  position: relative;
+  z-index: 2;
+  margin-top: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parrot-landscape__close-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  border-width: 2rpx;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parrot-landscape__close-icon {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+</style>

@@ -1,0 +1,594 @@
+<template>
+	<!-- LoginD 全功能登录模板：Tab切换(账号密码/手机验证码) + 第三方登录 -->
+	<view class="parrot-login-d">
+		<!-- 顶部区域 -->
+		<view class="parrot-login-d__header">
+			<image
+				v-if="logo"
+				class="parrot-login-d__logo"
+				:src="logo"
+				mode="aspectFit"
+			/>
+			<view v-if="!logo" class="parrot-login-d__logo-placeholder">
+				<text class="parrot-login-d__logo-placeholder-text">LOGO</text>
+			</view>
+			<text class="parrot-login-d__title">{{ title }}</text>
+		</view>
+
+		<!-- Tab 切换 -->
+		<view class="parrot-login-d__tabs">
+			<view
+				class="parrot-login-d__tab"
+				:class="[activeTab === 'account' ? 'parrot-login-d__tab--active' : '']"
+				@tap="switchTab('account')"
+			>
+				<text
+					class="parrot-login-d__tab-text"
+					:class="[activeTab === 'account' ? 'parrot-login-d__tab-text--active' : '']"
+				>账号密码</text>
+				<view v-if="activeTab === 'account'" class="parrot-login-d__tab-bar"></view>
+			</view>
+			<view
+				class="parrot-login-d__tab"
+				:class="[activeTab === 'phone' ? 'parrot-login-d__tab--active' : '']"
+				@tap="switchTab('phone')"
+			>
+				<text
+					class="parrot-login-d__tab-text"
+					:class="[activeTab === 'phone' ? 'parrot-login-d__tab-text--active' : '']"
+				>手机验证码</text>
+				<view v-if="activeTab === 'phone'" class="parrot-login-d__tab-bar"></view>
+			</view>
+		</view>
+
+		<!-- 账号密码表单 -->
+		<view v-if="activeTab === 'account'" class="parrot-login-d__form">
+			<view class="parrot-login-d__field">
+				<view class="parrot-login-d__input-wrap">
+					<text class="parrot-login-d__field-icon">👤</text>
+					<input
+						class="parrot-login-d__input"
+						type="text"
+						:value="username"
+						placeholder="请输入用户名/手机号"
+						placeholder-style="color:#a8abb2"
+						@input="onUsernameInput"
+					/>
+				</view>
+			</view>
+			<view class="parrot-login-d__field">
+				<view class="parrot-login-d__input-wrap">
+					<text class="parrot-login-d__field-icon">🔒</text>
+					<input
+						class="parrot-login-d__input"
+						type="text"
+						:value="password"
+						placeholder="请输入密码"
+						placeholder-style="color:#a8abb2"
+						:password="!pwdVisible"
+						@input="onPasswordInput"
+					/>
+					<view class="parrot-login-d__eye" @tap="togglePwdVisible">
+						<text class="parrot-login-d__eye-text">{{ pwdVisible ? '👁' : '👁‍🗨' }}</text>
+					</view>
+				</view>
+			</view>
+			<!-- 忘记密码 -->
+			<view class="parrot-login-d__forgot-row">
+				<text class="parrot-login-d__forgot-link" @tap="handleForgotPassword">忘记密码？</text>
+			</view>
+		</view>
+
+		<!-- 手机验证码表单 -->
+		<view v-if="activeTab === 'phone'" class="parrot-login-d__form">
+			<view class="parrot-login-d__field">
+				<view class="parrot-login-d__input-wrap">
+					<text class="parrot-login-d__field-icon">📱</text>
+					<input
+						class="parrot-login-d__input"
+						type="number"
+						:value="phone"
+						placeholder="请输入手机号"
+						placeholder-style="color:#a8abb2"
+						maxlength="11"
+						@input="onPhoneInput"
+					/>
+				</view>
+			</view>
+			<view class="parrot-login-d__field">
+				<view class="parrot-login-d__input-wrap">
+					<text class="parrot-login-d__field-icon">🔑</text>
+					<input
+						class="parrot-login-d__input"
+						type="number"
+						:value="smsCode"
+						placeholder="请输入验证码"
+						placeholder-style="color:#a8abb2"
+						maxlength="6"
+						@input="onSmsCodeInput"
+					/>
+					<view
+						class="parrot-login-d__code-btn"
+						:class="[codeBtnDisabled ? 'parrot-login-d__code-btn--disabled' : '']"
+						@tap="handleSendCode"
+					>
+						<text class="parrot-login-d__code-btn-text">{{ codeBtnText }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 登录按钮 -->
+		<view class="parrot-login-d__action">
+			<view
+				class="parrot-login-d__btn"
+				:class="[loginBtnDisabled ? 'parrot-login-d__btn--disabled' : '']"
+				@tap="handleLogin"
+			>
+				<text class="parrot-login-d__btn-text">登录</text>
+			</view>
+
+			<!-- 注册入口 -->
+			<view class="parrot-login-d__register-row">
+				<text class="parrot-login-d__register-text">还没有账号？</text>
+				<text class="parrot-login-d__register-link" @tap="handleRegister">立即注册</text>
+			</view>
+		</view>
+
+		<!-- 第三方登录 -->
+		<view v-if="showThirdParty" class="parrot-login-d__third">
+			<view class="parrot-login-d__divider-row">
+				<view class="parrot-login-d__divider-line"></view>
+				<text class="parrot-login-d__divider-text">其他方式登录</text>
+				<view class="parrot-login-d__divider-line"></view>
+			</view>
+			<view class="parrot-login-d__third-icons">
+				<view class="parrot-login-d__third-item" @tap="handleThirdLogin('wechat')">
+					<view class="parrot-login-d__third-icon parrot-login-d__third-icon--wechat">
+						<text class="parrot-login-d__third-icon-text">微</text>
+					</view>
+				</view>
+				<view class="parrot-login-d__third-item" @tap="handleThirdLogin('qq')">
+					<view class="parrot-login-d__third-icon parrot-login-d__third-icon--qq">
+						<text class="parrot-login-d__third-icon-text">Q</text>
+					</view>
+				</view>
+				<view class="parrot-login-d__third-item" @tap="handleThirdLogin('apple')">
+					<view class="parrot-login-d__third-icon parrot-login-d__third-icon--apple">
+						<text class="parrot-login-d__third-icon-text">A</text>
+					</view>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * LoginD 全功能登录模板
+ * 综合登录：Tab 切换(账号密码/手机验证码) + 第三方登录 + 忘记密码 + 注册
+ *
+ * @prop logo             Logo 图片地址
+ * @prop title            页面标题
+ * @prop showThirdParty   是否显示第三方登录
+ * @prop countdown        验证码倒计时秒数
+ *
+ * @event login           登录事件，返回 { type, username?, password?, phone?, code? }
+ * @event sendCode        发送验证码
+ * @event forgotPassword  忘记密码
+ * @event register        注册
+ * @event thirdLogin      第三方登录
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	logo ?: string
+	title ?: string
+	showThirdParty ?: boolean
+	countdown ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	logo: '',
+	title: '欢迎回来',
+	showThirdParty: true,
+	countdown: 60,
+})
+
+const emit = defineEmits<{
+	login: [data: { type : string; username ?: string; password ?: string; phone ?: string; code ?: string }]
+	sendCode: [phone: string]
+	forgotPassword: []
+	register: []
+	thirdLogin: [provider: string]
+}>()
+
+// Tab 状态
+const activeTab = ref<string>('account')
+
+// 账号密码表单
+const username = ref<string>('')
+const password = ref<string>('')
+const pwdVisible = ref<boolean>(false)
+
+// 手机验证码表单
+const phone = ref<string>('')
+const smsCode = ref<string>('')
+
+// 倒计时
+const counting = ref<boolean>(false)
+const countdownVal = ref<number>(0)
+let timerIdVal : number = 0
+
+// Tab 切换
+function switchTab(tab : string) {
+	activeTab.value = tab
+}
+
+// 输入事件
+function onUsernameInput(e : InputEvent) {
+	username.value = e.detail.value
+}
+
+function onPasswordInput(e : InputEvent) {
+	password.value = e.detail.value
+}
+
+function onPhoneInput(e : InputEvent) {
+	phone.value = e.detail.value
+}
+
+function onSmsCodeInput(e : InputEvent) {
+	smsCode.value = e.detail.value
+}
+
+// 切换密码可见
+function togglePwdVisible() {
+	pwdVisible.value = !pwdVisible.value
+}
+
+// 验证码按钮文字
+const codeBtnText = computed(() : string => {
+	if (counting.value) {
+		return `${countdownVal.value}s`
+	}
+	return '获取验证码'
+})
+
+// 验证码按钮是否禁用
+const codeBtnDisabled = computed(() : boolean => {
+	return counting.value || phone.value.length !== 11
+})
+
+// 登录按钮是否禁用
+const loginBtnDisabled = computed(() : boolean => {
+	if (activeTab.value === 'account') {
+		return username.value.length === 0 || password.value.length === 0
+	}
+	return phone.value.length !== 11 || smsCode.value.length === 0
+})
+
+// 发送验证码
+function handleSendCode() {
+	if (codeBtnDisabled.value) return
+	emit('sendCode', phone.value)
+	startCountdown()
+}
+
+// 开始倒计时
+function startCountdown() {
+	counting.value = true
+	countdownVal.value = props.countdown ?? 60
+	timerIdVal = setInterval(() => {
+		countdownVal.value--
+		if (countdownVal.value <= 0) {
+			clearInterval(timerIdVal)
+			counting.value = false
+			countdownVal.value = 0
+		}
+	}, 1000)
+}
+
+// 登录
+function handleLogin() {
+	if (loginBtnDisabled.value) return
+	if (activeTab.value === 'account') {
+		emit('login', {
+			type: 'account',
+			username: username.value,
+			password: password.value,
+		})
+	} else {
+		emit('login', {
+			type: 'phone',
+			phone: phone.value,
+			code: smsCode.value,
+		})
+	}
+}
+
+// 忘记密码
+function handleForgotPassword() {
+	emit('forgotPassword')
+}
+
+// 注册
+function handleRegister() {
+	emit('register')
+}
+
+// 第三方登录
+function handleThirdLogin(provider : string) {
+	emit('thirdLogin', provider)
+}
+</script>
+
+<style scoped>
+.parrot-login-d {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-color: #ffffff;
+	padding: 0 60rpx;
+}
+
+/* 头部 */
+.parrot-login-d__header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 140rpx;
+	padding-bottom: 48rpx;
+}
+
+.parrot-login-d__logo {
+	width: 140rpx;
+	height: 140rpx;
+	margin-bottom: 24rpx;
+	border-radius: 24rpx;
+}
+
+.parrot-login-d__logo-placeholder {
+	width: 140rpx;
+	height: 140rpx;
+	margin-bottom: 24rpx;
+	border-radius: 24rpx;
+	background-color: #f0f4ff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-d__logo-placeholder-text {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #1a7eff;
+}
+
+.parrot-login-d__title {
+	font-size: 44rpx;
+	font-weight: 700;
+	color: #1a1a1a;
+	line-height: 64rpx;
+}
+
+/* Tab 切换 */
+.parrot-login-d__tabs {
+	display: flex;
+	flex-direction: row;
+	margin-bottom: 48rpx;
+}
+
+.parrot-login-d__tab {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-bottom: 16rpx;
+	position: relative;
+}
+
+.parrot-login-d__tab-text {
+	font-size: 30rpx;
+	color: #909399;
+	font-weight: 500;
+}
+
+.parrot-login-d__tab-text--active {
+	color: #1a1a1a;
+	font-weight: 700;
+}
+
+.parrot-login-d__tab-bar {
+	width: 48rpx;
+	height: 6rpx;
+	border-radius: 3rpx;
+	background-color: #1a7eff;
+	margin-top: 8rpx;
+}
+
+/* 表单 */
+.parrot-login-d__form {
+	width: 100%;
+}
+
+.parrot-login-d__field {
+	margin-bottom: 28rpx;
+}
+
+.parrot-login-d__input-wrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 96rpx;
+	background-color: #f5f7fa;
+	border-radius: 16rpx;
+	padding: 0 28rpx;
+}
+
+.parrot-login-d__field-icon {
+	font-size: 36rpx;
+	margin-right: 16rpx;
+}
+
+.parrot-login-d__input {
+	flex: 1;
+	height: 96rpx;
+	font-size: 30rpx;
+	color: #303133;
+	background-color: transparent;
+}
+
+.parrot-login-d__eye {
+	padding: 0 8rpx;
+	display: flex;
+	align-items: center;
+}
+
+.parrot-login-d__eye-text {
+	font-size: 36rpx;
+}
+
+/* 忘记密码 */
+.parrot-login-d__forgot-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	margin-top: 4rpx;
+}
+
+.parrot-login-d__forgot-link {
+	font-size: 24rpx;
+	color: #1a7eff;
+}
+
+/* 验证码按钮 */
+.parrot-login-d__code-btn {
+	padding: 0 24rpx;
+	height: 60rpx;
+	border-radius: 30rpx;
+	background-color: #e8f1ff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 16rpx;
+}
+
+.parrot-login-d__code-btn--disabled {
+	opacity: 0.5;
+}
+
+.parrot-login-d__code-btn-text {
+	font-size: 24rpx;
+	font-weight: 500;
+	color: #1a7eff;
+	white-space: nowrap;
+}
+
+/* 登录按钮区域 */
+.parrot-login-d__action {
+	margin-top: 16rpx;
+}
+
+.parrot-login-d__btn {
+	width: 100%;
+	height: 96rpx;
+	background-color: #1a7eff;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-d__btn--disabled {
+	opacity: 0.5;
+}
+
+.parrot-login-d__btn-text {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.parrot-login-d__register-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-top: 32rpx;
+}
+
+.parrot-login-d__register-text {
+	font-size: 26rpx;
+	color: #909399;
+}
+
+.parrot-login-d__register-link {
+	font-size: 26rpx;
+	color: #1a7eff;
+	font-weight: 500;
+	margin-left: 8rpx;
+}
+
+/* 第三方登录 */
+.parrot-login-d__third {
+	margin-top: 64rpx;
+	padding-bottom: 80rpx;
+}
+
+.parrot-login-d__divider-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 40rpx;
+}
+
+.parrot-login-d__divider-line {
+	flex: 1;
+	height: 1rpx;
+	background-color: #e4e7ed;
+}
+
+.parrot-login-d__divider-text {
+	font-size: 24rpx;
+	color: #909399;
+	padding: 0 24rpx;
+}
+
+.parrot-login-d__third-icons {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+.parrot-login-d__third-item {
+	margin: 0 32rpx;
+}
+
+.parrot-login-d__third-icon {
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-d__third-icon--wechat {
+	background-color: #07c160;
+}
+
+.parrot-login-d__third-icon--qq {
+	background-color: #12b7f5;
+}
+
+.parrot-login-d__third-icon--apple {
+	background-color: #000000;
+}
+
+.parrot-login-d__third-icon-text {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+</style>

@@ -1,0 +1,151 @@
+<template>
+	<view class="parrot-result">
+		<!-- 图标区域 -->
+		<view class="parrot-result__icon-wrap">
+			<slot name="icon">
+				<view class="parrot-result__icon-circle" :style="iconCircleStyle">
+					<text class="parrot-result__icon-symbol" :style="iconSymbolStyle">{{ statusSymbol }}</text>
+				</view>
+			</slot>
+		</view>
+
+		<!-- 标题 -->
+		<text v-if="title" class="parrot-result__title">{{ title }}</text>
+
+		<!-- 描述 -->
+		<text v-if="description" class="parrot-result__description">{{ description }}</text>
+
+		<!-- 底部操作区插槽 -->
+		<view class="parrot-result__footer">
+			<slot />
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-result 结果页组件
+ * 用于操作结果反馈页面，如提交成功、支付失败等场景。
+ * 支持 success / warning / error / info 四种预设状态，自带图标映射。
+ * 支持自定义图标插槽和底部操作区插槽。
+ *
+ * @prop status      状态类型：success / warning / error / info，默认 success
+ * @prop title       标题文字
+ * @prop description 描述文字
+ * @prop icon        自定义图标符号（覆盖默认映射）
+ * @prop iconSize    图标容器大小 rpx，默认 120
+ *
+ * @slot default     底部操作区（如按钮）
+ * @slot icon        自定义图标区域
+ */
+import { computed } from 'vue'
+
+interface Props {
+	/** 状态类型：success / warning / error / info */
+	status ?: string
+	/** 标题文字 */
+	title ?: string
+	/** 描述文字 */
+	description ?: string
+	/** 自定义图标符号 */
+	icon ?: string
+	/** 图标容器大小 rpx */
+	iconSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	status: 'success',
+	title: '',
+	description: '',
+	icon: '',
+	iconSize: 120,
+})
+
+/** 状态对应的符号映射 */
+const symbolMap : Record<string, string> = {
+	success: '✓',
+	warning: '!',
+	error: '✕',
+	info: 'i',
+}
+
+/** 状态对应的背景颜色映射 */
+const bgColorMap : Record<string, string> = {
+	success: '#52c41a',
+	warning: '#fa8c16',
+	error: '#f5222d',
+	info: '#1a7eff',
+}
+
+/** 当前显示的符号 */
+const statusSymbol = computed(() : string => {
+	if (props.icon) return props.icon
+	return symbolMap[props.status ?? 'success'] ?? '✓'
+})
+
+/** 图标圆形背景样式 */
+const iconCircleStyle = computed(() : string => {
+	const size = props.iconSize ?? 120
+	const bg = bgColorMap[props.status ?? 'success'] ?? '#52c41a'
+	return `width:${size}rpx;height:${size}rpx;border-radius:${size}rpx;background-color:${bg};`
+})
+
+/** 图标符号样式 */
+const iconSymbolStyle = computed(() : string => {
+	const size = props.iconSize ?? 120
+	const fontSize = size * 0.5
+	return `font-size:${fontSize}rpx;`
+})
+</script>
+
+<style scoped>
+.parrot-result {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 80rpx 48rpx 60rpx;
+}
+
+.parrot-result__icon-wrap {
+	margin-bottom: 40rpx;
+}
+
+.parrot-result__icon-circle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-result__icon-symbol {
+	color: #ffffff;
+	font-weight: 700;
+	line-height: 1;
+	text-align: center;
+}
+
+.parrot-result__title {
+	font-size: 36rpx;
+	font-weight: 600;
+	color: #303133;
+	text-align: center;
+	margin-bottom: 16rpx;
+	line-height: 1.4;
+}
+
+.parrot-result__description {
+	font-size: 28rpx;
+	color: #909399;
+	text-align: center;
+	line-height: 1.6;
+	margin-bottom: 40rpx;
+	padding: 0 24rpx;
+}
+
+.parrot-result__footer {
+	margin-top: 20rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+</style>

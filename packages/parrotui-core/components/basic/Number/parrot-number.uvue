@@ -1,16 +1,45 @@
 <template>
+	<view v-if="statistic" class="parrot-number-statistic" :style="statisticStyle">
+		<!-- 统计标题 -->
+		<text v-if="title" class="parrot-number-statistic__title" :style="titleStyle">{{ title }}</text>
+		<!-- 统计数值行 -->
+		<view class="parrot-number-statistic__value">
+			<text v-if="prefix" class="parrot-number-statistic__prefix">{{ prefix }}</text>
+			<!-- 趋势图标 -->
+			<text v-if="trend === 'up'" class="parrot-number-statistic__trend parrot-number-statistic__trend--up">↑</text>
+			<text v-if="trend === 'down'" class="parrot-number-statistic__trend parrot-number-statistic__trend--down">↓</text>
+			<text 
+				class="parrot-number"
+				:class="[
+					numberClass,
+					type ? `parrot-number--${type}` : '',
+					size ? `parrot-number--${size}` : '',
+					bold ? 'parrot-number--bold' : '',
+					trend === 'up' ? 'parrot-number--trend-up' : '',
+					trend === 'down' ? 'parrot-number--trend-down' : ''
+				]"
+				:style="numberStyle"
+			>{{ formattedValue }}</text>
+			<text v-if="suffix" class="parrot-number-statistic__suffix">{{ suffix }}</text>
+		</view>
+		<!-- 统计描述 -->
+		<text v-if="description" class="parrot-number-statistic__desc">{{ description }}</text>
+	</view>
 	<text 
+		v-else
 		class="parrot-number"
 		:class="[
 			numberClass,
 			type ? `parrot-number--${type}` : '',
 			size ? `parrot-number--${size}` : '',
-			bold ? 'parrot-number--bold' : ''
+			bold ? 'parrot-number--bold' : '',
+			trend === 'up' ? 'parrot-number--trend-up' : '',
+			trend === 'down' ? 'parrot-number--trend-down' : ''
 		]"
 		:style="numberStyle"
 		@click="handleClick"
 	>
-		{{ formattedValue }}
+		{{ prefix }}{{ formattedValue }}{{ suffix }}
 	</text>
 </template>
 
@@ -34,6 +63,18 @@ interface Props {
 	thousandsSeparator?: boolean
 	// 货币符号
 	currencySymbol?: string
+	// 前缀文字
+	prefix?: string
+	// 后缀文字
+	suffix?: string
+	// 趋势方向
+	trend?: '' | 'up' | 'down'
+	// 是否为统计模式（带标题、描述的卡片式展示）
+	statistic?: boolean
+	// 统计标题
+	title?: string
+	// 统计描述
+	description?: string
 	// 自定义颜色
 	color?: string
 	// 自定义字体大小
@@ -55,6 +96,12 @@ const props = withDefaults(defineProps<Props>(), {
 	decimalPlaces: 2,
 	thousandsSeparator: false,
 	currencySymbol: '¥',
+	prefix: '',
+	suffix: '',
+	trend: '',
+	statistic: false,
+	title: '',
+	description: '',
 	color: '',
 	fontSize: '',
 	margin: '0',
@@ -71,14 +118,12 @@ const emit = defineEmits<{
 const formattedValue = computed(() => {
 	let numValue: number
 	
-	// 转换为数字
 	if (typeof props.value === 'string') {
 		numValue = parseFloat(props.value) || 0
 	} else {
 		numValue = props.value as number
 	}
 	
-	// 根据类型格式化
 	switch (props.type) {
 		case 'integer':
 			return formatInteger(numValue)
@@ -169,6 +214,14 @@ const numberStyle = computed(() => {
 		style.color = props.color
 	}
 	
+	// 趋势自动着色（未自定义颜色时）
+	if (!props.color && props.trend === 'up') {
+		style.color = '#f56c6c'
+	}
+	if (!props.color && props.trend === 'down') {
+		style.color = '#41a906'
+	}
+	
 	if (props.fontSize) {
 		let fontSize = props.fontSize
 		if (typeof fontSize === 'number') {
@@ -185,6 +238,22 @@ const numberStyle = computed(() => {
 		style.padding = props.padding
 	}
 	
+	return style
+})
+
+// 统计模式容器样式
+const statisticStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.margin) style.margin = props.margin
+	if (props.padding) style.padding = props.padding
+	return style
+})
+
+// 统计标题样式
+const titleStyle = computed(() => {
+	const style: CSSProperties = {}
+	style.color = '#909399'
+	style.fontSize = '24rpx'
 	return style
 })
 
@@ -225,25 +294,83 @@ const handleClick = (event: Event) => {
 		font-weight: bold;
 	}
 	
-	// 颜色类型
+	// 趋势颜色
+	&--trend-up {
+		color: #f56c6c;
+	}
+	
+	&--trend-down {
+		color: #41a906;
+	}
+	
+	// 颜色类型（使用 token 颜色）
 	&--primary {
-		color: #007aff;
+		color: #1a7eff;
 	}
 	
 	&--success {
-		color: #4cd964;
+		color: #41a906;
 	}
 	
 	&--warning {
-		color: #ffcc00;
+		color: #e6a23c;
 	}
 	
 	&--danger {
-		color: #ff3b30;
+		color: #f56c6c;
 	}
 	
 	&--info {
-		color: #5ac8fa;
+		color: #6c6f78;
 	}
+}
+
+// 统计模式
+.parrot-number-statistic {
+	display: flex;
+	flex-direction: column;
+}
+
+.parrot-number-statistic__title {
+	font-size: 24rpx;
+	color: #909399;
+	margin-bottom: 8rpx;
+}
+
+.parrot-number-statistic__value {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+}
+
+.parrot-number-statistic__prefix {
+	font-size: 28rpx;
+	color: #303133;
+	margin-right: 4rpx;
+}
+
+.parrot-number-statistic__suffix {
+	font-size: 24rpx;
+	color: #909399;
+	margin-left: 4rpx;
+}
+
+.parrot-number-statistic__trend {
+	font-size: 24rpx;
+	margin-right: 4rpx;
+}
+
+.parrot-number-statistic__trend--up {
+	color: #f56c6c;
+}
+
+.parrot-number-statistic__trend--down {
+	color: #41a906;
+}
+
+.parrot-number-statistic__desc {
+	font-size: 22rpx;
+	color: #c0c4cc;
+	margin-top: 8rpx;
 }
 </style>

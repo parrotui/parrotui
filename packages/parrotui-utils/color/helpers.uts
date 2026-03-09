@@ -1,0 +1,104 @@
+/**
+ * Parrot UI 颜色工具函数
+ * 提供 hex/rgb 转换、颜色混合、透明度、对比色等基础算法
+ * 供 color-manager.uts 和 useColor composable 共用
+ */
+
+/**
+ * 将 hex 颜色转为 RGB 数组
+ * @param hex - 支持 3 位或 6 位 hex（带或不带 #）
+ * @returns [r, g, b] 数组，失败返回 [0, 0, 0]
+ */
+export function hexToRgb(hex: string): number[] {
+  let h = hex.replace('#', '')
+  if (h.length === 3) {
+    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]
+  }
+  if (h.length !== 6) return [0, 0, 0]
+  const r = parseInt(h.substring(0, 2), 16)
+  const g = parseInt(h.substring(2, 4), 16)
+  const b = parseInt(h.substring(4, 6), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return [0, 0, 0]
+  return [r, g, b]
+}
+
+/**
+ * 将 RGB 数组转为 hex 字符串
+ * @param r - 红色通道 0-255
+ * @param g - 绿色通道 0-255
+ * @param b - 蓝色通道 0-255
+ * @returns #rrggbb 格式字符串
+ */
+export function rgbToHex(r: number, g: number, b: number): string {
+  const clamp = (v: number): number => Math.max(0, Math.min(255, Math.round(v)))
+  const toHex = (v: number): string => {
+    const hex = clamp(v).toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+  }
+  return '#' + toHex(r) + toHex(g) + toHex(b)
+}
+
+/**
+ * 混合两个颜色
+ * @param color1 - 第一个颜色 hex
+ * @param color2 - 第二个颜色 hex
+ * @param ratio  - 混合比例 0~1（0 = 纯 color1，1 = 纯 color2）
+ * @returns 混合后的 hex 颜色
+ */
+export function mixColors(color1: string, color2: string, ratio: number): string {
+  const r = Math.max(0, Math.min(1, ratio))
+  const rgb1 = hexToRgb(color1)
+  const rgb2 = hexToRgb(color2)
+  return rgbToHex(
+    rgb1[0] + (rgb2[0] - rgb1[0]) * r,
+    rgb1[1] + (rgb2[1] - rgb1[1]) * r,
+    rgb1[2] + (rgb2[2] - rgb1[2]) * r
+  )
+}
+
+/**
+ * 为颜色添加透明度，返回 rgba 字符串
+ * @param hex     - hex 颜色
+ * @param opacity - 透明度 0~1
+ * @returns rgba(r, g, b, opacity) 字符串
+ */
+export function withOpacity(hex: string, opacity: number): string {
+  const rgb = hexToRgb(hex)
+  const a = Math.max(0, Math.min(1, opacity))
+  return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'
+}
+
+/**
+ * 根据背景色自动判断应使用深色还是浅色文字
+ * 基于 WCAG 相对亮度公式
+ * @param bgHex - 背景色 hex
+ * @returns '#000000' 或 '#ffffff'
+ */
+export function contrastColor(bgHex: string): string {
+  const rgb = hexToRgb(bgHex)
+  // 相对亮度公式 (简化版)
+  const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255
+  return luminance > 0.5 ? '#000000' : '#ffffff'
+}
+
+/**
+ * 从基准色生成 50-900 十阶色板
+ * @param baseHex - 基准色（作为 500）
+ * @returns 包含 50~900 键的色板对象
+ */
+export function generateShades(baseHex: string): Record<string, string> {
+  const white = '#ffffff'
+  const black = '#000000'
+  return {
+    '50':  mixColors(baseHex, white, 0.92),
+    '100': mixColors(baseHex, white, 0.84),
+    '200': mixColors(baseHex, white, 0.66),
+    '300': mixColors(baseHex, white, 0.48),
+    '400': mixColors(baseHex, white, 0.26),
+    '500': baseHex,
+    '600': mixColors(baseHex, black, 0.16),
+    '700': mixColors(baseHex, black, 0.32),
+    '800': mixColors(baseHex, black, 0.50),
+    '900': mixColors(baseHex, black, 0.68),
+  }
+}

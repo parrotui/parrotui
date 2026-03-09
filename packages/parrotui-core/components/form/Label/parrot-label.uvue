@@ -1,0 +1,87 @@
+<template>
+	<!-- Label 表单标签：配合 Input/FormItem 使用 -->
+	<view class="parrot-label" :style="labelStyle">
+		<text v-if="required" class="parrot-label__required">*</text>
+		<text class="parrot-label__text" :style="textStyle">{{ text }}</text>
+		<text v-if="colon" class="parrot-label__colon">：</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-label 表单标签
+ * 表单项的标签说明文字，支持必填星号、冒号、自定义宽度和对齐方式。
+ *
+ * @prop text       标签文字
+ * @prop required   是否显示必填星号
+ * @prop width      标签宽度
+ * @prop align      文字对齐：left/center/right
+ * @prop colon      是否显示冒号
+ * @prop fontSize   字体大小 rpx
+ * @prop color      文字颜色
+ */
+import { computed } from 'vue'
+
+interface Props {
+	text ?: string
+	required ?: boolean
+	width ?: string
+	align ?: string
+	colon ?: boolean
+	fontSize ?: number
+	color ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	text: '',
+	required: false,
+	width: '',
+	align: 'left',
+	colon: false,
+	fontSize: 28,
+	color: '#303133',
+})
+
+const labelStyle = computed(() : string => {
+	const parts : string[] = []
+	if (props.width) parts.push(`width:${props.width}`)
+	const align = props.align ?? 'left'
+	if (align === 'center') {
+		parts.push('justify-content:center')
+	} else if (align === 'right') {
+		parts.push('justify-content:flex-end')
+	}
+	return parts.join(';')
+})
+
+const textStyle = computed(() : string => {
+	return `font-size:${props.fontSize ?? 28}rpx;color:${props.color ?? '#303133'}`
+})
+</script>
+
+<style scoped>
+.parrot-label {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-shrink: 0;
+	padding-right: 16rpx;
+}
+
+.parrot-label__required {
+	color: #f56c6c;
+	font-size: 28rpx;
+	margin-right: 4rpx;
+}
+
+.parrot-label__text {
+	font-size: 28rpx;
+	color: #303133;
+	line-height: 1.4;
+}
+
+.parrot-label__colon {
+	font-size: 28rpx;
+	color: #303133;
+}
+</style>

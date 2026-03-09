@@ -1,0 +1,398 @@
+<template>
+	<!-- 语音输入：输入框 + 麦克风按钮，按住录音 + 释放识别 -->
+	<view class="parrot-voice-input">
+		<!-- 输入框区域 -->
+		<view class="parrot-voice-input__field" :class="disabled ? 'parrot-voice-input__field--disabled' : ''">
+			<input
+				class="parrot-voice-input__inner"
+				:style="inputStyle"
+				:value="modelValue"
+				:placeholder="placeholder"
+				:disabled="disabled"
+				@input="onInput"
+				@focus="onFocus"
+				@blur="onBlur"
+			/>
+			<!-- 麦克风按钮 -->
+			<view
+				v-if="!disabled"
+				class="parrot-voice-input__mic"
+				:class="isRecording ? 'parrot-voice-input__mic--active' : ''"
+				@touchstart.prevent="onMicDown"
+				@touchend.prevent="onMicUp"
+				@touchcancel.prevent="onMicUp"
+			>
+				<text class="parrot-voice-input__mic-icon">🎤</text>
+			</view>
+		</view>
+
+		<!-- 录音状态浮层 -->
+		<view v-if="isRecording" class="parrot-voice-input__overlay">
+			<view class="parrot-voice-input__overlay-box">
+				<!-- 波浪动画条 -->
+				<view class="parrot-voice-input__wave">
+					<view
+						v-for="(h, i) in waveBars"
+						:key="i"
+						class="parrot-voice-input__wave-bar"
+						:style="`height:${h}rpx;`"
+					/>
+				</view>
+				<!-- 录音时长 -->
+				<text class="parrot-voice-input__duration">{{ durationText }}</text>
+				<!-- 提示文字 -->
+				<text class="parrot-voice-input__tip">释放结束录音</text>
+			</view>
+		</view>
+
+		<!-- 识别中浮层 -->
+		<view v-if="isRecognizing" class="parrot-voice-input__overlay">
+			<view class="parrot-voice-input__overlay-box">
+				<view class="parrot-voice-input__loading-dots">
+					<view class="parrot-voice-input__dot parrot-voice-input__dot--1" />
+					<view class="parrot-voice-input__dot parrot-voice-input__dot--2" />
+					<view class="parrot-voice-input__dot parrot-voice-input__dot--3" />
+				</view>
+				<text class="parrot-voice-input__recognizing">识别中{{ loadingDots }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-voice-input 语音输入
+ * 实验性组件 —— 输入框 + 麦克风按钮
+ *
+ * 按住麦克风按钮：显示录音状态浮层（波浪动画 + 录音时长 + 释放结束提示）
+ * 释放后模拟识别过程（显示"识别中..."），完成后将识别结果填入输入框
+ * 注意：实际语音识别需要原生插件，此组件提供 UI 框架和事件回调
+ *
+ * @prop modelValue   输入值（v-model）
+ * @prop placeholder  占位文字
+ * @prop maxDuration  最大录音时长秒
+ * @prop disabled     是否禁用
+ * @prop fontSize     字体大小 rpx
+ */
+
+import { ref, computed, onUnmounted } from 'vue'
+
+interface Props {
+	/** 输入值 */
+	modelValue ?: string
+	/** 占位文字 */
+	placeholder ?: string
+	/** 最大录音时长（秒） */
+	maxDuration ?: number
+	/** 是否禁用 */
+	disabled ?: boolean
+	/** 字体大小 rpx */
+	fontSize ?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: '',
+	placeholder: '请输入或按住说话',
+	maxDuration: 60,
+	disabled: false,
+	fontSize: 28,
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: string]
+	recordStart: []
+	recordEnd: [duration: number]
+	recognizeResult: [text: string]
+	input: [value: string]
+}>()
+
+/* ---------- 内部状态 ---------- */
+const isRecording = ref<boolean>(false)
+const isRecognizing = ref<boolean>(false)
+const recordDuration = ref<number>(0)
+const waveBars = ref<number[]>([20, 35, 50, 35, 20])
+const loadingDots = ref<string>('')
+
+let durationTimer = -1
+let waveTimer = -1
+let dotsTimer = -1
+let recognizeTimer = -1
+
+/* ---------- 计算属性 ---------- */
+
+/** 输入框样式 */
+const inputStyle = computed(() : string => {
+	return `font-size:${props.fontSize ?? 28}rpx;`
+})
+
+/** 录音时长文本 MM:SS */
+const durationText = computed(() : string => {
+	const d = recordDuration.value
+	const min = Math.floor(d / 60)
+	const sec = d % 60
+	const minStr = min < 10 ? '0' + String(min) : String(min)
+	const secStr = sec < 10 ? '0' + String(sec) : String(sec)
+	return minStr + ':' + secStr
+})
+
+/* ---------- 输入事件 ---------- */
+
+function onInput(e : InputEvent) {
+	const val = e.detail.value
+	emit('update:modelValue', val)
+	emit('input', val)
+}
+
+function onFocus(_e : any) {
+	/* 聚焦时可扩展 */
+}
+
+function onBlur(_e : any) {
+	/* 失焦时可扩展 */
+}
+
+/* ---------- 录音控制 ---------- */
+
+/** 开始录音 */
+function startRecord() {
+	if (isRecording.value || props.disabled) return
+	isRecording.value = true
+	recordDuration.value = 0
+	emit('recordStart')
+
+	/* 录音计时 */
+	durationTimer = setInterval(() => {
+		recordDuration.value++
+		if (recordDuration.value >= (props.maxDuration ?? 60)) {
+			stopRecord()
+		}
+	}, 1000)
+
+	/* 波浪动画 */
+	waveTimer = setInterval(() => {
+		const bars : number[] = []
+		for (let i = 0; i < 5; i++) {
+			bars.push(15 + Math.floor(Math.random() * 55))
+		}
+		waveBars.value = bars
+	}, 180)
+}
+
+/** 停止录音并进入识别阶段 */
+function stopRecord() {
+	if (!isRecording.value) return
+	isRecording.value = false
+
+	/* 清除录音相关定时器 */
+	if (durationTimer >= 0) {
+		clearInterval(durationTimer)
+		durationTimer = -1
+	}
+	if (waveTimer >= 0) {
+		clearInterval(waveTimer)
+		waveTimer = -1
+	}
+
+	const duration = recordDuration.value
+	emit('recordEnd', duration)
+
+	/* 进入识别状态 */
+	isRecognizing.value = true
+	let dotCount = 0
+	dotsTimer = setInterval(() => {
+		dotCount = (dotCount + 1) % 4
+		let dots = ''
+		for (let i = 0; i < dotCount; i++) {
+			dots += '.'
+		}
+		loadingDots.value = dots
+	}, 400)
+
+	/* 模拟识别过程（实际应由业务层对接原生插件替换此处） */
+	recognizeTimer = setTimeout(() => {
+		isRecognizing.value = false
+		if (dotsTimer >= 0) {
+			clearInterval(dotsTimer)
+			dotsTimer = -1
+		}
+		/* 模拟识别结果 —— 真实场景中由原生回调提供 */
+		const resultText = '[语音识别结果]'
+		emit('recognizeResult', resultText)
+		emit('update:modelValue', resultText)
+		emit('input', resultText)
+	}, 1500)
+}
+
+/* ---------- 麦克风按钮触摸事件 ---------- */
+
+function onMicDown(_e : UniTouchEvent) {
+	startRecord()
+}
+
+function onMicUp(_e : UniTouchEvent) {
+	stopRecord()
+}
+
+/* ---------- 清理 ---------- */
+
+function clearAllTimers() {
+	if (durationTimer >= 0) { clearInterval(durationTimer); durationTimer = -1 }
+	if (waveTimer >= 0) { clearInterval(waveTimer); waveTimer = -1 }
+	if (dotsTimer >= 0) { clearInterval(dotsTimer); dotsTimer = -1 }
+	if (recognizeTimer >= 0) { clearTimeout(recognizeTimer); recognizeTimer = -1 }
+}
+
+defineExpose({
+	startRecord,
+	stopRecord,
+})
+
+onUnmounted(() => {
+	clearAllTimers()
+})
+</script>
+
+<style scoped>
+.parrot-voice-input {
+	position: relative;
+}
+
+.parrot-voice-input__field {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background-color: #f5f7fa;
+	border-radius: 12rpx;
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #dcdfe6;
+	padding: 0 24rpx;
+	height: 72rpx;
+}
+
+.parrot-voice-input__field--disabled {
+	opacity: 0.55;
+	background-color: #f5f7fa;
+}
+
+.parrot-voice-input__inner {
+	flex: 1;
+	background: transparent;
+	border: none;
+	color: #303133;
+}
+
+.parrot-voice-input__mic {
+	width: 56rpx;
+	height: 56rpx;
+	border-radius: 50%;
+	background-color: #1a7eff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 16rpx;
+	flex-shrink: 0;
+}
+
+.parrot-voice-input__mic--active {
+	background-color: #f56c6c;
+}
+
+.parrot-voice-input__mic-icon {
+	font-size: 28rpx;
+	color: #ffffff;
+}
+
+/* ---------- 录音 / 识别浮层 ---------- */
+.parrot-voice-input__overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 999;
+}
+
+.parrot-voice-input__overlay-box {
+	width: 360rpx;
+	padding: 48rpx 32rpx;
+	background-color: #ffffff;
+	border-radius: 24rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/* ---------- 波浪动画 ---------- */
+.parrot-voice-input__wave {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	justify-content: center;
+	height: 80rpx;
+	margin-bottom: 24rpx;
+}
+
+.parrot-voice-input__wave-bar {
+	width: 12rpx;
+	border-radius: 6rpx;
+	background-color: #1a7eff;
+	margin-left: 8rpx;
+	margin-right: 8rpx;
+	transition-property: height;
+	transition-duration: 0.15s;
+}
+
+/* ---------- 时长 & 提示 ---------- */
+.parrot-voice-input__duration {
+	font-size: 40rpx;
+	color: #303133;
+	font-weight: 600;
+	margin-bottom: 12rpx;
+}
+
+.parrot-voice-input__tip {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+/* ---------- 识别中动画点 ---------- */
+.parrot-voice-input__loading-dots {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 20rpx;
+}
+
+.parrot-voice-input__dot {
+	width: 16rpx;
+	height: 16rpx;
+	border-radius: 16rpx;
+	background-color: #1a7eff;
+	margin-left: 10rpx;
+	margin-right: 10rpx;
+	opacity: 0.3;
+}
+
+.parrot-voice-input__dot--1 {
+	opacity: 1;
+}
+
+.parrot-voice-input__dot--2 {
+	opacity: 0.6;
+}
+
+.parrot-voice-input__dot--3 {
+	opacity: 0.3;
+}
+
+.parrot-voice-input__recognizing {
+	font-size: 28rpx;
+	color: #606266;
+}
+</style>

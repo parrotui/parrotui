@@ -1,0 +1,329 @@
+<template>
+	<!-- Select 选择器：下拉选择，基于 Popup -->
+	<view class="parrot-select" @tap="handleOpen">
+		<view
+			class="parrot-select__wrap"
+			:class="[
+				disabled ? 'parrot-select--disabled' : '',
+				border ? 'parrot-select--border' : '',
+				glass ? 'parrot-select--glass' : '',
+				isOpen ? 'parrot-select--focus' : '',
+			]"
+		>
+			<text v-if="displayText" class="parrot-select__value">{{ displayText }}</text>
+			<text v-if="!displayText" class="parrot-select__placeholder">{{ placeholder }}</text>
+			<text class="parrot-select__arrow" :class="[isOpen ? 'parrot-select__arrow--up' : '']">▾</text>
+		</view>
+	</view>
+
+	<!-- 弹出层选项列表 -->
+	<view v-if="visible" class="parrot-select__popup-wrap" @tap.stop="handleClose">
+		<view class="parrot-select__mask" :class="[maskShow ? 'parrot-select__mask--show' : '']"></view>
+		<view class="parrot-select__popup" :class="[contentShow ? 'parrot-select__popup--show' : '']" @tap.stop>
+			<!-- 标题栏 -->
+			<view class="parrot-select__header">
+				<text class="parrot-select__cancel" @tap="handleClose">取消</text>
+				<text class="parrot-select__title">{{ title ?? '请选择' }}</text>
+				<text class="parrot-select__confirm" @tap="handleConfirm">确定</text>
+			</view>
+			<!-- 选项列表 -->
+			<scroll-view class="parrot-select__list" scroll-y="true">
+				<view
+					v-for="(item, index) in options"
+					:key="index"
+					class="parrot-select__option"
+					:class="[isSelected(item) ? 'parrot-select__option--active' : '', item.disabled ? 'parrot-select__option--disabled' : '']"
+					@tap.stop="handleSelect(item)"
+				>
+					<text class="parrot-select__option-text" :class="[isSelected(item) ? 'parrot-select__option-text--active' : '']">{{ item.label ?? '' }}</text>
+					<text v-if="isSelected(item)" class="parrot-select__check">✓</text>
+				</view>
+			</scroll-view>
+			<!-- 安全区 -->
+			<view class="parrot-select__safe"></view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-select 选择器
+ * 下拉选择组件，底部弹出选项列表，支持单选/多选。
+ *
+ * @prop modelValue     当前值
+ * @prop options        选项列表 [{ label, value, disabled? }]
+ * @prop placeholder    占位文字
+ * @prop disabled       是否禁用
+ * @prop clearable      是否可清除
+ * @prop multiple       是否多选
+ * @prop title          弹出层标题
+ * @prop border         是否显示边框
+ * @prop glass          磨砂玻璃
+ *
+ * @event update:modelValue  值变更
+ * @event change             选择变化
+ * @event open               打开选项
+ * @event close              关闭选项
+ */
+import { computed, ref } from 'vue'
+
+interface SelectOption {
+	label ?: string
+	value ?: string
+	disabled ?: boolean
+}
+
+interface Props {
+	modelValue ?: string | string[]
+	options ?: SelectOption[]
+	placeholder ?: string
+	disabled ?: boolean
+	clearable ?: boolean
+	multiple ?: boolean
+	title ?: string
+	border ?: boolean
+	glass ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	placeholder: '请选择',
+	disabled: false,
+	clearable: false,
+	multiple: false,
+	title: '请选择',
+	border: true,
+	glass: false,
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [value: any]
+	change: [value: any]
+	open: []
+	close: []
+}>()
+
+const isOpen = ref<boolean>(false)
+const visible = ref<boolean>(false)
+const maskShow = ref<boolean>(false)
+const contentShow = ref<boolean>(false)
+// 临时选中值（多选时用）
+const tempValue = ref<string[]>([])
+
+// 显示文本
+const displayText = computed(() : string => {
+	const val = props.modelValue
+	if (val == null) return ''
+	const list = props.options ?? ([] as SelectOption[])
+	if (props.multiple && Array.isArray(val)) {
+		return list.filter((o : SelectOption) => (val as string[]).includes(o.value ?? '')).map((o : SelectOption) => o.label ?? '').join(', ')
+	}
+	const found = list.find((o : SelectOption) => o.value === val)
+	return found != null ? (found!.label ?? '') : ''
+})
+
+function isSelected(item : SelectOption) : boolean {
+	const val = props.modelValue
+	if (val == null) return false
+	if (props.multiple && Array.isArray(val)) {
+		return (val as string[]).includes(item.value ?? '')
+	}
+	return val === (item.value ?? '')
+}
+
+function handleOpen() {
+	if (props.disabled) return
+	isOpen.value = true
+	visible.value = true
+	// 初始化临时值
+	if (props.multiple && Array.isArray(props.modelValue)) {
+		tempValue.value = [...(props.modelValue as string[])]
+	}
+	setTimeout(() => {
+		maskShow.value = true
+		contentShow.value = true
+	}, 16)
+	emit('open')
+}
+
+function handleClose() {
+	maskShow.value = false
+	contentShow.value = false
+	isOpen.value = false
+	setTimeout(() => {
+		visible.value = false
+	}, 300)
+	emit('close')
+}
+
+function handleSelect(item : SelectOption) {
+	if (item.disabled) return
+	const val = item.value ?? ''
+	if (props.multiple) {
+		const idx = tempValue.value.indexOf(val)
+		if (idx > -1) {
+			tempValue.value.splice(idx, 1)
+		} else {
+			tempValue.value.push(val)
+		}
+	} else {
+		// 单选直接关闭
+		emit('update:modelValue', val)
+		emit('change', val)
+		handleClose()
+	}
+}
+
+function handleConfirm() {
+	if (props.multiple) {
+		emit('update:modelValue', [...tempValue.value])
+		emit('change', [...tempValue.value])
+	}
+	handleClose()
+}
+</script>
+
+<style scoped>
+.parrot-select__wrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 72rpx;
+	padding: 0 24rpx;
+	background-color: #f5f7fa;
+	border-radius: 12rpx;
+}
+.parrot-select--border {
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #dcdfe6;
+	background-color: #ffffff;
+}
+.parrot-select--focus.parrot-select--border {
+	border-color: #1a7eff;
+}
+.parrot-select--disabled {
+	opacity: 0.55;
+}
+.parrot-select--glass {
+	background: rgba(255, 255, 255, 0.18) !important;
+	border: 1.5rpx solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.parrot-select__value {
+	flex: 1;
+	font-size: 28rpx;
+	color: #303133;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.parrot-select__placeholder {
+	flex: 1;
+	font-size: 28rpx;
+	color: #a8abb2;
+}
+.parrot-select__arrow {
+	font-size: 28rpx;
+	color: #909399;
+	margin-left: 8rpx;
+	transition: transform 0.2s;
+}
+.parrot-select__arrow--up {
+	transform: rotate(180deg);
+}
+
+/* 弹出层 */
+.parrot-select__popup-wrap {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+}
+.parrot-select__mask {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0);
+	transition: background 0.3s;
+}
+.parrot-select__mask--show {
+	background: rgba(0, 0, 0, 0.45);
+}
+.parrot-select__popup {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: #ffffff;
+	border-radius: 32rpx 32rpx 0 0;
+	max-height: 70%;
+	transform: translateY(100%);
+	transition: transform 0.3s;
+}
+.parrot-select__popup--show {
+	transform: translateY(0);
+}
+
+.parrot-select__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 88rpx;
+	padding: 0 32rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #ebeef5;
+}
+.parrot-select__cancel {
+	font-size: 28rpx;
+	color: #909399;
+}
+.parrot-select__title {
+	flex: 1;
+	text-align: center;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #303133;
+}
+.parrot-select__confirm {
+	font-size: 28rpx;
+	color: #1a7eff;
+}
+
+.parrot-select__list {
+	max-height: 600rpx;
+}
+.parrot-select__option {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 24rpx 32rpx;
+}
+.parrot-select__option--active {
+	background-color: rgba(26, 126, 255, 0.06);
+}
+.parrot-select__option--disabled {
+	opacity: 0.45;
+}
+.parrot-select__option-text {
+	flex: 1;
+	font-size: 28rpx;
+	color: #303133;
+}
+.parrot-select__option-text--active {
+	color: #1a7eff;
+}
+.parrot-select__check {
+	font-size: 28rpx;
+	color: #1a7eff;
+	margin-left: 16rpx;
+}
+
+.parrot-select__safe {
+	height: env(safe-area-inset-bottom);
+}
+</style>

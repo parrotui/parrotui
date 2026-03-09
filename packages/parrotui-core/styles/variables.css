@@ -6,20 +6,57 @@
 
 /* ─── 亮色主题（默认）─────────────────────────────────────────── */
 :root {
-  /* 品牌色 */
+  /* 品牌主色 */
   --pui-primary:        #1a7eff;
   --pui-primary-light:  #ecf5ff;
   --pui-primary-dark:   #0065e6;
+  --pui-primary-50:     #ecf5ff;
+  --pui-primary-100:    #d9edff;
+  --pui-primary-200:    #b3d9ff;
+  --pui-primary-300:    #80bdff;
+  --pui-primary-400:    #4d9eff;
+  --pui-primary-500:    #1a7eff;
+  --pui-primary-600:    #0065e6;
+  --pui-primary-700:    #004eb3;
+  --pui-primary-800:    #003880;
+  --pui-primary-900:    #00224d;
+
+  /* 品牌副色 */
+  --pui-secondary:       #7c3aed;
+  --pui-secondary-light: #f5f3ff;
+  --pui-secondary-dark:  #6d28d9;
+  --pui-secondary-50:    #f5f3ff;
+  --pui-secondary-100:   #ede9fe;
+  --pui-secondary-200:   #ddd6fe;
+  --pui-secondary-300:   #c4b5fd;
+  --pui-secondary-400:   #a78bfa;
+  --pui-secondary-500:   #7c3aed;
+  --pui-secondary-600:   #6d28d9;
+  --pui-secondary-700:   #5b21b6;
+  --pui-secondary-800:   #4c1d95;
+  --pui-secondary-900:   #3b0764;
 
   /* 功能色 */
   --pui-success:        #41a906;
   --pui-success-light:  #f0f9eb;
+  --pui-success-50:     #f0f9eb;
+  --pui-success-500:    #41a906;
+  --pui-success-600:    #348a04;
   --pui-warning:        #e6a23c;
   --pui-warning-light:  #fdf6ec;
+  --pui-warning-50:     #fdf6ec;
+  --pui-warning-500:    #e6a23c;
+  --pui-warning-600:    #d48a1e;
   --pui-danger:         #f56c6c;
   --pui-danger-light:   #fef0f0;
+  --pui-danger-50:      #fef0f0;
+  --pui-danger-500:     #f56c6c;
+  --pui-danger-600:     #e64444;
   --pui-info:           #6c6f78;
   --pui-info-light:     #f4f4f5;
+  --pui-info-50:        #f4f4f5;
+  --pui-info-500:       #6c6f78;
+  --pui-info-600:       #565960;
 
   /* 文字色 */
   --pui-text-primary:      #303133;
@@ -102,6 +139,10 @@
   --pui-primary:        #4d9eff;
   --pui-primary-light:  #001f4d;
   --pui-primary-dark:   #80bdff;
+
+  --pui-secondary:       #a78bfa;
+  --pui-secondary-light: #1a1033;
+  --pui-secondary-dark:  #c4b5fd;
 
   --pui-success:        #5dba30;
   --pui-success-light:  #0d2601;

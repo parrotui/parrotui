@@ -1,0 +1,293 @@
+<template>
+	<!-- LoginA 基础登录模板：Logo + 用户名密码 + 登录按钮 + 注册链接 -->
+	<view class="parrot-login-a">
+		<!-- 顶部 Logo 区域 -->
+		<view class="parrot-login-a__header">
+			<image
+				v-if="logo"
+				class="parrot-login-a__logo"
+				:src="logo"
+				mode="aspectFit"
+			/>
+			<view v-if="!logo" class="parrot-login-a__logo-placeholder">
+				<text class="parrot-login-a__logo-text">LOGO</text>
+			</view>
+			<text class="parrot-login-a__title">{{ title }}</text>
+			<text v-if="subtitle" class="parrot-login-a__subtitle">{{ subtitle }}</text>
+		</view>
+
+		<!-- 表单区域 -->
+		<view class="parrot-login-a__form">
+			<!-- 用户名输入框 -->
+			<view class="parrot-login-a__field">
+				<view class="parrot-login-a__input-wrap">
+					<text class="parrot-login-a__input-icon">👤</text>
+					<input
+						class="parrot-login-a__input"
+						type="text"
+						:value="username"
+						placeholder="请输入用户名"
+						placeholder-style="color:#a8abb2"
+						@input="onUsernameInput"
+					/>
+				</view>
+			</view>
+
+			<!-- 密码输入框 -->
+			<view class="parrot-login-a__field">
+				<view class="parrot-login-a__input-wrap">
+					<text class="parrot-login-a__input-icon">🔒</text>
+					<input
+						class="parrot-login-a__input"
+						:type="passwordInputType"
+						:value="password"
+						placeholder="请输入密码"
+						placeholder-style="color:#a8abb2"
+						:password="!pwdVisible"
+						@input="onPasswordInput"
+					/>
+					<view class="parrot-login-a__eye" @tap="togglePwdVisible">
+						<text class="parrot-login-a__eye-icon">{{ pwdVisible ? '👁' : '👁‍🗨' }}</text>
+					</view>
+				</view>
+			</view>
+
+			<!-- 登录按钮 -->
+			<view
+				class="parrot-login-a__btn"
+				:class="[loginBtnDisabled ? 'parrot-login-a__btn--disabled' : '']"
+				@tap="handleLogin"
+			>
+				<text class="parrot-login-a__btn-text">登录</text>
+			</view>
+		</view>
+
+		<!-- 底部注册链接 -->
+		<view v-if="showRegister" class="parrot-login-a__footer">
+			<text class="parrot-login-a__footer-text">还没有账号？</text>
+			<text class="parrot-login-a__footer-link" @tap="handleRegister">立即注册</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * LoginA 基础登录模板
+ * 最简登录页：顶部 Logo + 用户名密码输入 + 登录按钮 + 底部注册链接
+ *
+ * @prop logo          Logo 图片地址
+ * @prop title         页面标题
+ * @prop subtitle      副标题
+ * @prop showRegister  是否显示注册链接
+ *
+ * @event login        点击登录，返回 { username, password }
+ * @event register     点击注册链接
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	logo ?: string
+	title ?: string
+	subtitle ?: string
+	showRegister ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	logo: '',
+	title: '欢迎登录',
+	subtitle: '',
+	showRegister: true,
+})
+
+const emit = defineEmits<{
+	login: [data: { username : string; password : string }]
+	register: []
+}>()
+
+// 表单数据
+const username = ref<string>('')
+const password = ref<string>('')
+const pwdVisible = ref<boolean>(false)
+
+// 密码输入框类型
+const passwordInputType = computed(() : string => {
+	return 'text'
+})
+
+// 按钮是否禁用
+const loginBtnDisabled = computed(() : boolean => {
+	return username.value.length === 0 || password.value.length === 0
+})
+
+// 用户名输入
+function onUsernameInput(e : InputEvent) {
+	username.value = e.detail.value
+}
+
+// 密码输入
+function onPasswordInput(e : InputEvent) {
+	password.value = e.detail.value
+}
+
+// 切换密码可见
+function togglePwdVisible() {
+	pwdVisible.value = !pwdVisible.value
+}
+
+// 登录
+function handleLogin() {
+	if (loginBtnDisabled.value) return
+	emit('login', {
+		username: username.value,
+		password: password.value,
+	})
+}
+
+// 注册
+function handleRegister() {
+	emit('register')
+}
+</script>
+
+<style scoped>
+.parrot-login-a {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 100vh;
+	background-color: #ffffff;
+	padding: 0 60rpx;
+}
+
+/* 头部区域 */
+.parrot-login-a__header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 180rpx;
+	padding-bottom: 80rpx;
+}
+
+.parrot-login-a__logo {
+	width: 160rpx;
+	height: 160rpx;
+	margin-bottom: 32rpx;
+	border-radius: 28rpx;
+}
+
+.parrot-login-a__logo-placeholder {
+	width: 160rpx;
+	height: 160rpx;
+	margin-bottom: 32rpx;
+	border-radius: 28rpx;
+	background-color: #f0f4ff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.parrot-login-a__logo-text {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1a7eff;
+}
+
+.parrot-login-a__title {
+	font-size: 48rpx;
+	font-weight: 700;
+	color: #1a1a1a;
+	line-height: 68rpx;
+}
+
+.parrot-login-a__subtitle {
+	font-size: 26rpx;
+	color: #909399;
+	margin-top: 12rpx;
+	line-height: 38rpx;
+}
+
+/* 表单区域 */
+.parrot-login-a__form {
+	width: 100%;
+}
+
+.parrot-login-a__field {
+	margin-bottom: 32rpx;
+}
+
+.parrot-login-a__input-wrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 96rpx;
+	background-color: #f5f7fa;
+	border-radius: 16rpx;
+	padding: 0 28rpx;
+}
+
+.parrot-login-a__input-icon {
+	font-size: 36rpx;
+	margin-right: 16rpx;
+}
+
+.parrot-login-a__input {
+	flex: 1;
+	height: 96rpx;
+	font-size: 30rpx;
+	color: #303133;
+	background-color: transparent;
+}
+
+.parrot-login-a__eye {
+	padding: 0 8rpx;
+	display: flex;
+	align-items: center;
+}
+
+.parrot-login-a__eye-icon {
+	font-size: 36rpx;
+}
+
+/* 登录按钮 */
+.parrot-login-a__btn {
+	width: 100%;
+	height: 96rpx;
+	background-color: #1a7eff;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 24rpx;
+}
+
+.parrot-login-a__btn--disabled {
+	opacity: 0.5;
+}
+
+.parrot-login-a__btn-text {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+/* 底部注册 */
+.parrot-login-a__footer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-top: 48rpx;
+}
+
+.parrot-login-a__footer-text {
+	font-size: 26rpx;
+	color: #909399;
+}
+
+.parrot-login-a__footer-link {
+	font-size: 26rpx;
+	color: #1a7eff;
+	font-weight: 500;
+	margin-left: 8rpx;
+}
+</style>

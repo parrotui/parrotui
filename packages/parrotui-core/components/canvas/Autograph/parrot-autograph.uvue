@@ -1,0 +1,261 @@
+<template>
+	<view class="parrot-autograph" :style="wrapStyle">
+		<!-- 画布区域 -->
+		<view class="parrot-autograph__canvas-wrap" :style="canvasWrapStyle">
+			<canvas
+				class="parrot-autograph__canvas"
+				:canvas-id="canvasId"
+				:style="canvasStyle"
+				@touchstart="onTouchStart"
+				@touchmove="onTouchMove"
+				@touchend="onTouchEnd"
+			/>
+			<!-- 占位提示文字（无笔迹时显示） -->
+			<text v-if="empty" class="parrot-autograph__placeholder">{{ placeholder }}</text>
+		</view>
+		<!-- 底部工具栏 -->
+		<view class="parrot-autograph__toolbar">
+			<view class="parrot-autograph__btn parrot-autograph__btn--clear" @tap="clear">
+				<text class="parrot-autograph__btn-text parrot-autograph__btn-text--clear">清除</text>
+			</view>
+			<view class="parrot-autograph__btn parrot-autograph__btn--confirm" @tap="handleConfirm">
+				<text class="parrot-autograph__btn-text parrot-autograph__btn-text--confirm">确认</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed, onMounted } from 'vue'
+
+interface Props {
+	/** 宽度，支持百分比或 rpx */
+	width ?: string
+	/** 高度 rpx */
+	height ?: number
+	/** 画笔颜色 */
+	penColor ?: string
+	/** 画笔粗细 */
+	penSize ?: number
+	/** 背景色 */
+	background ?: string
+	/** 占位提示文字 */
+	placeholder ?: string
+	/** 画布 ID */
+	canvasId ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	width: '100%',
+	height: 500,
+	penColor: '#000000',
+	penSize: 4,
+	background: '#ffffff',
+	placeholder: '请在此签名',
+	canvasId: 'parrot-autograph-canvas',
+})
+
+const emit = defineEmits<{
+	(e : 'start') : void
+	(e : 'signing') : void
+	(e : 'end') : void
+}>()
+
+/** 画布上下文 */
+let ctx : CanvasContext | null = null
+
+/** 是否为空（没有签名内容） */
+const empty = ref<boolean>(true)
+
+/** 是否正在绘制 */
+let drawing = false
+
+/** 外层容器样式 */
+const wrapStyle = computed(() : string => {
+	return `width:${props.width};`
+})
+
+/** 画布外层样式 */
+const canvasWrapStyle = computed(() : string => {
+	return `height:${props.height}rpx;background:${props.background};`
+})
+
+/** 画布样式 */
+const canvasStyle = computed(() : string => {
+	return `width:100%;height:${props.height}rpx;`
+})
+
+onMounted(() => {
+	ctx = uni.createCanvasContext(props.canvasId)
+	_initCanvas()
+})
+
+/** 初始化画布背景 */
+function _initCanvas() : void {
+	if (ctx == null) return
+	const context = ctx as CanvasContext
+	context.setFillStyle(props.background)
+	context.fillRect(0, 0, 9999, props.height)
+	context.draw(false)
+}
+
+/** 触摸开始 */
+function onTouchStart(e : TouchEvent) : void {
+	if (ctx == null) return
+	const context = ctx as CanvasContext
+	const touch = e.touches[0]
+	const x = touch.x
+	const y = touch.y
+	context.setStrokeStyle(props.penColor)
+	context.setLineWidth(props.penSize)
+	context.setLineCap('round')
+	context.setLineJoin('round')
+	context.beginPath()
+	context.moveTo(x, y)
+	drawing = true
+	empty.value = false
+	emit('start')
+}
+
+/** 触摸移动 */
+function onTouchMove(e : TouchEvent) : void {
+	if (ctx == null) return
+	if (!drawing) return
+	const context = ctx as CanvasContext
+	const touch = e.touches[0]
+	const x = touch.x
+	const y = touch.y
+	context.lineTo(x, y)
+	context.stroke()
+	context.draw(true)
+	context.moveTo(x, y)
+	emit('signing')
+}
+
+/** 触摸结束 */
+function onTouchEnd(_ : TouchEvent) : void {
+	drawing = false
+	emit('end')
+}
+
+/** 清除画布 */
+function clear() : void {
+	if (ctx == null) return
+	const context = ctx as CanvasContext
+	context.clearRect(0, 0, 9999, props.height)
+	context.setFillStyle(props.background)
+	context.fillRect(0, 0, 9999, props.height)
+	context.draw(false)
+	empty.value = true
+}
+
+/** 导出签名为临时图片文件 */
+function save() : void {
+	if (empty.value) return
+	uni.canvasToTempFilePath({
+		canvasId: props.canvasId,
+		success: (res) => {
+			emit('end')
+		},
+		fail: (_) => {
+			/* 导出失败静默处理 */
+		},
+	})
+}
+
+/** 判断是否为空 */
+function isEmpty() : boolean {
+	return empty.value
+}
+
+/** 确认按钮 */
+function handleConfirm() : void {
+	if (empty.value) {
+		uni.showToast({ title: '请先签名', icon: 'none' })
+		return
+	}
+	uni.canvasToTempFilePath({
+		canvasId: props.canvasId,
+		success: (res) => {
+			emit('end')
+		},
+		fail: (_) => {
+			uni.showToast({ title: '导出签名失败', icon: 'none' })
+		},
+	})
+}
+
+defineExpose({
+	clear,
+	save,
+	isEmpty,
+})
+</script>
+
+<style scoped>
+.parrot-autograph {
+	display: flex;
+	flex-direction: column;
+}
+
+.parrot-autograph__canvas-wrap {
+	position: relative;
+	border-width: 1rpx;
+	border-style: dashed;
+	border-color: #dcdfe6;
+	border-radius: 12rpx;
+	overflow: hidden;
+}
+
+.parrot-autograph__canvas {
+	display: block;
+}
+
+.parrot-autograph__placeholder {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	text-align: center;
+	font-size: 32rpx;
+	color: #c0c4cc;
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+
+.parrot-autograph__toolbar {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	padding-top: 16rpx;
+}
+
+.parrot-autograph__btn {
+	padding: 12rpx 32rpx;
+	border-radius: 8rpx;
+	margin-left: 16rpx;
+}
+
+.parrot-autograph__btn--clear {
+	background-color: #f5f7fa;
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #dcdfe6;
+}
+
+.parrot-autograph__btn--confirm {
+	background-color: #1a7eff;
+}
+
+.parrot-autograph__btn-text {
+	font-size: 26rpx;
+}
+
+.parrot-autograph__btn-text--clear {
+	color: #606266;
+}
+
+.parrot-autograph__btn-text--confirm {
+	color: #ffffff;
+}
+</style>

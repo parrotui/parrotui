@@ -1,0 +1,357 @@
+<template>
+	<!-- LoginB 验证码登录模板：手机号 + 验证码 + 协议勾选 -->
+	<view class="parrot-login-b">
+		<!-- 顶部标题 -->
+		<view class="parrot-login-b__header">
+			<text class="parrot-login-b__title">{{ title }}</text>
+			<text class="parrot-login-b__desc">未注册的手机号将自动创建账号</text>
+		</view>
+
+		<!-- 表单区域 -->
+		<view class="parrot-login-b__form">
+			<!-- 手机号输入 -->
+			<view class="parrot-login-b__field">
+				<view class="parrot-login-b__input-wrap">
+					<text class="parrot-login-b__prefix">+86</text>
+					<view class="parrot-login-b__divider"></view>
+					<input
+						class="parrot-login-b__input"
+						type="number"
+						:value="phone"
+						placeholder="请输入手机号"
+						placeholder-style="color:#a8abb2"
+						maxlength="11"
+						@input="onPhoneInput"
+					/>
+				</view>
+			</view>
+
+			<!-- 验证码输入 -->
+			<view class="parrot-login-b__field">
+				<view class="parrot-login-b__input-wrap">
+					<text class="parrot-login-b__code-icon">🔑</text>
+					<input
+						class="parrot-login-b__input"
+						type="number"
+						:value="code"
+						placeholder="请输入验证码"
+						placeholder-style="color:#a8abb2"
+						maxlength="6"
+						@input="onCodeInput"
+					/>
+					<view
+						class="parrot-login-b__code-btn"
+						:class="[codeBtnDisabled ? 'parrot-login-b__code-btn--disabled' : '']"
+						@tap="handleSendCode"
+					>
+						<text class="parrot-login-b__code-btn-text">{{ codeBtnText }}</text>
+					</view>
+				</view>
+			</view>
+
+			<!-- 登录按钮 -->
+			<view
+				class="parrot-login-b__btn"
+				:class="[loginBtnDisabled ? 'parrot-login-b__btn--disabled' : '']"
+				@tap="handleLogin"
+			>
+				<text class="parrot-login-b__btn-text">登录</text>
+			</view>
+		</view>
+
+		<!-- 协议勾选 -->
+		<view v-if="agreement" class="parrot-login-b__agreement">
+			<view
+				class="parrot-login-b__checkbox"
+				:class="[agreed ? 'parrot-login-b__checkbox--checked' : '']"
+				@tap="toggleAgreed"
+			>
+				<text v-if="agreed" class="parrot-login-b__checkbox-icon">✓</text>
+			</view>
+			<text class="parrot-login-b__agreement-text">我已阅读并同意</text>
+			<text class="parrot-login-b__agreement-link" @tap="handleAgreement">{{ agreement }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * LoginB 验证码登录模板
+ * 手机号 + 验证码登录，带发送倒计时和协议勾选
+ *
+ * @prop title         页面标题
+ * @prop countdown     验证码倒计时秒数
+ * @prop agreement     协议文字
+ * @prop agreementUrl  协议链接
+ *
+ * @event login        点击登录，返回 { phone, code }
+ * @event sendCode     发送验证码，返回 phone
+ * @event agreement    点击协议链接
+ */
+import { ref, computed } from 'vue'
+
+interface Props {
+	title ?: string
+	countdown ?: number
+	agreement ?: string
+	agreementUrl ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	title: '手机号登录',
+	countdown: 60,
+	agreement: '',
+	agreementUrl: '',
+})
+
+const emit = defineEmits<{
+	login: [data: { phone : string; code : string }]
+	sendCode: [phone: string]
+	agreement: []
+}>()
+
+// 表单数据
+const phone = ref<string>('')
+const code = ref<string>('')
+const agreed = ref<boolean>(false)
+
+// 倒计时相关
+const counting = ref<boolean>(false)
+const countdownVal = ref<number>(0)
+let timerIdVal : number = 0
+
+// 验证码按钮文字
+const codeBtnText = computed(() : string => {
+	if (counting.value) {
+		return `${countdownVal.value}s`
+	}
+	return '获取验证码'
+})
+
+// 验证码按钮是否禁用
+const codeBtnDisabled = computed(() : boolean => {
+	return counting.value || phone.value.length !== 11
+})
+
+// 登录按钮是否禁用
+const loginBtnDisabled = computed(() : boolean => {
+	return phone.value.length !== 11 || code.value.length === 0
+})
+
+// 手机号输入
+function onPhoneInput(e : InputEvent) {
+	phone.value = e.detail.value
+}
+
+// 验证码输入
+function onCodeInput(e : InputEvent) {
+	code.value = e.detail.value
+}
+
+// 切换协议勾选
+function toggleAgreed() {
+	agreed.value = !agreed.value
+}
+
+// 发送验证码
+function handleSendCode() {
+	if (codeBtnDisabled.value) return
+	emit('sendCode', phone.value)
+	startCountdown()
+}
+
+// 开始倒计时
+function startCountdown() {
+	counting.value = true
+	countdownVal.value = props.countdown ?? 60
+	timerIdVal = setInterval(() => {
+		countdownVal.value--
+		if (countdownVal.value <= 0) {
+			clearInterval(timerIdVal)
+			counting.value = false
+			countdownVal.value = 0
+		}
+	}, 1000)
+}
+
+// 登录
+function handleLogin() {
+	if (loginBtnDisabled.value) return
+	emit('login', {
+		phone: phone.value,
+		code: code.value,
+	})
+}
+
+// 查看协议
+function handleAgreement() {
+	if (props.agreementUrl) {
+		uni.navigateTo({ url: props.agreementUrl ?? '' })
+	}
+	emit('agreement')
+}
+</script>
+
+<style scoped>
+.parrot-login-b {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-color: #ffffff;
+	padding: 0 60rpx;
+}
+
+/* 头部 */
+.parrot-login-b__header {
+	padding-top: 180rpx;
+	padding-bottom: 72rpx;
+}
+
+.parrot-login-b__title {
+	font-size: 52rpx;
+	font-weight: 700;
+	color: #1a1a1a;
+	line-height: 72rpx;
+}
+
+.parrot-login-b__desc {
+	font-size: 26rpx;
+	color: #909399;
+	margin-top: 16rpx;
+	line-height: 38rpx;
+}
+
+/* 表单 */
+.parrot-login-b__form {
+	width: 100%;
+}
+
+.parrot-login-b__field {
+	margin-bottom: 32rpx;
+}
+
+.parrot-login-b__input-wrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 96rpx;
+	background-color: #f5f7fa;
+	border-radius: 16rpx;
+	padding: 0 28rpx;
+}
+
+.parrot-login-b__prefix {
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #303133;
+	margin-right: 0rpx;
+}
+
+.parrot-login-b__divider {
+	width: 2rpx;
+	height: 36rpx;
+	background-color: #dcdfe6;
+	margin: 0 20rpx;
+}
+
+.parrot-login-b__code-icon {
+	font-size: 36rpx;
+	margin-right: 16rpx;
+}
+
+.parrot-login-b__input {
+	flex: 1;
+	height: 96rpx;
+	font-size: 30rpx;
+	color: #303133;
+	background-color: transparent;
+}
+
+/* 验证码按钮 */
+.parrot-login-b__code-btn {
+	padding: 0 24rpx;
+	height: 60rpx;
+	border-radius: 30rpx;
+	background-color: #e8f1ff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 16rpx;
+}
+
+.parrot-login-b__code-btn--disabled {
+	opacity: 0.5;
+}
+
+.parrot-login-b__code-btn-text {
+	font-size: 24rpx;
+	font-weight: 500;
+	color: #1a7eff;
+	white-space: nowrap;
+}
+
+/* 登录按钮 */
+.parrot-login-b__btn {
+	width: 100%;
+	height: 96rpx;
+	background-color: #1a7eff;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 24rpx;
+}
+
+.parrot-login-b__btn--disabled {
+	opacity: 0.5;
+}
+
+.parrot-login-b__btn-text {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+/* 协议勾选 */
+.parrot-login-b__agreement {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-top: 40rpx;
+	justify-content: center;
+}
+
+.parrot-login-b__checkbox {
+	width: 36rpx;
+	height: 36rpx;
+	border-radius: 50%;
+	border-width: 2rpx;
+	border-style: solid;
+	border-color: #c0c4cc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 12rpx;
+}
+
+.parrot-login-b__checkbox--checked {
+	background-color: #1a7eff;
+	border-color: #1a7eff;
+}
+
+.parrot-login-b__checkbox-icon {
+	font-size: 22rpx;
+	color: #ffffff;
+	font-weight: 700;
+}
+
+.parrot-login-b__agreement-text {
+	font-size: 24rpx;
+	color: #909399;
+}
+
+.parrot-login-b__agreement-link {
+	font-size: 24rpx;
+	color: #1a7eff;
+}
+</style>

@@ -1,0 +1,302 @@
+<template>
+	<!-- DatePicker 日期时间选择器：基于滚轮选择日期/时间 -->
+	<view v-if="visible" class="parrot-date-picker-wrap" @tap.stop="handleClose">
+		<view class="parrot-date-picker__mask" :class="[maskShow ? 'parrot-date-picker__mask--show' : '']"></view>
+		<view class="parrot-date-picker__popup" :class="[contentShow ? 'parrot-date-picker__popup--show' : '']" @tap.stop>
+			<!-- 工具栏 -->
+			<view class="parrot-date-picker__toolbar">
+				<text class="parrot-date-picker__cancel" @tap="handleCancel">取消</text>
+				<text class="parrot-date-picker__title">{{ title ?? '选择日期' }}</text>
+				<text class="parrot-date-picker__confirm" @tap="handleConfirm">确定</text>
+			</view>
+			<!-- 滚轮 -->
+			<picker-view class="parrot-date-picker__view" :value="pickerIndexes" @change="onPickerChange">
+				<!-- 年 -->
+				<picker-view-column v-if="showYear">
+					<view v-for="y in yearList" :key="y" class="parrot-date-picker__item">
+						<text class="parrot-date-picker__item-text">{{ y }}年</text>
+					</view>
+				</picker-view-column>
+				<!-- 月 -->
+				<picker-view-column v-if="showMonth">
+					<view v-for="m in monthList" :key="m" class="parrot-date-picker__item">
+						<text class="parrot-date-picker__item-text">{{ padZero(m) }}月</text>
+					</view>
+				</picker-view-column>
+				<!-- 日 -->
+				<picker-view-column v-if="showDay">
+					<view v-for="d in dayList" :key="d" class="parrot-date-picker__item">
+						<text class="parrot-date-picker__item-text">{{ padZero(d) }}日</text>
+					</view>
+				</picker-view-column>
+				<!-- 时 -->
+				<picker-view-column v-if="showHour">
+					<view v-for="h in hourList" :key="h" class="parrot-date-picker__item">
+						<text class="parrot-date-picker__item-text">{{ padZero(h) }}时</text>
+					</view>
+				</picker-view-column>
+				<!-- 分 -->
+				<picker-view-column v-if="showMinute">
+					<view v-for="mi in minuteList" :key="mi" class="parrot-date-picker__item">
+						<text class="parrot-date-picker__item-text">{{ padZero(mi) }}分</text>
+					</view>
+				</picker-view-column>
+			</picker-view>
+			<view class="parrot-date-picker__safe"></view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-date-picker 日期时间选择器
+ *
+ * @prop show       是否显示
+ * @prop modelValue 当前值（格式如 '2024-01-01' 或 '2024-01-01 12:30'）
+ * @prop mode       模式：date/time/datetime/year-month
+ * @prop minDate    最小日期 'YYYY-MM-DD'
+ * @prop maxDate    最大日期 'YYYY-MM-DD'
+ * @prop title      标题
+ *
+ * @event confirm       确认 { value, year, month, day, hour, minute }
+ * @event cancel        取消
+ * @event change        滚轮变化
+ * @event update:show   显示状态
+ * @event update:modelValue 值变更
+ */
+import { ref, watch, computed } from 'vue'
+
+interface Props {
+	show ?: boolean
+	modelValue ?: string
+	mode ?: string
+	minDate ?: string
+	maxDate ?: string
+	title ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	show: false,
+	modelValue: '',
+	mode: 'date',
+	minDate: '2000-01-01',
+	maxDate: '2030-12-31',
+	title: '选择日期',
+})
+
+const emit = defineEmits<{
+	confirm: [event: any]
+	cancel: []
+	change: [event: any]
+	'update:show': [show: boolean]
+	'update:modelValue': [value: string]
+}>()
+
+const visible = ref<boolean>(false)
+const maskShow = ref<boolean>(false)
+const contentShow = ref<boolean>(false)
+
+// 当前选中值
+const selectedYear = ref<number>(2024)
+const selectedMonth = ref<number>(1)
+const selectedDay = ref<number>(1)
+const selectedHour = ref<number>(0)
+const selectedMinute = ref<number>(0)
+
+const showYear = computed(() : boolean => props.mode !== 'time')
+const showMonth = computed(() : boolean => props.mode !== 'time')
+const showDay = computed(() : boolean => props.mode === 'date' || props.mode === 'datetime')
+const showHour = computed(() : boolean => props.mode === 'time' || props.mode === 'datetime')
+const showMinute = computed(() : boolean => props.mode === 'time' || props.mode === 'datetime')
+
+// 年列表
+const minYear = computed(() : number => {
+	return parseInt((props.minDate ?? '2000-01-01').substring(0, 4)) || 2000
+})
+const maxYear = computed(() : number => {
+	return parseInt((props.maxDate ?? '2030-12-31').substring(0, 4)) || 2030
+})
+const yearList = computed(() : number[] => {
+	const list : number[] = []
+	for (let i = minYear.value; i <= maxYear.value; i++) list.push(i)
+	return list
+})
+const monthList = computed(() : number[] => {
+	const list : number[] = []
+	for (let i = 1; i <= 12; i++) list.push(i)
+	return list
+})
+const dayList = computed(() : number[] => {
+	const days = getDaysInMonth(selectedYear.value, selectedMonth.value)
+	const list : number[] = []
+	for (let i = 1; i <= days; i++) list.push(i)
+	return list
+})
+const hourList = computed(() : number[] => {
+	const list : number[] = []
+	for (let i = 0; i <= 23; i++) list.push(i)
+	return list
+})
+const minuteList = computed(() : number[] => {
+	const list : number[] = []
+	for (let i = 0; i <= 59; i++) list.push(i)
+	return list
+})
+
+// picker-view 索引
+const pickerIndexes = computed(() : number[] => {
+	const indexes : number[] = []
+	if (showYear.value) indexes.push(selectedYear.value - minYear.value)
+	if (showMonth.value) indexes.push(selectedMonth.value - 1)
+	if (showDay.value) indexes.push(selectedDay.value - 1)
+	if (showHour.value) indexes.push(selectedHour.value)
+	if (showMinute.value) indexes.push(selectedMinute.value)
+	return indexes
+})
+
+watch(() => props.show, (val) => {
+	if (val) {
+		parseModelValue()
+		openPicker()
+	} else {
+		closePicker()
+	}
+}, { immediate: true })
+
+function parseModelValue() {
+	const v = props.modelValue ?? ''
+	if (!v) {
+		const now = new Date()
+		selectedYear.value = now.getFullYear()
+		selectedMonth.value = now.getMonth() + 1
+		selectedDay.value = now.getDate()
+		selectedHour.value = now.getHours()
+		selectedMinute.value = now.getMinutes()
+		return
+	}
+	const parts = v.split(/[-\s:]/)
+	selectedYear.value = parseInt(parts[0] ?? '2024') || 2024
+	selectedMonth.value = parseInt(parts[1] ?? '1') || 1
+	selectedDay.value = parseInt(parts[2] ?? '1') || 1
+	selectedHour.value = parseInt(parts[3] ?? '0') || 0
+	selectedMinute.value = parseInt(parts[4] ?? '0') || 0
+}
+
+function getDaysInMonth(year : number, month : number) : number {
+	return new Date(year, month, 0).getDate()
+}
+
+function padZero(n : number) : string {
+	return n < 10 ? `0${n}` : `${n}`
+}
+
+function openPicker() {
+	visible.value = true
+	setTimeout(() => {
+		maskShow.value = true
+		contentShow.value = true
+	}, 16)
+}
+
+function closePicker() {
+	maskShow.value = false
+	contentShow.value = false
+	setTimeout(() => {
+		visible.value = false
+	}, 300)
+}
+
+function handleClose() {
+	emit('update:show', false)
+	emit('cancel')
+	closePicker()
+}
+
+function handleCancel() {
+	handleClose()
+}
+
+function handleConfirm() {
+	let value = ''
+	const m = props.mode ?? 'date'
+	if (m === 'year-month') {
+		value = `${selectedYear.value}-${padZero(selectedMonth.value)}`
+	} else if (m === 'date') {
+		value = `${selectedYear.value}-${padZero(selectedMonth.value)}-${padZero(selectedDay.value)}`
+	} else if (m === 'datetime') {
+		value = `${selectedYear.value}-${padZero(selectedMonth.value)}-${padZero(selectedDay.value)} ${padZero(selectedHour.value)}:${padZero(selectedMinute.value)}`
+	} else if (m === 'time') {
+		value = `${padZero(selectedHour.value)}:${padZero(selectedMinute.value)}`
+	}
+	emit('update:modelValue', value)
+	emit('confirm', {
+		value,
+		year: selectedYear.value,
+		month: selectedMonth.value,
+		day: selectedDay.value,
+		hour: selectedHour.value,
+		minute: selectedMinute.value,
+	})
+	emit('update:show', false)
+	closePicker()
+}
+
+function onPickerChange(e : any) {
+	const val = e.detail.value as number[]
+	let idx = 0
+	if (showYear.value) { selectedYear.value = (yearList.value[val[idx] ?? 0] ?? 2024); idx++ }
+	if (showMonth.value) { selectedMonth.value = (val[idx] ?? 0) + 1; idx++ }
+	if (showDay.value) {
+		const maxDay = getDaysInMonth(selectedYear.value, selectedMonth.value)
+		selectedDay.value = Math.min((val[idx] ?? 0) + 1, maxDay); idx++
+	}
+	if (showHour.value) { selectedHour.value = val[idx] ?? 0; idx++ }
+	if (showMinute.value) { selectedMinute.value = val[idx] ?? 0; idx++ }
+	emit('change', { year: selectedYear.value, month: selectedMonth.value, day: selectedDay.value, hour: selectedHour.value, minute: selectedMinute.value })
+}
+</script>
+
+<style scoped>
+.parrot-date-picker-wrap {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	z-index: 1000;
+}
+.parrot-date-picker__mask {
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0,0,0,0);
+	transition: background 0.3s;
+}
+.parrot-date-picker__mask--show {
+	background: rgba(0,0,0,0.45);
+}
+.parrot-date-picker__popup {
+	position: absolute;
+	left: 0; right: 0; bottom: 0;
+	background: #ffffff;
+	border-radius: 32rpx 32rpx 0 0;
+	transform: translateY(100%);
+	transition: transform 0.3s;
+}
+.parrot-date-picker__popup--show {
+	transform: translateY(0);
+}
+.parrot-date-picker__toolbar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 88rpx;
+	padding: 0 32rpx;
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #ebeef5;
+}
+.parrot-date-picker__cancel { font-size: 28rpx; color: #909399; }
+.parrot-date-picker__title { flex: 1; text-align: center; font-size: 30rpx; font-weight: 600; color: #303133; }
+.parrot-date-picker__confirm { font-size: 28rpx; color: #1a7eff; }
+.parrot-date-picker__view { height: 480rpx; }
+.parrot-date-picker__item { display: flex; align-items: center; justify-content: center; height: 88rpx; }
+.parrot-date-picker__item-text { font-size: 30rpx; color: #303133; }
+.parrot-date-picker__safe { height: env(safe-area-inset-bottom); }
+</style>

@@ -1,0 +1,129 @@
+<template>
+	<!-- Sticky 吸顶容器：内容滚动到顶部后自动吸附 -->
+	<view class="parrot-sticky">
+		<view
+			class="parrot-sticky__wrap"
+			:class="[isFixed ? 'parrot-sticky__wrap--fixed' : '']"
+			:style="fixedStyle"
+		>
+			<slot></slot>
+		</view>
+		<!-- 吸顶后的占位 -->
+		<view v-if="isFixed" class="parrot-sticky__placeholder" :style="placeholderStyle"></view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-sticky 吸顶容器
+ * 当内容滚动到指定位置时自动吸附在页面顶部。
+ * 使用 uni.createIntersectionObserver 实现。
+ *
+ * @prop offsetTop   吸顶距离顶部偏移量 px
+ * @prop zIndex      吸顶后层级
+ * @prop disabled    是否禁用吸顶
+ * @prop background  吸顶后背景色
+ *
+ * @event change  吸顶状态变化，{ isFixed: boolean }
+ */
+import { computed, ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+
+interface Props {
+	offsetTop ?: number
+	zIndex ?: number
+	disabled ?: boolean
+	background ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	offsetTop: 0,
+	zIndex: 99,
+	disabled: false,
+	background: '#ffffff',
+})
+
+const emit = defineEmits<{
+	change: [event: { isFixed: boolean }]
+}>()
+
+const isFixed = ref<boolean>(false)
+const contentHeight = ref<number>(0)
+let observer : UniApp.IntersectionObserver | null = null
+
+const fixedStyle = computed(() : string => {
+	if (!isFixed.value) return ''
+	const parts : string[] = [
+		'position:fixed',
+		'left:0',
+		'right:0',
+		`top:${props.offsetTop ?? 0}px`,
+		`z-index:${props.zIndex ?? 99}`,
+		`background:${props.background ?? '#ffffff'}`,
+	]
+	return parts.join(';')
+})
+
+const placeholderStyle = computed(() : string => {
+	return `height:${contentHeight.value}px`
+})
+
+onMounted(() => {
+	if (props.disabled) return
+	initObserver()
+})
+
+onUnmounted(() => {
+	if (observer != null) {
+		observer!.disconnect()
+		observer = null
+	}
+})
+
+function initObserver() {
+	const instance = getCurrentInstance()
+	if (instance == null) return
+
+	// 获取内容高度
+	const query = uni.createSelectorQuery().in(instance)
+	query.select('.parrot-sticky__wrap').boundingClientRect((rect) => {
+		if (rect != null) {
+			contentHeight.value = (rect as any).height ?? 0
+		}
+	}).exec()
+
+	// 创建交叉观察器
+	observer = uni.createIntersectionObserver(instance as any, {
+		thresholds: [0, 1],
+	})
+	observer!.relativeToViewport({ top: -(props.offsetTop ?? 0) } as any)
+	observer!.observe('.parrot-sticky', (res : any) => {
+		if (props.disabled) return
+		const ratio = (res as any).intersectionRatio ?? 0
+		const fixed = ratio < 1 && (res as any).boundingClientRect.top <= (props.offsetTop ?? 0)
+		if (fixed !== isFixed.value) {
+			isFixed.value = fixed
+			emit('change', { isFixed: fixed })
+		}
+	})
+}
+</script>
+
+<style scoped>
+.parrot-sticky {
+	position: relative;
+}
+
+.parrot-sticky__wrap {
+	/* 默认正常流 */
+}
+
+.parrot-sticky__wrap--fixed {
+	position: fixed;
+	left: 0;
+	right: 0;
+}
+
+.parrot-sticky__placeholder {
+	/* 占位，高度由 JS 动态设置 */
+}
+</style>

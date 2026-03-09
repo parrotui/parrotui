@@ -1,0 +1,210 @@
+<template>
+	<!-- Tabbar 底部标签栏：固定底部多 Tab 切换 -->
+	<view
+		class="parrot-tabbar"
+		:class="[
+			fixed ? 'parrot-tabbar--fixed' : '',
+			border ? 'parrot-tabbar--border' : '',
+			glass ? 'parrot-tabbar--glass' : '',
+		]"
+		:style="tabbarStyle"
+	>
+		<view class="parrot-tabbar__content">
+			<view
+				v-for="(item, index) in items"
+				:key="index"
+				class="parrot-tabbar__item"
+				@tap="handleSelect(index)"
+			>
+				<!-- 图标 -->
+				<view class="parrot-tabbar__icon-wrap">
+					<text class="parrot-tabbar__icon" :style="iconStyle(index)">{{ index === modelValue ? (item.activeIcon ?? item.icon ?? '') : (item.icon ?? '') }}</text>
+					<!-- 徽标 -->
+					<view v-if="item.badge" class="parrot-tabbar__badge">
+						<text class="parrot-tabbar__badge-text">{{ item.badge }}</text>
+					</view>
+					<view v-if="item.dot" class="parrot-tabbar__dot"></view>
+				</view>
+				<!-- 文字 -->
+				<text class="parrot-tabbar__label" :style="labelStyle(index)">{{ item.text ?? '' }}</text>
+			</view>
+		</view>
+		<!-- 安全区域 -->
+		<view v-if="safeAreaInsetBottom" class="parrot-tabbar__safe-area"></view>
+	</view>
+	<!-- 固定定位时的占位 -->
+	<view v-if="fixed" class="parrot-tabbar__placeholder"></view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-tabbar 底部标签栏
+ * 固定底部的 Tab 标签栏，支持图标、文字、徽标、圆点。
+ *
+ * @prop modelValue        当前选中索引
+ * @prop items             标签项数组 [{ text, icon, activeIcon, badge?, dot? }]
+ * @prop fixed             是否固定底部
+ * @prop border            是否显示顶部边框
+ * @prop safeAreaInsetBottom 是否适配安全区域
+ * @prop activeColor       选中颜色
+ * @prop inactiveColor     未选中颜色
+ * @prop glass             磨砂玻璃
+ * @prop background        背景色
+ *
+ * @event update:modelValue  索引变更
+ * @event change             Tab 切换
+ */
+import { computed } from 'vue'
+
+interface TabbarItem {
+	text ?: string
+	icon ?: string
+	activeIcon ?: string
+	badge ?: string | number
+	dot ?: boolean
+}
+
+interface Props {
+	modelValue ?: number
+	items ?: TabbarItem[]
+	fixed ?: boolean
+	border ?: boolean
+	safeAreaInsetBottom ?: boolean
+	activeColor ?: string
+	inactiveColor ?: string
+	glass ?: boolean
+	background ?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	modelValue: 0,
+	items: () : TabbarItem[] => [] as TabbarItem[],
+	fixed: true,
+	border: true,
+	safeAreaInsetBottom: true,
+	activeColor: '#1a7eff',
+	inactiveColor: '#909399',
+	glass: false,
+	background: '#ffffff',
+})
+
+const emit = defineEmits<{
+	'update:modelValue': [index: number]
+	change: [index: number]
+}>()
+
+const tabbarStyle = computed(() : string => {
+	const parts : string[] = []
+	if (!props.glass) {
+		parts.push(`background:${props.background ?? '#ffffff'}`)
+	}
+	return parts.join(';')
+})
+
+function iconStyle(index : number) : string {
+	const active = index === (props.modelValue ?? 0)
+	return `color:${active ? (props.activeColor ?? '#1a7eff') : (props.inactiveColor ?? '#909399')}`
+}
+
+function labelStyle(index : number) : string {
+	const active = index === (props.modelValue ?? 0)
+	return `color:${active ? (props.activeColor ?? '#1a7eff') : (props.inactiveColor ?? '#909399')}`
+}
+
+function handleSelect(index : number) {
+	if (index === props.modelValue) return
+	emit('update:modelValue', index)
+	emit('change', index)
+}
+</script>
+
+<style scoped>
+.parrot-tabbar {
+	width: 100%;
+}
+.parrot-tabbar--fixed {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+}
+.parrot-tabbar--border {
+	border-top-width: 1rpx;
+	border-top-style: solid;
+	border-top-color: #ebeef5;
+}
+.parrot-tabbar--glass {
+	background: rgba(255, 255, 255, 0.72) !important;
+	border-top: 1.5rpx solid rgba(255, 255, 255, 0.5);
+	box-shadow: 0 -2rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.parrot-tabbar__content {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 100rpx;
+}
+
+.parrot-tabbar__item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+}
+
+.parrot-tabbar__icon-wrap {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-tabbar__icon {
+	font-size: 40rpx;
+}
+
+.parrot-tabbar__badge {
+	position: absolute;
+	top: -8rpx;
+	right: -20rpx;
+	min-width: 32rpx;
+	height: 32rpx;
+	padding: 0 8rpx;
+	border-radius: 32rpx;
+	background-color: #f56c6c;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.parrot-tabbar__badge-text {
+	font-size: 20rpx;
+	color: #ffffff;
+	line-height: 1;
+}
+.parrot-tabbar__dot {
+	position: absolute;
+	top: -4rpx;
+	right: -8rpx;
+	width: 14rpx;
+	height: 14rpx;
+	border-radius: 50%;
+	background-color: #f56c6c;
+}
+
+.parrot-tabbar__label {
+	font-size: 22rpx;
+	margin-top: 4rpx;
+	line-height: 1.2;
+}
+
+.parrot-tabbar__safe-area {
+	height: env(safe-area-inset-bottom);
+}
+
+.parrot-tabbar__placeholder {
+	height: 120rpx;
+}
+</style>

@@ -1,0 +1,115 @@
+<template>
+	<!-- Preview 表单预览：Key-Value 键值对展示，适用于订单详情、信息确认等场景 -->
+	<view class="parrot-preview" :class="[border ? 'parrot-preview--border' : '']">
+		<view
+			v-for="(item, index) in items"
+			:key="index"
+			class="parrot-preview__item"
+			:class="[border ? 'parrot-preview__item--border' : '']"
+			:style="getItemStyle(item)"
+		>
+			<text class="parrot-preview__label" :style="labelStyle">{{ item.label }}</text>
+			<text class="parrot-preview__value">{{ item.value }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+/**
+ * parrot-preview 表单预览
+ * Key-Value 键值对展示组件，适用于订单详情、信息确认等场景。
+ * 支持多列布局和自定义标签宽度。
+ *
+ * @prop items      数据项 { label, value, span? }[]
+ * @prop columns    列数，默认 2
+ * @prop labelWidth 标签宽度，默认 '160rpx'
+ * @prop border     是否显示边框，默认 false
+ */
+import { computed } from 'vue'
+
+/** 预览项数据结构 */
+interface PreviewItem {
+	label : string
+	value : string
+	span ?: number
+}
+
+interface Props {
+	/** 数据项列表 */
+	items ?: PreviewItem[]
+	/** 列数 */
+	columns ?: number
+	/** 标签宽度 */
+	labelWidth ?: string
+	/** 是否显示边框 */
+	border ?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	items: () : PreviewItem[] => [],
+	columns: 2,
+	labelWidth: '160rpx',
+	border: false,
+})
+
+/** 标签样式 */
+const labelStyle = computed(() : string => {
+	return `width:${props.labelWidth ?? '160rpx'};min-width:${props.labelWidth ?? '160rpx'}`
+})
+
+/** 获取每个项的宽度样式 */
+const getItemStyle = (item : PreviewItem) : string => {
+	const cols = props.columns ?? 2
+	const span = item.span ?? 1
+	// 使用百分比宽度实现多列
+	const width = (span / cols) * 100
+	return `width:${width}%`
+}
+</script>
+
+<style scoped>
+.parrot-preview {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 100%;
+}
+.parrot-preview--border {
+	border-width: 1rpx;
+	border-style: solid;
+	border-color: #ebeef5;
+	border-radius: 8rpx;
+	overflow: hidden;
+}
+
+/* ---- 单个项 ---- */
+.parrot-preview__item {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	padding: 16rpx 24rpx;
+	box-sizing: border-box;
+}
+.parrot-preview__item--border {
+	border-bottom-width: 1rpx;
+	border-bottom-style: solid;
+	border-bottom-color: #ebeef5;
+}
+
+/* ---- 标签 ---- */
+.parrot-preview__label {
+	font-size: 26rpx;
+	color: #909399;
+	flex-shrink: 0;
+	line-height: 1.6;
+}
+
+/* ---- 值 ---- */
+.parrot-preview__value {
+	flex: 1;
+	font-size: 26rpx;
+	color: #303133;
+	line-height: 1.6;
+	text-align: right;
+}
+</style>

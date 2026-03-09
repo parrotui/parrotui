@@ -1,0 +1,77 @@
+<template>
+	<text
+		class="parrot-heading"
+		:class="[
+			`parrot-heading--${level}`,
+			type ? `parrot-heading--${type}` : '',
+			align ? `parrot-heading--${align}` : '',
+			ellipsis ? 'parrot-heading--ellipsis' : ''
+		]"
+		:style="headingStyle"
+		@click="$emit('click', $event)"
+	>
+		<slot>{{ text }}</slot>
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	text?: string
+	level?: 1 | 2 | 3 | 4 | 5 | 6
+	type?: 'default' | 'primary' | 'secondary' | 'muted'
+	align?: 'left' | 'center' | 'right'
+	ellipsis?: boolean
+	color?: string
+	margin?: string
+}>(), {
+	text: '',
+	level: 1,
+	type: 'default',
+	align: 'left',
+	ellipsis: false,
+	color: '',
+	margin: '',
+})
+
+defineEmits<{ click: [event: Event] }>()
+
+const headingStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.color) style.color = props.color
+	if (props.margin) style.margin = props.margin
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-heading {
+	display: block;
+	font-weight: bold;
+	color: #303133;
+	word-wrap: break-word;
+
+	&--1 { font-size: 48rpx; line-height: 1.3; margin: 0 0 24rpx 0; }
+	&--2 { font-size: 40rpx; line-height: 1.35; margin: 0 0 20rpx 0; }
+	&--3 { font-size: 36rpx; line-height: 1.4; margin: 0 0 16rpx 0; }
+	&--4 { font-size: 32rpx; line-height: 1.4; margin: 0 0 12rpx 0; }
+	&--5 { font-size: 28rpx; line-height: 1.5; margin: 0 0 8rpx 0; }
+	&--6 { font-size: 24rpx; line-height: 1.5; margin: 0 0 8rpx 0; }
+
+	&--primary { color: #1a7eff; }
+	&--secondary { color: #909399; }
+	&--muted { color: #c0c4cc; }
+
+	&--left { text-align: left; }
+	&--center { text-align: center; }
+	&--right { text-align: right; }
+
+	&--ellipsis {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+</style>

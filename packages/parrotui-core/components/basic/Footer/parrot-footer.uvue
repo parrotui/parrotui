@@ -46,20 +46,20 @@ interface NavItem {
 }
 
 interface StyleProps {
-	-- 容器样式
+	// 容器样式
 	margin?: string
 	padding?: string
 	backgroundColor?: string
 	borderRadius?: string
 	boxShadow?: string
 	
-	-- 布局样式
+	// 布局样式
 	direction?: 'row' | 'column'
 	justifyContent?: string
 	alignItems?: string
 	gap?: string
 	
-	-- 全局字体
+	// 全局字体
 	color?: string
 	fontSize?: number
 	fontWeight?: string | number
@@ -67,42 +67,42 @@ interface StyleProps {
 	lineHeight?: number
 	textAlign?: 'left' | 'center' | 'right'
 	
-	-- Logo
+	// Logo
 	logoWidth?: number
 	logoHeight?: number
 	logoColor?: string
 	logoFontSize?: number
 	logoMargin?: string
 	
-	-- 描述
+	// 描述
 	descriptionColor?: string
 	descriptionFontSize?: number
 	descriptionMargin?: string
 	
-	-- 导航
+	// 导航
 	navColor?: string
 	navFontSize?: number
 	navGap?: string
 	separatorColor?: string
 	
-	-- 版权
+	// 版权
 	copyrightColor?: string
 	copyrightFontSize?: number
 	copyrightMargin?: string
 	
-	-- ICP
+	// ICP
 	icpColor?: string
 	icpFontSize?: number
 	icpMargin?: string
 	
-	-- 定位
+	// 定位
 	isFixed?: boolean
 	bottom?: number
 	zIndex?: number
 }
 
 const props = withDefaults(defineProps<{
-	-- 数据
+	// 数据
 	navigate?: NavItem[]
 	text?: string
 	copyright?: string
@@ -111,24 +111,29 @@ const props = withDefaults(defineProps<{
 	logoUrl?: string
 	description?: string
 	
-	-- 显示控制
+	// 显示控制
 	showLogo?: boolean
 	showSeparator?: boolean
 	
-	-- 容器样式
+	// 变体预设
+	variant?: string
+	// 是否自动适配安全区域底部
+	safeAreaBottom?: boolean
+	
+	// 容器样式
 	margin?: string
 	padding?: string
 	backgroundColor?: string
 	borderRadius?: string
 	boxShadow?: string
 	
-	-- 布局
+	// 布局
 	direction?: string
 	justifyContent?: string
 	alignItems?: string
 	gap?: string
 	
-	-- 全局字体
+	// 全局字体
 	color?: string
 	fontSize?: number
 	fontWeight?: string | number
@@ -136,35 +141,35 @@ const props = withDefaults(defineProps<{
 	lineHeight?: number
 	textAlign?: string
 	
-	-- Logo 样式
+	// Logo 样式
 	logoWidth?: number
 	logoHeight?: number
 	logoColor?: string
 	logoFontSize?: number
 	logoMargin?: string
 	
-	-- 描述样式
+	// 描述样式
 	descriptionColor?: string
 	descriptionFontSize?: number
 	descriptionMargin?: string
 	
-	-- 导航样式
+	// 导航样式
 	navColor?: string
 	navFontSize?: number
 	navGap?: string
 	separatorColor?: string
 	
-	-- 版权样式
+	// 版权样式
 	copyrightColor?: string
 	copyrightFontSize?: number
 	copyrightMargin?: string
 	
-	-- ICP 样式
+	// ICP 样式
 	icpColor?: string
 	icpFontSize?: number
 	icpMargin?: string
 	
-	-- 定位
+	// 定位
 	isFixed?: boolean
 	bottom?: number
 	zIndex?: number
@@ -178,6 +183,8 @@ const props = withDefaults(defineProps<{
 	description: '',
 	showLogo: false,
 	showSeparator: true,
+	variant: 'default',
+	safeAreaBottom: false,
 	margin: '',
 	padding: '24rpx 30rpx',
 	backgroundColor: 'transparent',
@@ -228,12 +235,24 @@ const containerStyle = computed(() => {
 		`background-color: ${props.backgroundColor}`,
 	]
 	
+	// 变体预设
+	if (props.variant === 'branded') {
+		styles.push('border-top: 2px solid #1a7eff')
+	} else if (props.variant === 'minimal') {
+		styles.push('border-top: 1px solid #ebeef5')
+	}
+	
 	if (props.margin) styles.push(`margin: ${props.margin}`)
 	if (props.padding) styles.push(`padding: ${props.padding}`)
 	if (props.gap) styles.push(`gap: ${props.gap}`)
 	if (props.borderRadius) styles.push(`border-radius: ${props.borderRadius}`)
 	if (props.boxShadow) styles.push(`box-shadow: ${props.boxShadow}`)
 	if (props.fontFamily) styles.push(`font-family: ${props.fontFamily}`)
+	
+	// 安全区域底部
+	if (props.safeAreaBottom) {
+		styles.push('padding-bottom: env(safe-area-inset-bottom)')
+	}
 	
 	if (props.isFixed) {
 		styles.push(`position: fixed`)
@@ -251,7 +270,7 @@ const logoStyle = computed(() => `margin: ${props.logoMargin}`)
 const logoImageStyle = computed(() => `width: ${props.logoWidth}rpx; height: ${props.logoHeight}rpx`)
 
 const logoTextStyle = computed(() => 
-	`color: ${props.logoColor}; font-size: ${props.logoFontSize}rpx; font-weight: ${props.logoFontWeight || '600'}`
+	`color: ${props.logoColor}; font-size: ${props.logoFontSize}rpx; font-weight: 600`
 )
 
 const descStyle = computed(() => {

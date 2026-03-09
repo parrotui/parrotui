@@ -1,0 +1,102 @@
+<template>
+	<text
+		class="parrot-currency"
+		:class="[
+			size ? `parrot-currency--${size}` : '',
+			type ? `parrot-currency--${type}` : '',
+			strikethrough ? 'parrot-currency--strikethrough' : ''
+		]"
+		:style="currencyStyle"
+		@click="$emit('click', $event)"
+	>
+		<text v-if="showSymbol" class="parrot-currency__symbol">{{ symbol }}</text>
+		<text class="parrot-currency__integer">{{ integerPart }}</text>
+		<text v-if="showDecimal" class="parrot-currency__decimal">.{{ decimalPart }}</text>
+	</text>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import type { CSSProperties } from 'vue'
+
+const props = withDefaults(defineProps<{
+	value?: number | string
+	symbol?: string
+	showSymbol?: boolean
+	decimalPlaces?: number
+	showDecimal?: boolean
+	thousandsSeparator?: boolean
+	size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+	type?: '' | 'primary' | 'danger' | 'success' | 'warning'
+	color?: string
+	strikethrough?: boolean
+}>(), {
+	value: 0,
+	symbol: '¥',
+	showSymbol: true,
+	decimalPlaces: 2,
+	showDecimal: true,
+	thousandsSeparator: true,
+	size: 'md',
+	type: '',
+	color: '',
+	strikethrough: false,
+})
+
+defineEmits<{ click: [event: Event] }>()
+
+const numValue = computed(() => {
+	if (typeof props.value === 'string') return parseFloat(props.value) || 0
+	return props.value as number
+})
+
+const integerPart = computed(() => {
+	let str = Math.floor(Math.abs(numValue.value)).toString()
+	if (props.thousandsSeparator) {
+		str = str.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+	}
+	return (numValue.value < 0 ? '-' : '') + str
+})
+
+const decimalPart = computed(() => {
+	return Math.abs(numValue.value).toFixed(props.decimalPlaces).split('.')[1] || '00'
+})
+
+const currencyStyle = computed(() => {
+	const style: CSSProperties = {}
+	if (props.color) style.color = props.color
+	return style
+})
+</script>
+
+<style lang="scss">
+.parrot-currency {
+	display: inline-flex;
+	align-items: baseline;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	color: #303133;
+	font-weight: bold;
+
+	&--xs { font-size: 22rpx; }
+	&--sm { font-size: 26rpx; }
+	&--md { font-size: 32rpx; }
+	&--lg { font-size: 40rpx; }
+	&--xl { font-size: 52rpx; }
+
+	&--primary { color: #1a7eff; }
+	&--danger { color: #f56c6c; }
+	&--success { color: #41a906; }
+	&--warning { color: #e6a23c; }
+
+	&--strikethrough { text-decoration: line-through; opacity: 0.6; }
+}
+
+.parrot-currency__symbol {
+	font-size: 0.7em;
+	margin-right: 2rpx;
+}
+
+.parrot-currency__decimal {
+	font-size: 0.75em;
+}
+</style>
