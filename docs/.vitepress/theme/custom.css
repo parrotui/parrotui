@@ -91,23 +91,8 @@
   background-color: rgba(20, 20, 20, 0.85) !important;
 }
 
-/* 强制清除 VPContent 顶部空白
-   VitePress 内部使用 scoped [data-v-xxx] 选择器，优先级高于普通类名
-   用 :where() 外包 + id 选择器提升权重，确保覆盖 */
-#VPContent,
-.VPContent,
-div.VPContent,
-div#VPContent {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* 同时覆盖 has-sidebar 状态下 VitePress 自动加的 padding-top: var(--vp-nav-height) */
-#VPContent.has-sidebar,
-.VPContent.has-sidebar {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
+/* VPContent 不能修改 margin/padding，否则会破坏侧边栏与内容区的并排 flex 布局
+   顶部空白已通过 --vp-layout-top-height: 0px 从根源清零 */
 
 /* 导航栏 logo + 标题 */
 .VPNavBarTitle .title {
@@ -255,27 +240,12 @@ div#VPContent {
 
 /* ─── 内容区域样式 ──────────────────────────────────────────── */
 
-/* VPDoc 本身有 padding-top 补偿导航高度，清零使内容与侧边栏顶部齐平 */
-.VPDoc {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-
+/* VPDoc 容器最大宽度 */
 .VPDoc .container {
   max-width: 100% !important;
-  margin-top: 0 !important;
-  padding-top: 0 !important;
 }
 
-/* 确保内容列和主体区域无多余顶部空白 */
-.VPDoc .content,
-.VPDoc .content-container,
-.VPDoc .main {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-
-/* 页面首个 h1 与顶部导航之间保留合适间距 */
+/* 页面首个 h1 与顶部保留合适间距 */
 .vp-doc > div > h1:first-child {
   margin-top: 0 !important;
   padding-top: 24px;
