@@ -91,20 +91,6 @@
   background-color: rgba(20, 20, 20, 0.85) !important;
 }
 
-/*
-  精确修复顶部空白（已通过控制台确认数值）：
-  - VPContent padding-top: 64px（来自 VitePress scoped 样式 padding-top: var(--vp-nav-height)）
-  - VPDoc    padding-top: 40px（VitePress 内容区额外间距）
-  VitePress 用 scoped [data-v-xxx] 属性选择器，权重为 (0,2,0)。
-  使用 html body 前缀将权重提升到 (0,2,2)，稳定覆盖。
-*/
-html body #VPContent.has-sidebar {
-  padding-top: 0 !important;
-}
-html body .VPDoc.has-sidebar {
-  padding-top: 0 !important;
-}
-
 /* 确保内容区左侧留出侧边栏宽度，防止 fixed 侧边栏遮挡内容 */
 @media (min-width: 960px) {
   html body #VPContent.has-sidebar {
