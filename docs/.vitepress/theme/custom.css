@@ -123,16 +123,13 @@ html body .VPDoc.has-sidebar {
 
 /* 桌面端：侧边栏 sticky 固定，不随内容滚动消失 */
 .VPSidebar {
-  position: sticky !important;
-  top: var(--vp-nav-height);
-  height: calc(100vh - var(--vp-nav-height));
+  /* 保持 VitePress 默认的 fixed 定位，不占文档流，避免把 VPContent 挤下去 */
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--vp-c-border) transparent;
   background-color: var(--vp-sidebar-bg-color);
   border-right: 1px solid var(--vp-c-divider);
-  flex-shrink: 0;
 }
 
 /* 侧边栏分组标题 */
