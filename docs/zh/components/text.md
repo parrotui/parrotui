@@ -1,3 +1,9 @@
+---
+aside: false
+---
+
+<ComponentDoc demo="TextDemo" title="Text 文本">
+
 # Text 文本
 
 文本组件，支持多种模式、多种颜色类型、可复制、省略等。
@@ -56,3 +62,5 @@
 |------|------|---------|
 | `click` | 点击 | `(event)` |
 | `copy` | 复制成功 | `(text)` |
+
+</ComponentDoc>

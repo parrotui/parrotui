@@ -247,11 +247,30 @@
   padding-top: 24px;
 }
 
-/* 正文标题锚点悬停 */
-.VPDoc h2:hover .header-anchor,
-.VPDoc h3:hover .header-anchor {
-  opacity: 1;
+/* 正文标题锚点：确保 # 图标始终可见并居中 */
+.vp-doc h1 .header-anchor,
+.vp-doc h2 .header-anchor,
+.vp-doc h3 .header-anchor,
+.vp-doc h4 .header-anchor,
+.vp-doc h5 .header-anchor,
+.vp-doc h6 .header-anchor {
+  opacity: 0;
+  transition: opacity 0.2s;
+  float: left;
+  margin-left: -1em;
+  padding-right: 0.23em;
+  font-weight: 400;
+  font-size: 0.85em;
   color: var(--vp-c-brand-1);
+}
+
+.vp-doc h1:hover .header-anchor,
+.vp-doc h2:hover .header-anchor,
+.vp-doc h3:hover .header-anchor,
+.vp-doc h4:hover .header-anchor,
+.vp-doc h5:hover .header-anchor,
+.vp-doc h6:hover .header-anchor {
+  opacity: 1;
 }
 
 /* 代码块圆角 */
