@@ -91,10 +91,22 @@
   background-color: rgba(20, 20, 20, 0.85) !important;
 }
 
-/* 兜底：强制清除 VPContent 因 --vp-layout-top-height 产生的顶部空白 */
-.VPContent {
+/* 强制清除 VPContent 顶部空白
+   VitePress 内部使用 scoped [data-v-xxx] 选择器，优先级高于普通类名
+   用 :where() 外包 + id 选择器提升权重，确保覆盖 */
+#VPContent,
+.VPContent,
+div.VPContent,
+div#VPContent {
   margin-top: 0 !important;
   padding-top: 0 !important;
+}
+
+/* 同时覆盖 has-sidebar 状态下 VitePress 自动加的 padding-top: var(--vp-nav-height) */
+#VPContent.has-sidebar,
+.VPContent.has-sidebar {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* 导航栏 logo + 标题 */
