@@ -161,6 +161,51 @@
   background-color: rgba(77, 158, 255, 0.12);
 }
 
+/* ─── 侧边栏单双数交替背景（组件列表斑马纹）─────────────────── */
+
+/* 奇数项（1, 3, 5...）→ 浅灰背景 */
+.VPSidebarItem.level-1:nth-child(odd) > .item {
+  background-color: #f0f2f5;
+  border-radius: 4px;
+}
+
+/* 偶数项（2, 4, 6...）→ 白色背景 */
+.VPSidebarItem.level-1:nth-child(even) > .item {
+  background-color: #ffffff;
+  border-radius: 4px;
+}
+
+/* hover 时覆盖斑马纹底色 */
+.VPSidebarItem.level-1:nth-child(odd) > .item:hover,
+.VPSidebarItem.level-1:nth-child(even) > .item:hover {
+  background-color: var(--vp-sidebar-item-hover-bg);
+}
+
+/* 激活项优先级高于斑马纹 */
+.VPSidebarItem.level-1.is-active:nth-child(odd) > .item,
+.VPSidebarItem.level-1.is-active:nth-child(even) > .item {
+  background-color: var(--vp-c-brand-soft);
+}
+
+/* 暗色模式斑马纹 */
+.dark .VPSidebarItem.level-1:nth-child(odd) > .item {
+  background-color: #1e1e1e;
+}
+
+.dark .VPSidebarItem.level-1:nth-child(even) > .item {
+  background-color: #252525;
+}
+
+.dark .VPSidebarItem.level-1:nth-child(odd) > .item:hover,
+.dark .VPSidebarItem.level-1:nth-child(even) > .item:hover {
+  background-color: var(--vp-sidebar-item-hover-bg);
+}
+
+.dark .VPSidebarItem.level-1.is-active:nth-child(odd) > .item,
+.dark .VPSidebarItem.level-1.is-active:nth-child(even) > .item {
+  background-color: rgba(77, 158, 255, 0.12);
+}
+
 /* ─── 右侧 TOC 目录样式 ─────────────────────────────────────── */
 .VPDocAsideOutline {
   position: sticky;
