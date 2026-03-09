@@ -12,11 +12,13 @@ export default {
     app.component('PhonePreview', PhonePreview)
     app.component('PlatformTable', PlatformTable)
 
-    // 每次路由切换后回到顶部
-    // 使用 requestAnimationFrame 确保 DOM 渲染完成后再滚动，避免固定导航遮挡顶部内容
-    router.onAfterRouteChanged = () => {
+    // 路由切换后处理滚动：
+    // - 带 hash 锚点（如 /guide#install）：不强制回顶，让浏览器自然定位到锚点
+    // - 普通页面切换：回到顶部，避免上一页的滚动位置残留
+    router.onAfterRouteChanged = (href) => {
       if (typeof window === 'undefined') return
-      // 等待两帧，确保 VitePress 内部锚点定位逻辑执行完毕后再覆盖
+      const hasHash = href && href.includes('#')
+      if (hasHash) return // 有锚点时不干预，交给 scroll-margin-top 处理偏移
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           window.scrollTo({ top: 0, behavior: 'instant' })

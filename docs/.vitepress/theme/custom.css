@@ -239,6 +239,20 @@
   padding-top: 0 !important;
 }
 
+/* 确保内容列和主体区域无多余顶部空白 */
+.VPDoc .content,
+.VPDoc .content-container,
+.VPDoc .main {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* 页面首个 h1 与顶部导航之间保留合适间距（非锚点滚动场景） */
+.vp-doc > div > h1:first-child {
+  margin-top: 0 !important;
+  padding-top: 24px;
+}
+
 /* 正文标题锚点悬停 */
 .VPDoc h2:hover .header-anchor,
 .VPDoc h3:hover .header-anchor {
