@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tree-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTreeEditor — parrot-tree-editor
+ */
+defineOptions({ name: 'ParrotTreeEditor' })
+</script>
+
+<style lang="scss">
+.parrot-tree-editor {
+  /* TODO */
+}
+</style>

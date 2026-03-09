@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-pie-chart">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPieChart — parrot-pie-chart
+ */
+defineOptions({ name: 'ParrotPieChart' })
+</script>
+
+<style lang="scss">
+.parrot-pie-chart {
+  /* TODO */
+}
+</style>

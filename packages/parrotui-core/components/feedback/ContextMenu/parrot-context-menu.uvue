@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-context-menu">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotContextMenu — parrot-context-menu
+ */
+defineOptions({ name: 'ParrotContextMenu' })
+</script>
+
+<style lang="scss">
+.parrot-context-menu {
+  /* TODO */
+}
+</style>

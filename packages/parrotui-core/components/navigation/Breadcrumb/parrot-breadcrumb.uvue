@@ -1,93 +1,18 @@
 <template>
-	<!-- Breadcrumb 面包屑：层级导航，支持自定义分隔符和点击跳转 -->
-	<view class="parrot-breadcrumb">
-		<view
-			v-for="(item, index) in items"
-			:key="index"
-			class="parrot-breadcrumb__item"
-		>
-			<!-- 面包屑文字 -->
-			<text
-				class="parrot-breadcrumb__text"
-				:class="[index === items.length - 1 ? 'parrot-breadcrumb__text--active' : 'parrot-breadcrumb__text--link']"
-				@tap="onItemTap(item, index)"
-			>{{ item.text }}</text>
-			<!-- 分隔符（最后一个不显示） -->
-			<text
-				v-if="index < items.length - 1"
-				class="parrot-breadcrumb__separator"
-			>{{ separator }}</text>
-		</view>
-	</view>
+  <view class="parrot-breadcrumb">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
 /**
- * parrot-breadcrumb 面包屑
- * 显示当前页面在层级结构中的位置，支持自定义分隔符。
- *
- * @prop items     面包屑数据 { text, url? }[]
- * @prop separator 分隔符，默认 '/'
- *
- * @event click    点击面包屑项，返回 [item, index]
+ * ParrotBreadcrumb — parrot-breadcrumb
  */
-
-/** 面包屑项数据结构 */
-interface BreadcrumbItem {
-	text : string
-	url ?: string
-}
-
-interface Props {
-	/** 面包屑数据列表 */
-	items ?: BreadcrumbItem[]
-	/** 分隔符 */
-	separator ?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	items: () : BreadcrumbItem[] => [],
-	separator: '/',
-})
-
-const emit = defineEmits<{
-	click: [item: BreadcrumbItem, index: number]
-}>()
-
-/** 点击面包屑项 */
-function onItemTap(item : BreadcrumbItem, index : number) {
-	emit('click', item, index)
-}
+defineOptions({ name: 'ParrotBreadcrumb' })
 </script>
 
-<style scoped>
+<style lang="scss">
 .parrot-breadcrumb {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	flex-wrap: wrap;
-	padding: 16rpx 24rpx;
-}
-.parrot-breadcrumb__item {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-}
-.parrot-breadcrumb__text {
-	font-size: 26rpx;
-	line-height: 1.4;
-}
-.parrot-breadcrumb__text--link {
-	color: #1a7eff;
-}
-.parrot-breadcrumb__text--active {
-	color: #303133;
-	font-weight: 500;
-}
-.parrot-breadcrumb__separator {
-	font-size: 24rpx;
-	color: #c0c4cc;
-	margin-left: 12rpx;
-	margin-right: 12rpx;
+  /* TODO */
 }
 </style>

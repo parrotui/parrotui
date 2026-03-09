@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-dropzone">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDropzone — parrot-dropzone
+ */
+defineOptions({ name: 'ParrotDropzone' })
+</script>
+
+<style lang="scss">
+.parrot-dropzone {
+  /* TODO */
+}
+</style>

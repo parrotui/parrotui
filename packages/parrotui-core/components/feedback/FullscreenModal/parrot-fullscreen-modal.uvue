@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-fullscreen-modal">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFullscreenModal — parrot-fullscreen-modal
+ */
+defineOptions({ name: 'ParrotFullscreenModal' })
+</script>
+
+<style lang="scss">
+.parrot-fullscreen-modal {
+  /* TODO */
+}
+</style>

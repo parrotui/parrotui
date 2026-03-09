@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-visibility-sensor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVisibilitySensor — parrot-visibility-sensor
+ */
+defineOptions({ name: 'ParrotVisibilitySensor' })
+</script>
+
+<style lang="scss">
+.parrot-visibility-sensor {
+  /* TODO */
+}
+</style>

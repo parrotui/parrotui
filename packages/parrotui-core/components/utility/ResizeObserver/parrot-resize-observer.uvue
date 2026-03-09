@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-resize-observer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotResizeObserver — parrot-resize-observer
+ */
+defineOptions({ name: 'ParrotResizeObserver' })
+</script>
+
+<style lang="scss">
+.parrot-resize-observer {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-global-search">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGlobalSearch — parrot-global-search
+ */
+defineOptions({ name: 'ParrotGlobalSearch' })
+</script>
+
+<style lang="scss">
+.parrot-global-search {
+  /* TODO */
+}
+</style>

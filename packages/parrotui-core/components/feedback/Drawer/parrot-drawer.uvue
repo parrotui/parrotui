@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-drawer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDrawer — parrot-drawer
+ */
+defineOptions({ name: 'ParrotDrawer' })
+</script>
+
+<style lang="scss">
+.parrot-drawer {
+  /* TODO */
+}
+</style>

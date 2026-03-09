@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-modal">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotModal — parrot-modal
+ */
+defineOptions({ name: 'ParrotModal' })
+</script>
+
+<style lang="scss">
+.parrot-modal {
+  /* TODO */
+}
+</style>

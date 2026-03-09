@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-barcode-scanner">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotBarcodeScanner — parrot-barcode-scanner
+ */
+defineOptions({ name: 'ParrotBarcodeScanner' })
+</script>
+
+<style lang="scss">
+.parrot-barcode-scanner {
+  /* TODO */
+}
+</style>

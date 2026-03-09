@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-space">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSpace — parrot-space
+ */
+defineOptions({ name: 'ParrotSpace' })
+</script>
+
+<style lang="scss">
+.parrot-space {
+  /* TODO */
+}
+</style>

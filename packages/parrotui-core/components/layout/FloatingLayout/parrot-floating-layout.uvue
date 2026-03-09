@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-floating-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFloatingLayout — parrot-floating-layout
+ */
+defineOptions({ name: 'ParrotFloatingLayout' })
+</script>
+
+<style lang="scss">
+.parrot-floating-layout {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-gallery">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGallery — parrot-gallery
+ */
+defineOptions({ name: 'ParrotGallery' })
+</script>
+
+<style lang="scss">
+.parrot-gallery {
+  /* TODO */
+}
+</style>

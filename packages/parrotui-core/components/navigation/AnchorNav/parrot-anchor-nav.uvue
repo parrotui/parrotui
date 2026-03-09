@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-anchor-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAnchorNav — parrot-anchor-nav
+ */
+defineOptions({ name: 'ParrotAnchorNav' })
+</script>
+
+<style lang="scss">
+.parrot-anchor-nav {
+  /* TODO */
+}
+</style>

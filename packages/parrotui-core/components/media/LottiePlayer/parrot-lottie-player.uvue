@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-lottie-player">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLottiePlayer — parrot-lottie-player
+ */
+defineOptions({ name: 'ParrotLottiePlayer' })
+</script>
+
+<style lang="scss">
+.parrot-lottie-player {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-skeleton">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSkeleton — parrot-skeleton
+ */
+defineOptions({ name: 'ParrotSkeleton' })
+</script>
+
+<style lang="scss">
+.parrot-skeleton {
+  /* TODO */
+}
+</style>

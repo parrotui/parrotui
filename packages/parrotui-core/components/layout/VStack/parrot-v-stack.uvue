@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-v-stack">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVStack — parrot-v-stack
+ */
+defineOptions({ name: 'ParrotVStack' })
+</script>
+
+<style lang="scss">
+.parrot-v-stack {
+  /* TODO */
+}
+</style>

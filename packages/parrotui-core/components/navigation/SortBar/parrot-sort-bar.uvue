@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-sort-bar">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSortBar — parrot-sort-bar
+ */
+defineOptions({ name: 'ParrotSortBar' })
+</script>
+
+<style lang="scss">
+.parrot-sort-bar {
+  /* TODO */
+}
+</style>

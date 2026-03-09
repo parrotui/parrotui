@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-range-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRangePicker — parrot-range-picker
+ */
+defineOptions({ name: 'ParrotRangePicker' })
+</script>
+
+<style lang="scss">
+.parrot-range-picker {
+  /* TODO */
+}
+</style>

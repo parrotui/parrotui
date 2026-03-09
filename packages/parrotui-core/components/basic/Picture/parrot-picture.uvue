@@ -1,77 +1,18 @@
 <template>
-	<view class="parrot-picture" :style="containerStyle">
-		<parrot-image
-			:src="src"
-			:mode="mode"
-			:width="width"
-			:height="height"
-			:radius="radius"
-			:round="round"
-			:lazy-load="lazyLoad"
-			:previewable="previewable"
-			@click="$emit('click', $event)"
-			@load="$emit('load')"
-			@error="$emit('error')"
-		/>
-		<text v-if="caption" class="parrot-picture__caption" :style="captionStyleObj">{{ caption }}</text>
-	</view>
+  <view class="parrot-picture">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	src?: string
-	caption?: string
-	mode?: string
-	width?: string
-	height?: string
-	radius?: string
-	round?: boolean
-	lazyLoad?: boolean
-	previewable?: boolean
-	captionAlign?: 'left' | 'center' | 'right'
-	margin?: string
-}>(), {
-	src: '',
-	caption: '',
-	mode: 'aspectFill',
-	width: '100%',
-	height: '300rpx',
-	radius: '8rpx',
-	round: false,
-	lazyLoad: true,
-	previewable: false,
-	captionAlign: 'center',
-	margin: '',
-})
-
-defineEmits<{ click: [event: Event], load: [], error: [] }>()
-
-const containerStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.margin) style.margin = props.margin
-	return style
-})
-
-const captionStyleObj = computed(() => {
-	const style: CSSProperties = {}
-	style.textAlign = props.captionAlign
-	return style
-})
+/**
+ * ParrotPicture — parrot-picture
+ */
+defineOptions({ name: 'ParrotPicture' })
 </script>
 
 <style lang="scss">
 .parrot-picture {
-	display: flex;
-	flex-direction: column;
-}
-
-.parrot-picture__caption {
-	font-size: 22rpx;
-	color: #909399;
-	margin-top: 12rpx;
-	line-height: 1.4;
+  /* TODO */
 }
 </style>

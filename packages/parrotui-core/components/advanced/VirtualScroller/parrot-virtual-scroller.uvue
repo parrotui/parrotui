@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-virtual-scroller">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVirtualScroller — parrot-virtual-scroller
+ */
+defineOptions({ name: 'ParrotVirtualScroller' })
+</script>
+
+<style lang="scss">
+.parrot-virtual-scroller {
+  /* TODO */
+}
+</style>

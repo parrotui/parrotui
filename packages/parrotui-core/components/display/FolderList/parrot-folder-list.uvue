@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-folder-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFolderList — parrot-folder-list
+ */
+defineOptions({ name: 'ParrotFolderList' })
+</script>
+
+<style lang="scss">
+.parrot-folder-list {
+  /* TODO */
+}
+</style>

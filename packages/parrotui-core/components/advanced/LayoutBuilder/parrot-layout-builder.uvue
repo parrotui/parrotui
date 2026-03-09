@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-layout-builder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLayoutBuilder — parrot-layout-builder
+ */
+defineOptions({ name: 'ParrotLayoutBuilder' })
+</script>
+
+<style lang="scss">
+.parrot-layout-builder {
+  /* TODO */
+}
+</style>

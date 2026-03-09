@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-notification-center">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotNotificationCenter — parrot-notification-center
+ */
+defineOptions({ name: 'ParrotNotificationCenter' })
+</script>
+
+<style lang="scss">
+.parrot-notification-center {
+  /* TODO */
+}
+</style>

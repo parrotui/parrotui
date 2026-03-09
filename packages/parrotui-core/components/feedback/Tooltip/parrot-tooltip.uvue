@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tooltip">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTooltip — parrot-tooltip
+ */
+defineOptions({ name: 'ParrotTooltip' })
+</script>
+
+<style lang="scss">
+.parrot-tooltip {
+  /* TODO */
+}
+</style>

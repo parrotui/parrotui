@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-portal">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPortal — parrot-portal
+ */
+defineOptions({ name: 'ParrotPortal' })
+</script>
+
+<style lang="scss">
+.parrot-portal {
+  /* TODO */
+}
+</style>

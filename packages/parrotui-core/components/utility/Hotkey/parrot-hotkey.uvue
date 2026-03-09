@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-hotkey">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotHotkey — parrot-hotkey
+ */
+defineOptions({ name: 'ParrotHotkey' })
+</script>
+
+<style lang="scss">
+.parrot-hotkey {
+  /* TODO */
+}
+</style>

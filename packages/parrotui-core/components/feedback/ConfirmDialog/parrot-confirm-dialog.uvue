@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-confirm-dialog">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotConfirmDialog — parrot-confirm-dialog
+ */
+defineOptions({ name: 'ParrotConfirmDialog' })
+</script>
+
+<style lang="scss">
+.parrot-confirm-dialog {
+  /* TODO */
+}
+</style>

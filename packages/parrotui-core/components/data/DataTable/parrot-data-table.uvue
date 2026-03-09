@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-data-table">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDataTable — parrot-data-table
+ */
+defineOptions({ name: 'ParrotDataTable' })
+</script>
+
+<style lang="scss">
+.parrot-data-table {
+  /* TODO */
+}
+</style>

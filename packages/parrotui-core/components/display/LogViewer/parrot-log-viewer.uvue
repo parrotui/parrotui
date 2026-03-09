@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-log-viewer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLogViewer — parrot-log-viewer
+ */
+defineOptions({ name: 'ParrotLogViewer' })
+</script>
+
+<style lang="scss">
+.parrot-log-viewer {
+  /* TODO */
+}
+</style>

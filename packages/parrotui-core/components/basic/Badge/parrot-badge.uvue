@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-badge">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotBadge — parrot-badge
+ */
+defineOptions({ name: 'ParrotBadge' })
+</script>
+
+<style lang="scss">
+.parrot-badge {
+  /* TODO */
+}
+</style>

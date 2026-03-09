@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-countdown">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCountdown — parrot-countdown
+ */
+defineOptions({ name: 'ParrotCountdown' })
+</script>
+
+<style lang="scss">
+.parrot-countdown {
+  /* TODO */
+}
+</style>

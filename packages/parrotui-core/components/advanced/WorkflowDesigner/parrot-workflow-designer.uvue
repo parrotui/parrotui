@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-workflow-designer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWorkflowDesigner — parrot-workflow-designer
+ */
+defineOptions({ name: 'ParrotWorkflowDesigner' })
+</script>
+
+<style lang="scss">
+.parrot-workflow-designer {
+  /* TODO */
+}
+</style>

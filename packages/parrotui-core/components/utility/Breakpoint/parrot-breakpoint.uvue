@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-breakpoint">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotBreakpoint — parrot-breakpoint
+ */
+defineOptions({ name: 'ParrotBreakpoint' })
+</script>
+
+<style lang="scss">
+.parrot-breakpoint {
+  /* TODO */
+}
+</style>

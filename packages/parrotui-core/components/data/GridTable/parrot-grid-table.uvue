@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-grid-table">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGridTable — parrot-grid-table
+ */
+defineOptions({ name: 'ParrotGridTable' })
+</script>
+
+<style lang="scss">
+.parrot-grid-table {
+  /* TODO */
+}
+</style>

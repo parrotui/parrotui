@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-wizard-form">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWizardForm — parrot-wizard-form
+ */
+defineOptions({ name: 'ParrotWizardForm' })
+</script>
+
+<style lang="scss">
+.parrot-wizard-form {
+  /* TODO */
+}
+</style>

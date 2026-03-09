@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-top-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTopNav — parrot-top-nav
+ */
+defineOptions({ name: 'ParrotTopNav' })
+</script>
+
+<style lang="scss">
+.parrot-top-nav {
+  /* TODO */
+}
+</style>

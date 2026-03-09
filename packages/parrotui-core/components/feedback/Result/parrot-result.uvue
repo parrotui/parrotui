@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-result">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotResult — parrot-result
+ */
+defineOptions({ name: 'ParrotResult' })
+</script>
+
+<style lang="scss">
+.parrot-result {
+  /* TODO */
+}
+</style>

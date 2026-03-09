@@ -1,141 +1,18 @@
 <template>
-	<view class="parrot-statistic" :class="[align ? `parrot-statistic--${align}` : '']" :style="containerStyle">
-		<text v-if="title" class="parrot-statistic__title">{{ title }}</text>
-		<view class="parrot-statistic__value-row">
-			<text v-if="prefix" class="parrot-statistic__prefix">{{ prefix }}</text>
-			<text v-if="trend === 'up'" class="parrot-statistic__trend parrot-statistic__trend--up">↑</text>
-			<text v-if="trend === 'down'" class="parrot-statistic__trend parrot-statistic__trend--down">↓</text>
-			<text class="parrot-statistic__value" :class="[valueType ? `parrot-statistic__value--${valueType}` : '']" :style="valueStyle">{{ formattedValue }}</text>
-			<text v-if="suffix" class="parrot-statistic__suffix">{{ suffix }}</text>
-		</view>
-		<text v-if="description" class="parrot-statistic__desc">{{ description }}</text>
-		<slot></slot>
-	</view>
+  <view class="parrot-statistic">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	title?: string
-	value?: number | string
-	prefix?: string
-	suffix?: string
-	description?: string
-	precision?: number
-	thousandsSeparator?: boolean
-	trend?: '' | 'up' | 'down'
-	valueType?: '' | 'primary' | 'success' | 'warning' | 'danger'
-	align?: 'left' | 'center' | 'right'
-	valueColor?: string
-	valueSize?: string
-	margin?: string
-}>(), {
-	title: '',
-	value: 0,
-	prefix: '',
-	suffix: '',
-	description: '',
-	precision: 0,
-	thousandsSeparator: false,
-	trend: '',
-	valueType: '',
-	align: 'left',
-	valueColor: '',
-	valueSize: '',
-	margin: '',
-})
-
-const formattedValue = computed(() => {
-	let num: number
-	if (typeof props.value === 'string') {
-		num = parseFloat(props.value) || 0
-	} else {
-		num = props.value as number
-	}
-	let str = props.precision > 0 ? num.toFixed(props.precision) : Math.floor(num).toString()
-	if (props.thousandsSeparator) {
-		const parts = str.split('.')
-		parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-		str = parts.join('.')
-	}
-	return str
-})
-
-const containerStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.margin) style.margin = props.margin
-	return style
-})
-
-const valueStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.valueColor) style.color = props.valueColor
-	if (props.valueSize) style.fontSize = props.valueSize
-	if (!props.valueColor && props.trend === 'up') style.color = '#f56c6c'
-	if (!props.valueColor && props.trend === 'down') style.color = '#41a906'
-	return style
-})
+/**
+ * ParrotStatistic — parrot-statistic
+ */
+defineOptions({ name: 'ParrotStatistic' })
 </script>
 
 <style lang="scss">
 .parrot-statistic {
-	display: flex;
-	flex-direction: column;
-
-	&--left { align-items: flex-start; }
-	&--center { align-items: center; }
-	&--right { align-items: flex-end; }
-}
-
-.parrot-statistic__title {
-	font-size: 24rpx;
-	color: #909399;
-	margin-bottom: 8rpx;
-}
-
-.parrot-statistic__value-row {
-	display: flex;
-	flex-direction: row;
-	align-items: baseline;
-}
-
-.parrot-statistic__prefix {
-	font-size: 28rpx;
-	color: #303133;
-	margin-right: 4rpx;
-}
-
-.parrot-statistic__suffix {
-	font-size: 24rpx;
-	color: #909399;
-	margin-left: 4rpx;
-}
-
-.parrot-statistic__value {
-	font-size: 48rpx;
-	font-weight: bold;
-	color: #303133;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-	&--primary { color: #1a7eff; }
-	&--success { color: #41a906; }
-	&--warning { color: #e6a23c; }
-	&--danger { color: #f56c6c; }
-}
-
-.parrot-statistic__trend {
-	font-size: 28rpx;
-	margin-right: 4rpx;
-}
-
-.parrot-statistic__trend--up { color: #f56c6c; }
-.parrot-statistic__trend--down { color: #41a906; }
-
-.parrot-statistic__desc {
-	font-size: 22rpx;
-	color: #c0c4cc;
-	margin-top: 8rpx;
+  /* TODO */
 }
 </style>

@@ -1,73 +1,18 @@
 <template>
-	<view
-		class="parrot-button-group"
-		:class="[
-			`parrot-button-group--${direction}`,
-			round ? 'parrot-button-group--round' : ''
-		]"
-	>
-		<slot></slot>
-	</view>
+  <view class="parrot-button-group">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-const props = withDefaults(defineProps<{
-	direction?: 'horizontal' | 'vertical'
-	round?: boolean
-}>(), {
-	direction: 'horizontal',
-	round: false,
-})
+/**
+ * ParrotButtonGroup — parrot-button-group
+ */
+defineOptions({ name: 'ParrotButtonGroup' })
 </script>
 
 <style lang="scss">
 .parrot-button-group {
-	display: inline-flex;
-
-	&--horizontal {
-		flex-direction: row;
-
-		.parrot-button {
-			border-radius: 0;
-			margin-left: -1px;
-		}
-
-		.parrot-button:first-child {
-			border-radius: 8rpx 0 0 8rpx;
-			margin-left: 0;
-		}
-
-		.parrot-button:last-child {
-			border-radius: 0 8rpx 8rpx 0;
-		}
-	}
-
-	&--vertical {
-		flex-direction: column;
-
-		.parrot-button {
-			border-radius: 0;
-			margin-top: -1px;
-		}
-
-		.parrot-button:first-child {
-			border-radius: 8rpx 8rpx 0 0;
-			margin-top: 0;
-		}
-
-		.parrot-button:last-child {
-			border-radius: 0 0 8rpx 8rpx;
-		}
-	}
-
-	&--round {
-		.parrot-button:first-child {
-			border-radius: 999px 0 0 999px;
-		}
-
-		.parrot-button:last-child {
-			border-radius: 0 999px 999px 0;
-		}
-	}
+  /* TODO */
 }
 </style>

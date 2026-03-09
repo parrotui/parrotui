@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-infinite-scroll">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotInfiniteScroll — parrot-infinite-scroll
+ */
+defineOptions({ name: 'ParrotInfiniteScroll' })
+</script>
+
+<style lang="scss">
+.parrot-infinite-scroll {
+  /* TODO */
+}
+</style>

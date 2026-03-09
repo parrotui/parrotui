@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-virtual-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVirtualList — parrot-virtual-list
+ */
+defineOptions({ name: 'ParrotVirtualList' })
+</script>
+
+<style lang="scss">
+.parrot-virtual-list {
+  /* TODO */
+}
+</style>

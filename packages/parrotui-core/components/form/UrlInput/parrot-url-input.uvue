@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-url-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotUrlInput — parrot-url-input
+ */
+defineOptions({ name: 'ParrotUrlInput' })
+</script>
+
+<style lang="scss">
+.parrot-url-input {
+  /* TODO */
+}
+</style>

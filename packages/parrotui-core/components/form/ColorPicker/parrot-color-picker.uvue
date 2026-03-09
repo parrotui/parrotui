@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-color-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotColorPicker — parrot-color-picker
+ */
+defineOptions({ name: 'ParrotColorPicker' })
+</script>
+
+<style lang="scss">
+.parrot-color-picker {
+  /* TODO */
+}
+</style>

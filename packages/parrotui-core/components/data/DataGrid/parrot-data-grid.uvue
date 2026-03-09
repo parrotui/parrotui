@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-data-grid">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDataGrid — parrot-data-grid
+ */
+defineOptions({ name: 'ParrotDataGrid' })
+</script>
+
+<style lang="scss">
+.parrot-data-grid {
+  /* TODO */
+}
+</style>

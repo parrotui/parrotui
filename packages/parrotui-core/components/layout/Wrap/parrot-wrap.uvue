@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-wrap">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWrap — parrot-wrap
+ */
+defineOptions({ name: 'ParrotWrap' })
+</script>
+
+<style lang="scss">
+.parrot-wrap {
+  /* TODO */
+}
+</style>

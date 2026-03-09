@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-banner">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotBanner — parrot-banner
+ */
+defineOptions({ name: 'ParrotBanner' })
+</script>
+
+<style lang="scss">
+.parrot-banner {
+  /* TODO */
+}
+</style>

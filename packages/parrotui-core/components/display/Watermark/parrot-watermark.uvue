@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-watermark">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWatermark — parrot-watermark
+ */
+defineOptions({ name: 'ParrotWatermark' })
+</script>
+
+<style lang="scss">
+.parrot-watermark {
+  /* TODO */
+}
+</style>

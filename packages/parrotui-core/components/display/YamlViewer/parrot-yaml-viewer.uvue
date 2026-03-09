@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-yaml-viewer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotYamlViewer — parrot-yaml-viewer
+ */
+defineOptions({ name: 'ParrotYamlViewer' })
+</script>
+
+<style lang="scss">
+.parrot-yaml-viewer {
+  /* TODO */
+}
+</style>

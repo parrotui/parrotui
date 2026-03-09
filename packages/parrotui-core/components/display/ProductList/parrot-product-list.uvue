@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-product-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotProductList — parrot-product-list
+ */
+defineOptions({ name: 'ParrotProductList' })
+</script>
+
+<style lang="scss">
+.parrot-product-list {
+  /* TODO */
+}
+</style>

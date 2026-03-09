@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-media-card">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMediaCard — parrot-media-card
+ */
+defineOptions({ name: 'ParrotMediaCard' })
+</script>
+
+<style lang="scss">
+.parrot-media-card {
+  /* TODO */
+}
+</style>

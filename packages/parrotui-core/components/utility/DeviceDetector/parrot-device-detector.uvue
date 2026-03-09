@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-device-detector">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDeviceDetector — parrot-device-detector
+ */
+defineOptions({ name: 'ParrotDeviceDetector' })
+</script>
+
+<style lang="scss">
+.parrot-device-detector {
+  /* TODO */
+}
+</style>

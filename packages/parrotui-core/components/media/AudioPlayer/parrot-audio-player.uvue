@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-audio-player">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAudioPlayer — parrot-audio-player
+ */
+defineOptions({ name: 'ParrotAudioPlayer' })
+</script>
+
+<style lang="scss">
+.parrot-audio-player {
+  /* TODO */
+}
+</style>

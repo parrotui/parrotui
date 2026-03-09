@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-command-palette">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCommandPalette — parrot-command-palette
+ */
+defineOptions({ name: 'ParrotCommandPalette' })
+</script>
+
+<style lang="scss">
+.parrot-command-palette {
+  /* TODO */
+}
+</style>

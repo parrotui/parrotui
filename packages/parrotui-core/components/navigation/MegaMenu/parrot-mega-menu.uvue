@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-mega-menu">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMegaMenu — parrot-mega-menu
+ */
+defineOptions({ name: 'ParrotMegaMenu' })
+</script>
+
+<style lang="scss">
+.parrot-mega-menu {
+  /* TODO */
+}
+</style>

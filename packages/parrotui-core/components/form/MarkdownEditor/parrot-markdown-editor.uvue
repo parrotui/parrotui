@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-markdown-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMarkdownEditor — parrot-markdown-editor
+ */
+defineOptions({ name: 'ParrotMarkdownEditor' })
+</script>
+
+<style lang="scss">
+.parrot-markdown-editor {
+  /* TODO */
+}
+</style>

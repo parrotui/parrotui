@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-thumbnail">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotThumbnail — parrot-thumbnail
+ */
+defineOptions({ name: 'ParrotThumbnail' })
+</script>
+
+<style lang="scss">
+.parrot-thumbnail {
+  /* TODO */
+}
+</style>

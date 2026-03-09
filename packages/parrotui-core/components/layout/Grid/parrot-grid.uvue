@@ -1,156 +1,18 @@
 <template>
-  <!-- Grid 宫格容器：provide 列数/间距给 GridItem，使用 flex wrap 替代 CSS Grid 保证跨端兼容 -->
-  <view
-    class="parrot-grid"
-    :class="[
-      border ? 'parrot-grid--border' : '',
-      square ? 'parrot-grid--square' : '',
-    ]"
-    :style="gridStyle"
-  >
-    <slot></slot>
+  <view class="parrot-grid">
+    <slot />
   </view>
 </template>
 
 <script setup lang="uts">
 /**
- * parrot-grid 宫格容器（重构版）
- * 超越 firstui：
- *   - 使用 provide 向 GridItem 传递列数/间距（取代 CSS 变量，跨端兼容）
- *   - 使用 flex wrap 替代 CSS grid（uni-app X 全端兼容）
- *   - 支持 glass 整体磨砂玻璃容器
- *   - 支持 clickable 点击反馈
- *
- * @prop columns    列数，默认 4
- * @prop border     显示外边框，默认 false
- * @prop square     正方形格子，默认 false
- * @prop gutter     格子间距 rpx，默认 0
- * @prop padding    容器 padding
- * @prop background 背景色
- * @prop glass      磨砂玻璃容器，默认 false
+ * ParrotGrid — parrot-grid
  */
-
-interface Props {
-  columns ?: number
-  border ?: boolean
-  square ?: boolean
-  gutter ?: number
-  padding ?: string
-  background ?: string
-  glass ?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  columns: 4,
-  border: false,
-  square: false,
-  gutter: 0,
-  glass: false,
-})
-
-// 向 GridItem 传递列数和间距（替代 CSS 变量）
-provide('gridColumns', computed(() => props.columns ?? 4))
-provide('gridGutter', computed(() => props.gutter ?? 0))
-provide('gridSquare', computed(() => props.square ?? false))
-
-const gridStyle = computed(() : string => {
-  const parts : string[] = ['display:flex', 'flex-direction:row', 'flex-wrap:wrap']
-  if (props.padding) parts.push(`padding:${props.padding}`)
-  if (props.background) parts.push(`background:${props.background}`)
-  if (props.glass) {
-    parts.push(
-      'background:rgba(255,255,255,0.18)',
-      'border:1.5rpx solid rgba(255,255,255,0.35)',
-      'box-shadow:0 4rpx 24rpx rgba(0,0,0,0.08)',
-      'border-radius:20rpx',
-    )
-  }
-  // 间距由 GridItem 自己处理 margin
-  if ((props.gutter ?? 0) > 0) {
-    parts.push(`margin:0 -${(props.gutter ?? 0) / 2}rpx`)
-  }
-  return parts.join(';')
-})
+defineOptions({ name: 'ParrotGrid' })
 </script>
 
 <style lang="scss">
 .parrot-grid {
-	display: grid;
-	width: 100%;
-	box-sizing: border-box;
-	
-	// 通过 CSS 变量设置列数和间距
-	grid-template-columns: repeat(var(--parrot-grid-columns, 4), 1fr);
-	gap: var(--parrot-grid-gutter, 0rpx);
-	
-	// 边框样式
-	&--border {
-		.parrot-grid-item {
-			position: relative;
-			
-			&::after {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				border: 1px solid #e5e5e5;
-				pointer-events: none;
-				box-sizing: border-box;
-			}
-			
-			// 隐藏右边和下边的重复边框
-			&:nth-child(var(--parrot-grid-columns)) {
-				&::after {
-					border-right: none;
-				}
-			}
-			
-			&:nth-last-child(-n+var(--parrot-grid-columns)) {
-				&::after {
-					border-bottom: none;
-				}
-			}
-		}
-	}
-	
-	// 正方形格子
-	&--square {
-		.parrot-grid-item {
-			aspect-ratio: 1;
-		}
-	}
-	
-	// 常用列数预设
-	&--cols-2 {
-		--parrot-grid-columns: 2;
-	}
-	
-	&--cols-3 {
-		--parrot-grid-columns: 3;
-	}
-	
-	&--cols-4 {
-		--parrot-grid-columns: 4;
-	}
-	
-	&--cols-5 {
-		--parrot-grid-columns: 5;
-	}
-	
-	&--cols-6 {
-		--parrot-grid-columns: 6;
-	}
-}
-
-// Grid Item 组件样式
-.parrot-grid-item {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	box-sizing: border-box;
+  /* TODO */
 }
 </style>

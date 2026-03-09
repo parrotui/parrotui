@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-stepper">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotStepper — parrot-stepper
+ */
+defineOptions({ name: 'ParrotStepper' })
+</script>
+
+<style lang="scss">
+.parrot-stepper {
+  /* TODO */
+}
+</style>

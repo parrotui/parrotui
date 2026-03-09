@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-audio-recorder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAudioRecorder — parrot-audio-recorder
+ */
+defineOptions({ name: 'ParrotAudioRecorder' })
+</script>
+
+<style lang="scss">
+.parrot-audio-recorder {
+  /* TODO */
+}
+</style>

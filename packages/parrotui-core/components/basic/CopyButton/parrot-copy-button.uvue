@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-copy-button">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCopyButton — parrot-copy-button
+ */
+defineOptions({ name: 'ParrotCopyButton' })
+</script>
+
+<style lang="scss">
+.parrot-copy-button {
+  /* TODO */
+}
+</style>

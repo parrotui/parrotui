@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-screen-recorder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotScreenRecorder — parrot-screen-recorder
+ */
+defineOptions({ name: 'ParrotScreenRecorder' })
+</script>
+
+<style lang="scss">
+.parrot-screen-recorder {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-activity-feed">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotActivityFeed — parrot-activity-feed
+ */
+defineOptions({ name: 'ParrotActivityFeed' })
+</script>
+
+<style lang="scss">
+.parrot-activity-feed {
+  /* TODO */
+}
+</style>

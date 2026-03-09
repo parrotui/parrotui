@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-aspect-ratio-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAspectRatioLayout — parrot-aspect-ratio-layout
+ */
+defineOptions({ name: 'ParrotAspectRatioLayout' })
+</script>
+
+<style lang="scss">
+.parrot-aspect-ratio-layout {
+  /* TODO */
+}
+</style>

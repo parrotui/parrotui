@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-geo-map">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGeoMap — parrot-geo-map
+ */
+defineOptions({ name: 'ParrotGeoMap' })
+</script>
+
+<style lang="scss">
+.parrot-geo-map {
+  /* TODO */
+}
+</style>

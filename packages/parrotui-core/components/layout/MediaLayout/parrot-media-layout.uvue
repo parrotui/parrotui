@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-media-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMediaLayout — parrot-media-layout
+ */
+defineOptions({ name: 'ParrotMediaLayout' })
+</script>
+
+<style lang="scss">
+.parrot-media-layout {
+  /* TODO */
+}
+</style>

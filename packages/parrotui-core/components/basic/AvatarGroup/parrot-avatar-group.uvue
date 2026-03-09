@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-avatar-group">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAvatarGroup — parrot-avatar-group
+ */
+defineOptions({ name: 'ParrotAvatarGroup' })
+</script>
+
+<style lang="scss">
+.parrot-avatar-group {
+  /* TODO */
+}
+</style>

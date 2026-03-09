@@ -1,60 +1,18 @@
 <template>
-	<view class="parrot-aspect-ratio" :style="containerStyle">
-		<view class="parrot-aspect-ratio__inner">
-			<slot></slot>
-		</view>
-	</view>
+  <view class="parrot-aspect-ratio">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	ratio?: number
-	width?: string
-	maxWidth?: string
-	background?: string
-	radius?: string
-}>(), {
-	ratio: 1,
-	width: '100%',
-	maxWidth: '',
-	background: 'transparent',
-	radius: '0',
-})
-
-const containerStyle = computed(() => {
-	const style: CSSProperties = {}
-	style.width = props.width
-	if (props.maxWidth) style.maxWidth = props.maxWidth
-	style.position = 'relative'
-	// padding-bottom 百分比实现宽高比
-	const percent = (1 / props.ratio) * 100
-	style.paddingBottom = percent + '%'
-	style.height = '0'
-	if (props.background !== 'transparent') {
-		style.backgroundColor = props.background
-	}
-	if (props.radius !== '0') {
-		style.borderRadius = props.radius
-		style.overflow = 'hidden'
-	}
-	return style
-})
+/**
+ * ParrotAspectRatio — parrot-aspect-ratio
+ */
+defineOptions({ name: 'ParrotAspectRatio' })
 </script>
 
 <style lang="scss">
 .parrot-aspect-ratio {
-	position: relative;
-	overflow: hidden;
-}
-
-.parrot-aspect-ratio__inner {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
+  /* TODO */
 }
 </style>

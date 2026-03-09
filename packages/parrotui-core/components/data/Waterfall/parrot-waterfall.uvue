@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-waterfall">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWaterfall — parrot-waterfall
+ */
+defineOptions({ name: 'ParrotWaterfall' })
+</script>
+
+<style lang="scss">
+.parrot-waterfall {
+  /* TODO */
+}
+</style>

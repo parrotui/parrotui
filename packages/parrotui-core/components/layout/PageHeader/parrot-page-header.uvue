@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-page-header">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPageHeader — parrot-page-header
+ */
+defineOptions({ name: 'ParrotPageHeader' })
+</script>
+
+<style lang="scss">
+.parrot-page-header {
+  /* TODO */
+}
+</style>

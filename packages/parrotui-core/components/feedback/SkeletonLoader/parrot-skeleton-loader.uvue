@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-skeleton-loader">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSkeletonLoader — parrot-skeleton-loader
+ */
+defineOptions({ name: 'ParrotSkeletonLoader' })
+</script>
+
+<style lang="scss">
+.parrot-skeleton-loader {
+  /* TODO */
+}
+</style>

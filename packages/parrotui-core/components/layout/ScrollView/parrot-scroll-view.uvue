@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-scroll-view">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotScrollView — parrot-scroll-view
+ */
+defineOptions({ name: 'ParrotScrollView' })
+</script>
+
+<style lang="scss">
+.parrot-scroll-view {
+  /* TODO */
+}
+</style>

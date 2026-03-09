@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-carousel">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCarousel — parrot-carousel
+ */
+defineOptions({ name: 'ParrotCarousel' })
+</script>
+
+<style lang="scss">
+.parrot-carousel {
+  /* TODO */
+}
+</style>

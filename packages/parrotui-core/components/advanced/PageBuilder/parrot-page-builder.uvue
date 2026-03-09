@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-page-builder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPageBuilder — parrot-page-builder
+ */
+defineOptions({ name: 'ParrotPageBuilder' })
+</script>
+
+<style lang="scss">
+.parrot-page-builder {
+  /* TODO */
+}
+</style>

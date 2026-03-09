@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-error-page">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotErrorPage — parrot-error-page
+ */
+defineOptions({ name: 'ParrotErrorPage' })
+</script>
+
+<style lang="scss">
+.parrot-error-page {
+  /* TODO */
+}
+</style>

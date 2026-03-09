@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-week-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotWeekPicker — parrot-week-picker
+ */
+defineOptions({ name: 'ParrotWeekPicker' })
+</script>
+
+<style lang="scss">
+.parrot-week-picker {
+  /* TODO */
+}
+</style>

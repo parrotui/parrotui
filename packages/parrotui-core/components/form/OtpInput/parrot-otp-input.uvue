@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-otp-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotOtpInput — parrot-otp-input
+ */
+defineOptions({ name: 'ParrotOtpInput' })
+</script>
+
+<style lang="scss">
+.parrot-otp-input {
+  /* TODO */
+}
+</style>

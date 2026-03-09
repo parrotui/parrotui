@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-file-tree">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFileTree — parrot-file-tree
+ */
+defineOptions({ name: 'ParrotFileTree' })
+</script>
+
+<style lang="scss">
+.parrot-file-tree {
+  /* TODO */
+}
+</style>

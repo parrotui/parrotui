@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-range-slider-field">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRangeSliderField — parrot-range-slider-field
+ */
+defineOptions({ name: 'ParrotRangeSliderField' })
+</script>
+
+<style lang="scss">
+.parrot-range-slider-field {
+  /* TODO */
+}
+</style>

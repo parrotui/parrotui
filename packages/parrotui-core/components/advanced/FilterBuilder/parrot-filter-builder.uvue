@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-filter-builder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFilterBuilder — parrot-filter-builder
+ */
+defineOptions({ name: 'ParrotFilterBuilder' })
+</script>
+
+<style lang="scss">
+.parrot-filter-builder {
+  /* TODO */
+}
+</style>

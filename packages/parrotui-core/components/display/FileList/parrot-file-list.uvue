@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-file-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFileList — parrot-file-list
+ */
+defineOptions({ name: 'ParrotFileList' })
+</script>
+
+<style lang="scss">
+.parrot-file-list {
+  /* TODO */
+}
+</style>

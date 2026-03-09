@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-sortable-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSortableList — parrot-sortable-list
+ */
+defineOptions({ name: 'ParrotSortableList' })
+</script>
+
+<style lang="scss">
+.parrot-sortable-list {
+  /* TODO */
+}
+</style>

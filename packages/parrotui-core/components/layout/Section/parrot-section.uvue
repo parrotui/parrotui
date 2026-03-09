@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-section">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSection — parrot-section
+ */
+defineOptions({ name: 'ParrotSection' })
+</script>
+
+<style lang="scss">
+.parrot-section {
+  /* TODO */
+}
+</style>

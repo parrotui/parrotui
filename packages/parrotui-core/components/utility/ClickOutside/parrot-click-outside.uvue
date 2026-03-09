@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-click-outside">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotClickOutside — parrot-click-outside
+ */
+defineOptions({ name: 'ParrotClickOutside' })
+</script>
+
+<style lang="scss">
+.parrot-click-outside {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-locale-provider">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLocaleProvider — parrot-locale-provider
+ */
+defineOptions({ name: 'ParrotLocaleProvider' })
+</script>
+
+<style lang="scss">
+.parrot-locale-provider {
+  /* TODO */
+}
+</style>

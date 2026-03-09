@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-guide">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGuide — parrot-guide
+ */
+defineOptions({ name: 'ParrotGuide' })
+</script>
+
+<style lang="scss">
+.parrot-guide {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-spotlight">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSpotlight — parrot-spotlight
+ */
+defineOptions({ name: 'ParrotSpotlight' })
+</script>
+
+<style lang="scss">
+.parrot-spotlight {
+  /* TODO */
+}
+</style>

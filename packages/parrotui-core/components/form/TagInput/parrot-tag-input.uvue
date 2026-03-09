@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tag-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTagInput — parrot-tag-input
+ */
+defineOptions({ name: 'ParrotTagInput' })
+</script>
+
+<style lang="scss">
+.parrot-tag-input {
+  /* TODO */
+}
+</style>

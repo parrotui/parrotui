@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-image-cropper">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotImageCropper — parrot-image-cropper
+ */
+defineOptions({ name: 'ParrotImageCropper' })
+</script>
+
+<style lang="scss">
+.parrot-image-cropper {
+  /* TODO */
+}
+</style>

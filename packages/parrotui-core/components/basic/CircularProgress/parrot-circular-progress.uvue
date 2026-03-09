@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-circular-progress">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCircularProgress — parrot-circular-progress
+ */
+defineOptions({ name: 'ParrotCircularProgress' })
+</script>
+
+<style lang="scss">
+.parrot-circular-progress {
+  /* TODO */
+}
+</style>

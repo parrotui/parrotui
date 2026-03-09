@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-mention">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMention — parrot-mention
+ */
+defineOptions({ name: 'ParrotMention' })
+</script>
+
+<style lang="scss">
+.parrot-mention {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-slider-field">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSliderField — parrot-slider-field
+ */
+defineOptions({ name: 'ParrotSliderField' })
+</script>
+
+<style lang="scss">
+.parrot-slider-field {
+  /* TODO */
+}
+</style>

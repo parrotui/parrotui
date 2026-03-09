@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-snackbar">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSnackbar — parrot-snackbar
+ */
+defineOptions({ name: 'ParrotSnackbar' })
+</script>
+
+<style lang="scss">
+.parrot-snackbar {
+  /* TODO */
+}
+</style>

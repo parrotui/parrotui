@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-scroll-spy">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotScrollSpy — parrot-scroll-spy
+ */
+defineOptions({ name: 'ParrotScrollSpy' })
+</script>
+
+<style lang="scss">
+.parrot-scroll-spy {
+  /* TODO */
+}
+</style>

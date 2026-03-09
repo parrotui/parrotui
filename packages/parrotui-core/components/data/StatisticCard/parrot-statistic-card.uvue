@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-statistic-card">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotStatisticCard — parrot-statistic-card
+ */
+defineOptions({ name: 'ParrotStatisticCard' })
+</script>
+
+<style lang="scss">
+.parrot-statistic-card {
+  /* TODO */
+}
+</style>

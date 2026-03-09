@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tour">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTour — parrot-tour
+ */
+defineOptions({ name: 'ParrotTour' })
+</script>
+
+<style lang="scss">
+.parrot-tour {
+  /* TODO */
+}
+</style>

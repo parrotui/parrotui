@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-viewport">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotViewport — parrot-viewport
+ */
+defineOptions({ name: 'ParrotViewport' })
+</script>
+
+<style lang="scss">
+.parrot-viewport {
+  /* TODO */
+}
+</style>

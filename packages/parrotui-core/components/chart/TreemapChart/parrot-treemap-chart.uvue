@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-treemap-chart">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTreemapChart — parrot-treemap-chart
+ */
+defineOptions({ name: 'ParrotTreemapChart' })
+</script>
+
+<style lang="scss">
+.parrot-treemap-chart {
+  /* TODO */
+}
+</style>

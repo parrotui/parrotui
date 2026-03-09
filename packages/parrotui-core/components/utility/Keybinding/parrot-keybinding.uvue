@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-keybinding">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotKeybinding — parrot-keybinding
+ */
+defineOptions({ name: 'ParrotKeybinding' })
+</script>
+
+<style lang="scss">
+.parrot-keybinding {
+  /* TODO */
+}
+</style>

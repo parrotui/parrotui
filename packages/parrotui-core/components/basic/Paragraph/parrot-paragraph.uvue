@@ -1,73 +1,18 @@
 <template>
-	<text
-		class="parrot-paragraph"
-		:class="[
-			type ? `parrot-paragraph--${type}` : '',
-			size ? `parrot-paragraph--${size}` : '',
-			align ? `parrot-paragraph--${align}` : '',
-			indent ? 'parrot-paragraph--indent' : ''
-		]"
-		:style="paragraphStyle"
-		@click="$emit('click', $event)"
-	>
-		<slot>{{ text }}</slot>
-	</text>
+  <view class="parrot-paragraph">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	text?: string
-	type?: 'default' | 'secondary' | 'muted'
-	size?: 'sm' | 'md' | 'lg'
-	align?: 'left' | 'center' | 'right' | 'justify'
-	indent?: boolean
-	color?: string
-	lineHeight?: string
-	margin?: string
-}>(), {
-	text: '',
-	type: 'default',
-	size: 'md',
-	align: 'left',
-	indent: false,
-	color: '',
-	lineHeight: '1.8',
-	margin: '0 0 24rpx 0',
-})
-
-defineEmits<{ click: [event: Event] }>()
-
-const paragraphStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.color) style.color = props.color
-	if (props.lineHeight) style.lineHeight = props.lineHeight
-	if (props.margin) style.margin = props.margin
-	return style
-})
+/**
+ * ParrotParagraph — parrot-paragraph
+ */
+defineOptions({ name: 'ParrotParagraph' })
 </script>
 
 <style lang="scss">
 .parrot-paragraph {
-	display: block;
-	word-wrap: break-word;
-	word-break: break-all;
-
-	&--sm { font-size: 24rpx; }
-	&--md { font-size: 28rpx; }
-	&--lg { font-size: 32rpx; }
-
-	&--default { color: #606266; }
-	&--secondary { color: #909399; }
-	&--muted { color: #c0c4cc; }
-
-	&--left { text-align: left; }
-	&--center { text-align: center; }
-	&--right { text-align: right; }
-	&--justify { text-align: justify; }
-
-	&--indent { text-indent: 2em; }
+  /* TODO */
 }
 </style>

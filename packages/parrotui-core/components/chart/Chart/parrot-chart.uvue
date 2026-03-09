@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-chart">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotChart — parrot-chart
+ */
+defineOptions({ name: 'ParrotChart' })
+</script>
+
+<style lang="scss">
+.parrot-chart {
+  /* TODO */
+}
+</style>

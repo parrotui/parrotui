@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-code-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCodeEditor — parrot-code-editor
+ */
+defineOptions({ name: 'ParrotCodeEditor' })
+</script>
+
+<style lang="scss">
+.parrot-code-editor {
+  /* TODO */
+}
+</style>

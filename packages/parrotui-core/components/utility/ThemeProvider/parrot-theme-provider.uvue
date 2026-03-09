@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-theme-provider">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotThemeProvider — parrot-theme-provider
+ */
+defineOptions({ name: 'ParrotThemeProvider' })
+</script>
+
+<style lang="scss">
+.parrot-theme-provider {
+  /* TODO */
+}
+</style>

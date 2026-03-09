@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-metric">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMetric — parrot-metric
+ */
+defineOptions({ name: 'ParrotMetric' })
+</script>
+
+<style lang="scss">
+.parrot-metric {
+  /* TODO */
+}
+</style>

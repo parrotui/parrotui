@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-category-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCategoryNav — parrot-category-nav
+ */
+defineOptions({ name: 'ParrotCategoryNav' })
+</script>
+
+<style lang="scss">
+.parrot-category-nav {
+  /* TODO */
+}
+</style>

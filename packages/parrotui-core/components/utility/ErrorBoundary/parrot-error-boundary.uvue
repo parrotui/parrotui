@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-error-boundary">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotErrorBoundary — parrot-error-boundary
+ */
+defineOptions({ name: 'ParrotErrorBoundary' })
+</script>
+
+<style lang="scss">
+.parrot-error-boundary {
+  /* TODO */
+}
+</style>

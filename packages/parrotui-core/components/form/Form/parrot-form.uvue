@@ -1,135 +1,18 @@
 <template>
-	<!-- Form 表单校验容器：provide 校验规则给子 FormItem -->
-	<view class="parrot-form" :class="[`parrot-form--${labelPosition ?? 'left'}`]">
-		<slot></slot>
-	</view>
+  <view class="parrot-form">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
 /**
- * parrot-form 表单
- * 表单校验容器，通过 provide 向 FormItem 子组件提供 model、rules 等。
- * 暴露 validate / resetFields / clearValidate 方法。
- *
- * @prop model          表单数据对象
- * @prop rules          校验规则对象
- * @prop labelWidth     标签宽度
- * @prop labelPosition  标签位置：left/top
- * @prop labelAlign     标签对齐：left/right
- * @prop disabled       是否禁用整个表单
- * @prop showMessage    是否显示错误提示
- *
- * @event validate  整体校验结果回调
+ * ParrotForm — parrot-form
  */
-import { provide, ref, reactive } from 'vue'
-
-interface Props {
-	model ?: any
-	rules ?: any
-	labelWidth ?: string
-	labelPosition ?: string
-	labelAlign ?: string
-	disabled ?: boolean
-	showMessage ?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	labelWidth: '180rpx',
-	labelPosition: 'left',
-	labelAlign: 'left',
-	disabled: false,
-	showMessage: true,
-})
-
-const emit = defineEmits<{
-	validate: [valid: boolean, errors: any]
-}>()
-
-// 已注册的 FormItem 列表（由子组件注册）
-const fields : any[] = reactive([])
-
-// 注册 FormItem
-function addField(field : any) {
-	fields.push(field)
-}
-
-// 移除 FormItem
-function removeField(field : any) {
-	const idx = fields.indexOf(field)
-	if (idx > -1) fields.splice(idx, 1)
-}
-
-// provide 给子组件
-provide('formModel', computed(() => props.model))
-provide('formRules', computed(() => props.rules))
-provide('formLabelWidth', computed(() => props.labelWidth))
-provide('formLabelPosition', computed(() => props.labelPosition))
-provide('formLabelAlign', computed(() => props.labelAlign))
-provide('formDisabled', computed(() => props.disabled))
-provide('formShowMessage', computed(() => props.showMessage))
-provide('formAddField', addField)
-provide('formRemoveField', removeField)
-
-// 校验所有字段
-function validate() : Promise<boolean> {
-	return new Promise((resolve) => {
-		if (fields.length === 0) {
-			resolve(true)
-			return
-		}
-		let valid = true
-		const errors : any[] = []
-		let count = 0
-		fields.forEach((field : any) => {
-			if (field.validate) {
-				field.validate((err : any) => {
-					if (err) {
-						valid = false
-						errors.push(err)
-					}
-					count++
-					if (count === fields.length) {
-						emit('validate', valid, errors)
-						resolve(valid)
-					}
-				})
-			} else {
-				count++
-				if (count === fields.length) {
-					emit('validate', valid, errors)
-					resolve(valid)
-				}
-			}
-		})
-	})
-}
-
-// 重置所有字段
-function resetFields() {
-	fields.forEach((field : any) => {
-		if (field.resetField) field.resetField()
-	})
-}
-
-// 清除校验
-function clearValidate() {
-	fields.forEach((field : any) => {
-		if (field.clearValidate) field.clearValidate()
-	})
-}
-
-defineExpose({
-	validate,
-	resetFields,
-	clearValidate,
-})
+defineOptions({ name: 'ParrotForm' })
 </script>
 
-<style scoped>
+<style lang="scss">
 .parrot-form {
-	width: 100%;
-}
-.parrot-form--top {
-	/* labelPosition=top 时子项垂直排列 */
+  /* TODO */
 }
 </style>

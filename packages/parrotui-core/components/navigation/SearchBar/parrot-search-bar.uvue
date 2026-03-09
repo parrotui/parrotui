@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-search-bar">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSearchBar — parrot-search-bar
+ */
+defineOptions({ name: 'ParrotSearchBar' })
+</script>
+
+<style lang="scss">
+.parrot-search-bar {
+  /* TODO */
+}
+</style>

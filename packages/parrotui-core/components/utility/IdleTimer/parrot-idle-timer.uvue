@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-idle-timer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotIdleTimer — parrot-idle-timer
+ */
+defineOptions({ name: 'ParrotIdleTimer' })
+</script>
+
+<style lang="scss">
+.parrot-idle-timer {
+  /* TODO */
+}
+</style>

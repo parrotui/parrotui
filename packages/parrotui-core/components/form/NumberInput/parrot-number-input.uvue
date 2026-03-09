@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-number-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotNumberInput — parrot-number-input
+ */
+defineOptions({ name: 'ParrotNumberInput' })
+</script>
+
+<style lang="scss">
+.parrot-number-input {
+  /* TODO */
+}
+</style>

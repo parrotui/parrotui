@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-document-viewer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDocumentViewer — parrot-document-viewer
+ */
+defineOptions({ name: 'ParrotDocumentViewer' })
+</script>
+
+<style lang="scss">
+.parrot-document-viewer {
+  /* TODO */
+}
+</style>

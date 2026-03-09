@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-autocomplete">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAutocomplete — parrot-autocomplete
+ */
+defineOptions({ name: 'ParrotAutocomplete' })
+</script>
+
+<style lang="scss">
+.parrot-autocomplete {
+  /* TODO */
+}
+</style>

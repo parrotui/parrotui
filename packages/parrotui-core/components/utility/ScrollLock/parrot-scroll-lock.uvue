@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-scroll-lock">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotScrollLock — parrot-scroll-lock
+ */
+defineOptions({ name: 'ParrotScrollLock' })
+</script>
+
+<style lang="scss">
+.parrot-scroll-lock {
+  /* TODO */
+}
+</style>

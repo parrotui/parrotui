@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-mind-map">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMindMap — parrot-mind-map
+ */
+defineOptions({ name: 'ParrotMindMap' })
+</script>
+
+<style lang="scss">
+.parrot-mind-map {
+  /* TODO */
+}
+</style>

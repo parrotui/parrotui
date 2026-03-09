@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-file-upload">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFileUpload — parrot-file-upload
+ */
+defineOptions({ name: 'ParrotFileUpload' })
+</script>
+
+<style lang="scss">
+.parrot-file-upload {
+  /* TODO */
+}
+</style>

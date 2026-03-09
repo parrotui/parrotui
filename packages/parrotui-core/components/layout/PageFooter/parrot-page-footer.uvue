@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-page-footer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPageFooter — parrot-page-footer
+ */
+defineOptions({ name: 'ParrotPageFooter' })
+</script>
+
+<style lang="scss">
+.parrot-page-footer {
+  /* TODO */
+}
+</style>

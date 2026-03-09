@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-form-error">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFormError — parrot-form-error
+ */
+defineOptions({ name: 'ParrotFormError' })
+</script>
+
+<style lang="scss">
+.parrot-form-error {
+  /* TODO */
+}
+</style>

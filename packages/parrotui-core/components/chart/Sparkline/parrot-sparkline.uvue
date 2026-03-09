@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-sparkline">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSparkline — parrot-sparkline
+ */
+defineOptions({ name: 'ParrotSparkline' })
+</script>
+
+<style lang="scss">
+.parrot-sparkline {
+  /* TODO */
+}
+</style>

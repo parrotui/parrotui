@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-rating-field">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRatingField — parrot-rating-field
+ */
+defineOptions({ name: 'ParrotRatingField' })
+</script>
+
+<style lang="scss">
+.parrot-rating-field {
+  /* TODO */
+}
+</style>

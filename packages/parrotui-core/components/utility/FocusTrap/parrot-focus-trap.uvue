@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-focus-trap">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFocusTrap — parrot-focus-trap
+ */
+defineOptions({ name: 'ParrotFocusTrap' })
+</script>
+
+<style lang="scss">
+.parrot-focus-trap {
+  /* TODO */
+}
+</style>

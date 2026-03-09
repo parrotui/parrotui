@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-drag-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDragList — parrot-drag-list
+ */
+defineOptions({ name: 'ParrotDragList' })
+</script>
+
+<style lang="scss">
+.parrot-drag-list {
+  /* TODO */
+}
+</style>

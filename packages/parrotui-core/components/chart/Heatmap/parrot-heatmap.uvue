@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-heatmap">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotHeatmap — parrot-heatmap
+ */
+defineOptions({ name: 'ParrotHeatmap' })
+</script>
+
+<style lang="scss">
+.parrot-heatmap {
+  /* TODO */
+}
+</style>

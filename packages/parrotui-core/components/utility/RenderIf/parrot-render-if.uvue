@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-render-if">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRenderIf — parrot-render-if
+ */
+defineOptions({ name: 'ParrotRenderIf' })
+</script>
+
+<style lang="scss">
+.parrot-render-if {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-form-field">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFormField — parrot-form-field
+ */
+defineOptions({ name: 'ParrotFormField' })
+</script>
+
+<style lang="scss">
+.parrot-form-field {
+  /* TODO */
+}
+</style>

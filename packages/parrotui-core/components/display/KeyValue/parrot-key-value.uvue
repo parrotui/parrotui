@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-key-value">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotKeyValue — parrot-key-value
+ */
+defineOptions({ name: 'ParrotKeyValue' })
+</script>
+
+<style lang="scss">
+.parrot-key-value {
+  /* TODO */
+}
+</style>

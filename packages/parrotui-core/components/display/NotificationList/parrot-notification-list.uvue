@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-notification-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotNotificationList — parrot-notification-list
+ */
+defineOptions({ name: 'ParrotNotificationList' })
+</script>
+
+<style lang="scss">
+.parrot-notification-list {
+  /* TODO */
+}
+</style>

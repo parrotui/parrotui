@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-json-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotJsonEditor — parrot-json-editor
+ */
+defineOptions({ name: 'ParrotJsonEditor' })
+</script>
+
+<style lang="scss">
+.parrot-json-editor {
+  /* TODO */
+}
+</style>

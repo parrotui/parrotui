@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-link">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLink — parrot-link
+ */
+defineOptions({ name: 'ParrotLink' })
+</script>
+
+<style lang="scss">
+.parrot-link {
+  /* TODO */
+}
+</style>

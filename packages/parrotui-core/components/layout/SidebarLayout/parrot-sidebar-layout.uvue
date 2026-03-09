@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-sidebar-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSidebarLayout — parrot-sidebar-layout
+ */
+defineOptions({ name: 'ParrotSidebarLayout' })
+</script>
+
+<style lang="scss">
+.parrot-sidebar-layout {
+  /* TODO */
+}
+</style>

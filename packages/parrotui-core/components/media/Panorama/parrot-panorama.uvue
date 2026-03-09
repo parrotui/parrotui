@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-panorama">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPanorama — parrot-panorama
+ */
+defineOptions({ name: 'ParrotPanorama' })
+</script>
+
+<style lang="scss">
+.parrot-panorama {
+  /* TODO */
+}
+</style>

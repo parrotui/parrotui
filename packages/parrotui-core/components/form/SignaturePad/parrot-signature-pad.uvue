@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-signature-pad">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSignaturePad — parrot-signature-pad
+ */
+defineOptions({ name: 'ParrotSignaturePad' })
+</script>
+
+<style lang="scss">
+.parrot-signature-pad {
+  /* TODO */
+}
+</style>

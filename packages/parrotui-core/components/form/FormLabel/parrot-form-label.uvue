@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-form-label">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFormLabel — parrot-form-label
+ */
+defineOptions({ name: 'ParrotFormLabel' })
+</script>
+
+<style lang="scss">
+.parrot-form-label {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-image-zoom">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotImageZoom — parrot-image-zoom
+ */
+defineOptions({ name: 'ParrotImageZoom' })
+</script>
+
+<style lang="scss">
+.parrot-image-zoom {
+  /* TODO */
+}
+</style>

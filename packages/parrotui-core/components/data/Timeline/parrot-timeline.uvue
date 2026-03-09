@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-timeline">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTimeline — parrot-timeline
+ */
+defineOptions({ name: 'ParrotTimeline' })
+</script>
+
+<style lang="scss">
+.parrot-timeline {
+  /* TODO */
+}
+</style>

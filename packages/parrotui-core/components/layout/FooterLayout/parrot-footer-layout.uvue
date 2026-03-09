@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-footer-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFooterLayout — parrot-footer-layout
+ */
+defineOptions({ name: 'ParrotFooterLayout' })
+</script>
+
+<style lang="scss">
+.parrot-footer-layout {
+  /* TODO */
+}
+</style>

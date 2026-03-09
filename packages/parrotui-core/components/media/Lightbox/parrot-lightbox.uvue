@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-lightbox">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLightbox — parrot-lightbox
+ */
+defineOptions({ name: 'ParrotLightbox' })
+</script>
+
+<style lang="scss">
+.parrot-lightbox {
+  /* TODO */
+}
+</style>

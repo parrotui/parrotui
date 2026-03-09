@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-search-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSearchInput — parrot-search-input
+ */
+defineOptions({ name: 'ParrotSearchInput' })
+</script>
+
+<style lang="scss">
+.parrot-search-input {
+  /* TODO */
+}
+</style>

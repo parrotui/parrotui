@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-offline">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotOffline — parrot-offline
+ */
+defineOptions({ name: 'ParrotOffline' })
+</script>
+
+<style lang="scss">
+.parrot-offline {
+  /* TODO */
+}
+</style>

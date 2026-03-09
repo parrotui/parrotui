@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-spinner">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSpinner — parrot-spinner
+ */
+defineOptions({ name: 'ParrotSpinner' })
+</script>
+
+<style lang="scss">
+.parrot-spinner {
+  /* TODO */
+}
+</style>

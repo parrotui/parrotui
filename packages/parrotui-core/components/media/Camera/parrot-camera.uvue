@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-camera">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCamera — parrot-camera
+ */
+defineOptions({ name: 'ParrotCamera' })
+</script>
+
+<style lang="scss">
+.parrot-camera {
+  /* TODO */
+}
+</style>

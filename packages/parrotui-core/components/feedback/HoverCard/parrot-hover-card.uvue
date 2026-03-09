@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-hover-card">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotHoverCard — parrot-hover-card
+ */
+defineOptions({ name: 'ParrotHoverCard' })
+</script>
+
+<style lang="scss">
+.parrot-hover-card {
+  /* TODO */
+}
+</style>

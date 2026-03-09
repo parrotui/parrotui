@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-mobile-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMobileNav — parrot-mobile-nav
+ */
+defineOptions({ name: 'ParrotMobileNav' })
+</script>
+
+<style lang="scss">
+.parrot-mobile-nav {
+  /* TODO */
+}
+</style>

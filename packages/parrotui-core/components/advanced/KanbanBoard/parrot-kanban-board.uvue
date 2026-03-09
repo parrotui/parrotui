@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-kanban-board">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotKanbanBoard — parrot-kanban-board
+ */
+defineOptions({ name: 'ParrotKanbanBoard' })
+</script>
+
+<style lang="scss">
+.parrot-kanban-board {
+  /* TODO */
+}
+</style>

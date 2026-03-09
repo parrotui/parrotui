@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-switch">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSwitch — parrot-switch
+ */
+defineOptions({ name: 'ParrotSwitch' })
+</script>
+
+<style lang="scss">
+.parrot-switch {
+  /* TODO */
+}
+</style>

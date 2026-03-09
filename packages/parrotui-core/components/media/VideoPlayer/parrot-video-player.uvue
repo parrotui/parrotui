@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-video-player">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVideoPlayer — parrot-video-player
+ */
+defineOptions({ name: 'ParrotVideoPlayer' })
+</script>
+
+<style lang="scss">
+.parrot-video-player {
+  /* TODO */
+}
+</style>

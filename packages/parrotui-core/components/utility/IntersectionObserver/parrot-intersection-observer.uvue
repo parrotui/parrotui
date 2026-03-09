@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-intersection-observer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotIntersectionObserver — parrot-intersection-observer
+ */
+defineOptions({ name: 'ParrotIntersectionObserver' })
+</script>
+
+<style lang="scss">
+.parrot-intersection-observer {
+  /* TODO */
+}
+</style>

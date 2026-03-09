@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-transfer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTransfer — parrot-transfer
+ */
+defineOptions({ name: 'ParrotTransfer' })
+</script>
+
+<style lang="scss">
+.parrot-transfer {
+  /* TODO */
+}
+</style>

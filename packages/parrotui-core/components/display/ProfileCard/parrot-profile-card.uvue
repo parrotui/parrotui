@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-profile-card">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotProfileCard — parrot-profile-card
+ */
+defineOptions({ name: 'ParrotProfileCard' })
+</script>
+
+<style lang="scss">
+.parrot-profile-card {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tree-select">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTreeSelect — parrot-tree-select
+ */
+defineOptions({ name: 'ParrotTreeSelect' })
+</script>
+
+<style lang="scss">
+.parrot-tree-select {
+  /* TODO */
+}
+</style>

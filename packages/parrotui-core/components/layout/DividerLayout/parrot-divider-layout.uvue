@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-divider-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDividerLayout — parrot-divider-layout
+ */
+defineOptions({ name: 'ParrotDividerLayout' })
+</script>
+
+<style lang="scss">
+.parrot-divider-layout {
+  /* TODO */
+}
+</style>

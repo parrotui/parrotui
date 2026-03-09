@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-container">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotContainer — parrot-container
+ */
+defineOptions({ name: 'ParrotContainer' })
+</script>
+
+<style lang="scss">
+.parrot-container {
+  /* TODO */
+}
+</style>

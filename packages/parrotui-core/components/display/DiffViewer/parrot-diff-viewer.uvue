@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-diff-viewer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDiffViewer — parrot-diff-viewer
+ */
+defineOptions({ name: 'ParrotDiffViewer' })
+</script>
+
+<style lang="scss">
+.parrot-diff-viewer {
+  /* TODO */
+}
+</style>

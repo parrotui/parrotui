@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-loading-overlay">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotLoadingOverlay — parrot-loading-overlay
+ */
+defineOptions({ name: 'ParrotLoadingOverlay' })
+</script>
+
+<style lang="scss">
+.parrot-loading-overlay {
+  /* TODO */
+}
+</style>

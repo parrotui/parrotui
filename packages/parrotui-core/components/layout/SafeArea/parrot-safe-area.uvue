@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-safe-area">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSafeArea — parrot-safe-area
+ */
+defineOptions({ name: 'ParrotSafeArea' })
+</script>
+
+<style lang="scss">
+.parrot-safe-area {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-pagination">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPagination — parrot-pagination
+ */
+defineOptions({ name: 'ParrotPagination' })
+</script>
+
+<style lang="scss">
+.parrot-pagination {
+  /* TODO */
+}
+</style>

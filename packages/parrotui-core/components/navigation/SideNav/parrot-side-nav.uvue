@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-side-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSideNav — parrot-side-nav
+ */
+defineOptions({ name: 'ParrotSideNav' })
+</script>
+
+<style lang="scss">
+.parrot-side-nav {
+  /* TODO */
+}
+</style>

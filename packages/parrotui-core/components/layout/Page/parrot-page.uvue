@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-page">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPage — parrot-page
+ */
+defineOptions({ name: 'ParrotPage' })
+</script>
+
+<style lang="scss">
+.parrot-page {
+  /* TODO */
+}
+</style>

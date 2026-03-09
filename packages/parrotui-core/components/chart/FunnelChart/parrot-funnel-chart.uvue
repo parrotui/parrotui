@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-funnel-chart">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFunnelChart — parrot-funnel-chart
+ */
+defineOptions({ name: 'ParrotFunnelChart' })
+</script>
+
+<style lang="scss">
+.parrot-funnel-chart {
+  /* TODO */
+}
+</style>

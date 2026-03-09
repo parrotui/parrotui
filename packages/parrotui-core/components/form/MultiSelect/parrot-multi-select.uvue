@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-multi-select">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMultiSelect — parrot-multi-select
+ */
+defineOptions({ name: 'ParrotMultiSelect' })
+</script>
+
+<style lang="scss">
+.parrot-multi-select {
+  /* TODO */
+}
+</style>

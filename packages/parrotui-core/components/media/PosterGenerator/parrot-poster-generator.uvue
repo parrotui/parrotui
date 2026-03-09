@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-poster-generator">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPosterGenerator — parrot-poster-generator
+ */
+defineOptions({ name: 'ParrotPosterGenerator' })
+</script>
+
+<style lang="scss">
+.parrot-poster-generator {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-flex">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFlex — parrot-flex
+ */
+defineOptions({ name: 'ParrotFlex' })
+</script>
+
+<style lang="scss">
+.parrot-flex {
+  /* TODO */
+}
+</style>

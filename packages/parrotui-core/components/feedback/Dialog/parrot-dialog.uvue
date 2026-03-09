@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-dialog">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDialog — parrot-dialog
+ */
+defineOptions({ name: 'ParrotDialog' })
+</script>
+
+<style lang="scss">
+.parrot-dialog {
+  /* TODO */
+}
+</style>

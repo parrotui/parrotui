@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-popover">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotPopover — parrot-popover
+ */
+defineOptions({ name: 'ParrotPopover' })
+</script>
+
+<style lang="scss">
+.parrot-popover {
+  /* TODO */
+}
+</style>

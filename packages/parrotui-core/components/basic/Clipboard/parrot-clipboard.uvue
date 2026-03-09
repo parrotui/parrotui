@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-clipboard">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotClipboard — parrot-clipboard
+ */
+defineOptions({ name: 'ParrotClipboard' })
+</script>
+
+<style lang="scss">
+.parrot-clipboard {
+  /* TODO */
+}
+</style>

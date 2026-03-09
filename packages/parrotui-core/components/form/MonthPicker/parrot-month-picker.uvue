@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-month-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMonthPicker — parrot-month-picker
+ */
+defineOptions({ name: 'ParrotMonthPicker' })
+</script>
+
+<style lang="scss">
+.parrot-month-picker {
+  /* TODO */
+}
+</style>

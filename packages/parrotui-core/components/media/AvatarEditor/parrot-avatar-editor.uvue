@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-avatar-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAvatarEditor — parrot-avatar-editor
+ */
+defineOptions({ name: 'ParrotAvatarEditor' })
+</script>
+
+<style lang="scss">
+.parrot-avatar-editor {
+  /* TODO */
+}
+</style>

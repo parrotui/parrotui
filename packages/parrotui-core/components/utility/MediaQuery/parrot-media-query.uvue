@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-media-query">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotMediaQuery — parrot-media-query
+ */
+defineOptions({ name: 'ParrotMediaQuery' })
+</script>
+
+<style lang="scss">
+.parrot-media-query {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-smart-table">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSmartTable — parrot-smart-table
+ */
+defineOptions({ name: 'ParrotSmartTable' })
+</script>
+
+<style lang="scss">
+.parrot-smart-table {
+  /* TODO */
+}
+</style>

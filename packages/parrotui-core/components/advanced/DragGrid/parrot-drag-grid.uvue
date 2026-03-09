@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-drag-grid">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDragGrid — parrot-drag-grid
+ */
+defineOptions({ name: 'ParrotDragGrid' })
+</script>
+
+<style lang="scss">
+.parrot-drag-grid {
+  /* TODO */
+}
+</style>

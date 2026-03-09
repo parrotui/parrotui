@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-retry">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRetry — parrot-retry
+ */
+defineOptions({ name: 'ParrotRetry' })
+</script>
+
+<style lang="scss">
+.parrot-retry {
+  /* TODO */
+}
+</style>

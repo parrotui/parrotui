@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-year-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotYearPicker — parrot-year-picker
+ */
+defineOptions({ name: 'ParrotYearPicker' })
+</script>
+
+<style lang="scss">
+.parrot-year-picker {
+  /* TODO */
+}
+</style>

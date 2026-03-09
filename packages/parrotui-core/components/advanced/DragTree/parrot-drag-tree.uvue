@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-drag-tree">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDragTree — parrot-drag-tree
+ */
+defineOptions({ name: 'ParrotDragTree' })
+</script>
+
+<style lang="scss">
+.parrot-drag-tree {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-avatar">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotAvatar — parrot-avatar
+ */
+defineOptions({ name: 'ParrotAvatar' })
+</script>
+
+<style lang="scss">
+.parrot-avatar {
+  /* TODO */
+}
+</style>

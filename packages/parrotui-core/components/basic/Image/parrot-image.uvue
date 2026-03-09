@@ -1,142 +1,18 @@
 <template>
-	<view
-		class="parrot-image"
-		:class="[
-			round ? 'parrot-image--round' : '',
-			circle ? 'parrot-image--circle' : '',
-			loading ? 'parrot-image--loading' : '',
-			error ? 'parrot-image--error' : ''
-		]"
-		:style="containerStyle"
-		@click="handleClick"
-	>
-		<image
-			v-if="!error"
-			class="parrot-image__img"
-			:src="src"
-			:mode="mode"
-			:lazy-load="lazyLoad"
-			:style="imgStyle"
-			@load="handleLoad"
-			@error="handleError"
-		/>
-		<!-- 加载中占位 -->
-		<view v-if="loading && !error" class="parrot-image__placeholder">
-			<text class="parrot-image__placeholder-text">加载中</text>
-		</view>
-		<!-- 加载失败占位 -->
-		<view v-if="error" class="parrot-image__error">
-			<text class="parrot-image__error-text">{{ errorText }}</text>
-		</view>
-		<slot></slot>
-	</view>
+  <view class="parrot-image">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { ref, computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	src?: string
-	mode?: string
-	width?: string
-	height?: string
-	radius?: string
-	round?: boolean
-	circle?: boolean
-	lazyLoad?: boolean
-	showLoading?: boolean
-	errorText?: string
-	previewable?: boolean
-}>(), {
-	src: '',
-	mode: 'aspectFill',
-	width: '100%',
-	height: '300rpx',
-	radius: '0',
-	round: false,
-	circle: false,
-	lazyLoad: true,
-	showLoading: true,
-	errorText: '加载失败',
-	previewable: false,
-})
-
-const emit = defineEmits<{
-	click: [event: Event]
-	load: []
-	error: []
-}>()
-
-const loading = ref<boolean>(true)
-const error = ref<boolean>(false)
-
-const containerStyle = computed(() => {
-	const style: CSSProperties = {}
-	style.width = props.width
-	style.height = props.height
-	if (props.radius && !props.round && !props.circle) {
-		style.borderRadius = props.radius
-	}
-	return style
-})
-
-const imgStyle = computed(() => {
-	const style: CSSProperties = {}
-	style.width = '100%'
-	style.height = '100%'
-	return style
-})
-
-function handleLoad() {
-	loading.value = false
-	emit('load')
-}
-
-function handleError() {
-	loading.value = false
-	error.value = true
-	emit('error')
-}
-
-function handleClick(e: Event) {
-	if (props.previewable && props.src) {
-		uni.previewImage({ urls: [props.src], current: props.src })
-	}
-	emit('click', e)
-}
+/**
+ * ParrotImage — parrot-image
+ */
+defineOptions({ name: 'ParrotImage' })
 </script>
 
 <style lang="scss">
 .parrot-image {
-	position: relative;
-	overflow: hidden;
-	display: inline-block;
-
-	&--round { border-radius: 8rpx; }
-	&--circle { border-radius: 50%; }
-}
-
-.parrot-image__img {
-	display: block;
-}
-
-.parrot-image__placeholder,
-.parrot-image__error {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: #f5f7fa;
-}
-
-.parrot-image__placeholder-text,
-.parrot-image__error-text {
-	font-size: 22rpx;
-	color: #c0c4cc;
+  /* TODO */
 }
 </style>

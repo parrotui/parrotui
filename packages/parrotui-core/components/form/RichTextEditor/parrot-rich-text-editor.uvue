@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-rich-text-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotRichTextEditor — parrot-rich-text-editor
+ */
+defineOptions({ name: 'ParrotRichTextEditor' })
+</script>
+
+<style lang="scss">
+.parrot-rich-text-editor {
+  /* TODO */
+}
+</style>

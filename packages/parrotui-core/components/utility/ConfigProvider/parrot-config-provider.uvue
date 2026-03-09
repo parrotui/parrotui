@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-config-provider">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotConfigProvider — parrot-config-provider
+ */
+defineOptions({ name: 'ParrotConfigProvider' })
+</script>
+
+<style lang="scss">
+.parrot-config-provider {
+  /* TODO */
+}
+</style>

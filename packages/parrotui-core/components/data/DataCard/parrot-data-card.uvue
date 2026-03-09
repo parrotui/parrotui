@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-data-card">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDataCard — parrot-data-card
+ */
+defineOptions({ name: 'ParrotDataCard' })
+</script>
+
+<style lang="scss">
+.parrot-data-card {
+  /* TODO */
+}
+</style>

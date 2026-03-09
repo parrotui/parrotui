@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-visually-hidden">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVisuallyHidden — parrot-visually-hidden
+ */
+defineOptions({ name: 'ParrotVisuallyHidden' })
+</script>
+
+<style lang="scss">
+.parrot-visually-hidden {
+  /* TODO */
+}
+</style>

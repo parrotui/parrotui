@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-query-builder">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotQueryBuilder — parrot-query-builder
+ */
+defineOptions({ name: 'ParrotQueryBuilder' })
+</script>
+
+<style lang="scss">
+.parrot-query-builder {
+  /* TODO */
+}
+</style>

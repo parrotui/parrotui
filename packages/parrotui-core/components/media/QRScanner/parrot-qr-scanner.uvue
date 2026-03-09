@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-qr-scanner">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotQRScanner — parrot-qr-scanner
+ */
+defineOptions({ name: 'ParrotQRScanner' })
+</script>
+
+<style lang="scss">
+.parrot-qr-scanner {
+  /* TODO */
+}
+</style>

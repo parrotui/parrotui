@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-schedule">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotSchedule — parrot-schedule
+ */
+defineOptions({ name: 'ParrotSchedule' })
+</script>
+
+<style lang="scss">
+.parrot-schedule {
+  /* TODO */
+}
+</style>

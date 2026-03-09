@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-dual-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDualList — parrot-dual-list
+ */
+defineOptions({ name: 'ParrotDualList' })
+</script>
+
+<style lang="scss">
+.parrot-dual-list {
+  /* TODO */
+}
+</style>

@@ -1,120 +1,18 @@
 <template>
-	<!-- DropdownMenu 下拉菜单容器：管理多个下拉列表项的展开/收起 -->
-	<view class="parrot-dropdown-menu">
-		<!-- 菜单标题栏 -->
-		<view class="parrot-dropdown-menu__bar" :style="`z-index:${(zIndex ?? 10) + 1}`">
-			<slot />
-		</view>
-		<!-- 遮罩层 -->
-		<view
-			v-if="showOverlay"
-			class="parrot-dropdown-menu__overlay"
-			:class="[overlayVisible ? 'parrot-dropdown-menu__overlay--show' : '']"
-			:style="`z-index:${zIndex ?? 10}`"
-			@tap.stop="onOverlayTap"
-		></view>
-	</view>
+  <view class="parrot-dropdown-menu">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
 /**
- * parrot-dropdown-menu 下拉菜单容器
- * 配合 parrot-dropdown-list 使用，管理多个下拉列表项的展开/收起。
- * 通过 provide 向子组件注入 toggle/close 方法。
- *
- * @prop activeColor         激活颜色
- * @prop overlay             是否显示遮罩，默认 true
- * @prop closeOnClickOverlay 点击遮罩关闭，默认 true
- * @prop direction           展开方向：down / up，默认 down
- * @prop zIndex              层级，默认 10
+ * ParrotDropdownMenu — parrot-dropdown-menu
  */
-import { ref, provide } from 'vue'
-
-interface Props {
-	/** 激活颜色 */
-	activeColor ?: string
-	/** 是否显示遮罩层 */
-	overlay ?: boolean
-	/** 点击遮罩是否关闭 */
-	closeOnClickOverlay ?: boolean
-	/** 展开方向 */
-	direction ?: string
-	/** 层级 */
-	zIndex ?: number
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	activeColor: '#1a7eff',
-	overlay: true,
-	closeOnClickOverlay: true,
-	direction: 'down',
-	zIndex: 10,
-})
-
-/** 当前展开的列表索引，-1 表示全部收起 */
-const activeIndex = ref<number>(-1)
-/** 遮罩是否显示 */
-const showOverlay = ref<boolean>(false)
-const overlayVisible = ref<boolean>(false)
-
-/** 切换指定索引的下拉列表 */
-function toggle(index : number) {
-	if (activeIndex.value === index) {
-		closeAll()
-	} else {
-		activeIndex.value = index
-		if (props.overlay ?? true) {
-			showOverlay.value = true
-			setTimeout(() => { overlayVisible.value = true }, 16)
-		}
-	}
-}
-
-/** 关闭所有下拉列表 */
-function closeAll() {
-	activeIndex.value = -1
-	overlayVisible.value = false
-	setTimeout(() => { showOverlay.value = false }, 300)
-}
-
-/** 点击遮罩 */
-function onOverlayTap() {
-	if (props.closeOnClickOverlay ?? true) {
-		closeAll()
-	}
-}
-
-// 向子组件注入方法和状态
-provide('dropdownMenuToggle', toggle)
-provide('dropdownMenuClose', closeAll)
-provide('dropdownMenuActiveIndex', activeIndex)
-provide('dropdownMenuDirection', props.direction ?? 'down')
-provide('dropdownMenuActiveColor', props.activeColor ?? '#1a7eff')
-provide('dropdownMenuZIndex', props.zIndex ?? 10)
+defineOptions({ name: 'ParrotDropdownMenu' })
 </script>
 
-<style scoped>
+<style lang="scss">
 .parrot-dropdown-menu {
-	position: relative;
-	width: 100%;
-}
-.parrot-dropdown-menu__bar {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	background-color: #ffffff;
-	position: relative;
-}
-.parrot-dropdown-menu__overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba(0, 0, 0, 0);
-	transition: background 0.3s;
-}
-.parrot-dropdown-menu__overlay--show {
-	background: rgba(0, 0, 0, 0.35);
+  /* TODO */
 }
 </style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-calendar">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCalendar — parrot-calendar
+ */
+defineOptions({ name: 'ParrotCalendar' })
+</script>
+
+<style lang="scss">
+.parrot-calendar {
+  /* TODO */
+}
+</style>

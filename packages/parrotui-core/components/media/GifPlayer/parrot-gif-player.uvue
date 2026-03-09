@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-gif-player">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotGifPlayer — parrot-gif-player
+ */
+defineOptions({ name: 'ParrotGifPlayer' })
+</script>
+
+<style lang="scss">
+.parrot-gif-player {
+  /* TODO */
+}
+</style>

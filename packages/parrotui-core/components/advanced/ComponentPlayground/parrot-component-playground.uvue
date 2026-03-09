@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-component-playground">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotComponentPlayground — parrot-component-playground
+ */
+defineOptions({ name: 'ParrotComponentPlayground' })
+</script>
+
+<style lang="scss">
+.parrot-component-playground {
+  /* TODO */
+}
+</style>

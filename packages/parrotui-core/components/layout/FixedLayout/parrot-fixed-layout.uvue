@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-fixed-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotFixedLayout — parrot-fixed-layout
+ */
+defineOptions({ name: 'ParrotFixedLayout' })
+</script>
+
+<style lang="scss">
+.parrot-fixed-layout {
+  /* TODO */
+}
+</style>

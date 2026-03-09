@@ -1,114 +1,18 @@
 <template>
-	<view
-		class="parrot-quote"
-		:class="[
-			`parrot-quote--${type}`,
-			align ? `parrot-quote--${align}` : ''
-		]"
-		:style="quoteStyle"
-	>
-		<view v-if="type === 'border'" class="parrot-quote__bar" :style="barStyle"></view>
-		<text v-if="icon && type === 'icon'" class="parrot-quote__icon">"</text>
-		<view class="parrot-quote__body">
-			<text class="parrot-quote__text"><slot>{{ text }}</slot></text>
-			<text v-if="author" class="parrot-quote__author">— {{ author }}</text>
-		</view>
-	</view>
+  <view class="parrot-quote">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	text?: string
-	author?: string
-	type?: 'border' | 'background' | 'icon'
-	align?: 'left' | 'center'
-	color?: string
-	borderColor?: string
-	icon?: boolean
-	margin?: string
-}>(), {
-	text: '',
-	author: '',
-	type: 'border',
-	align: 'left',
-	color: '',
-	borderColor: '#1a7eff',
-	icon: true,
-	margin: '16rpx 0',
-})
-
-const quoteStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.margin) style.margin = props.margin
-	return style
-})
-
-const barStyle = computed(() => {
-	const style: CSSProperties = {}
-	if (props.borderColor) style.backgroundColor = props.borderColor
-	return style
-})
+/**
+ * ParrotQuote — parrot-quote
+ */
+defineOptions({ name: 'ParrotQuote' })
 </script>
 
 <style lang="scss">
 .parrot-quote {
-	display: flex;
-	flex-direction: row;
-
-	&--border {
-		padding: 20rpx 24rpx;
-	}
-
-	&--background {
-		background-color: #f5f7fa;
-		padding: 24rpx 28rpx;
-		border-radius: 8rpx;
-	}
-
-	&--icon {
-		flex-direction: column;
-		padding: 24rpx;
-	}
-
-	&--left { text-align: left; }
-	&--center { text-align: center; align-items: center; }
-}
-
-.parrot-quote__bar {
-	width: 6rpx;
-	min-height: 100%;
-	background-color: #1a7eff;
-	border-radius: 3rpx;
-	margin-right: 20rpx;
-	flex-shrink: 0;
-}
-
-.parrot-quote__icon {
-	font-size: 64rpx;
-	color: #1a7eff;
-	line-height: 1;
-	font-family: Georgia, serif;
-	margin-bottom: 8rpx;
-}
-
-.parrot-quote__body {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-}
-
-.parrot-quote__text {
-	font-size: 28rpx;
-	color: #606266;
-	line-height: 1.7;
-}
-
-.parrot-quote__author {
-	font-size: 24rpx;
-	color: #909399;
-	margin-top: 12rpx;
+  /* TODO */
 }
 </style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-bottom-sheet">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotBottomSheet — parrot-bottom-sheet
+ */
+defineOptions({ name: 'ParrotBottomSheet' })
+</script>
+
+<style lang="scss">
+.parrot-bottom-sheet {
+  /* TODO */
+}
+</style>

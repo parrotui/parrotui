@@ -1,46 +1,18 @@
 <template>
-	<view
-		class="parrot-spacer"
-		:class="[direction === 'horizontal' ? 'parrot-spacer--h' : 'parrot-spacer--v']"
-		:style="spacerStyle"
-	></view>
+  <view class="parrot-spacer">
+    <slot />
+  </view>
 </template>
 
 <script setup lang="uts">
-import { computed } from 'vue'
-import type { CSSProperties } from 'vue'
-
-const props = withDefaults(defineProps<{
-	size?: number | string
-	direction?: 'horizontal' | 'vertical'
-	color?: string
-}>(), {
-	size: 24,
-	direction: 'vertical',
-	color: 'transparent',
-})
-
-const spacerStyle = computed(() => {
-	const style: CSSProperties = {}
-	const sizeVal = typeof props.size === 'number' ? `${props.size}rpx` : props.size
-	if (props.direction === 'vertical') {
-		style.height = sizeVal
-		style.width = '100%'
-	} else {
-		style.width = sizeVal
-		style.height = '100%'
-	}
-	if (props.color !== 'transparent') {
-		style.backgroundColor = props.color
-	}
-	return style
-})
+/**
+ * ParrotSpacer — parrot-spacer
+ */
+defineOptions({ name: 'ParrotSpacer' })
 </script>
 
 <style lang="scss">
 .parrot-spacer {
-	flex-shrink: 0;
-	&--v { display: block; }
-	&--h { display: inline-block; }
+  /* TODO */
 }
 </style>

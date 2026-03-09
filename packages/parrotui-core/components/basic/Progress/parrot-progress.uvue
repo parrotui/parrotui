@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-progress">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotProgress — parrot-progress
+ */
+defineOptions({ name: 'ParrotProgress' })
+</script>
+
+<style lang="scss">
+.parrot-progress {
+  /* TODO */
+}
+</style>

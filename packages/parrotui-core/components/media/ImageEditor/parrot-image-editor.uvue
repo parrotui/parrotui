@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-image-editor">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotImageEditor — parrot-image-editor
+ */
+defineOptions({ name: 'ParrotImageEditor' })
+</script>
+
+<style lang="scss">
+.parrot-image-editor {
+  /* TODO */
+}
+</style>

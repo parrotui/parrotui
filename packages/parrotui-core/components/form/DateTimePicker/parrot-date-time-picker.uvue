@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-date-time-picker">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDateTimePicker — parrot-date-time-picker
+ */
+defineOptions({ name: 'ParrotDateTimePicker' })
+</script>
+
+<style lang="scss">
+.parrot-date-time-picker {
+  /* TODO */
+}
+</style>

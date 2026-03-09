@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-callout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotCallout — parrot-callout
+ */
+defineOptions({ name: 'ParrotCallout' })
+</script>
+
+<style lang="scss">
+.parrot-callout {
+  /* TODO */
+}
+</style>

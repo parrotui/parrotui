@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tag-nav">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTagNav — parrot-tag-nav
+ */
+defineOptions({ name: 'ParrotTagNav' })
+</script>
+
+<style lang="scss">
+.parrot-tag-nav {
+  /* TODO */
+}
+</style>

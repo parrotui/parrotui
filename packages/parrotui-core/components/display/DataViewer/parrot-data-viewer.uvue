@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-data-viewer">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDataViewer — parrot-data-viewer
+ */
+defineOptions({ name: 'ParrotDataViewer' })
+</script>
+
+<style lang="scss">
+.parrot-data-viewer {
+  /* TODO */
+}
+</style>

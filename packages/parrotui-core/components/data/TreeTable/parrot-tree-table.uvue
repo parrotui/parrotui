@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-tree-table">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotTreeTable — parrot-tree-table
+ */
+defineOptions({ name: 'ParrotTreeTable' })
+</script>
+
+<style lang="scss">
+.parrot-tree-table {
+  /* TODO */
+}
+</style>

@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-user-list">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotUserList — parrot-user-list
+ */
+defineOptions({ name: 'ParrotUserList' })
+</script>
+
+<style lang="scss">
+.parrot-user-list {
+  /* TODO */
+}
+</style>

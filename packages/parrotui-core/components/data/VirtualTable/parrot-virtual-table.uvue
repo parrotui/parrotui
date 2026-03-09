@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-virtual-table">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotVirtualTable — parrot-virtual-table
+ */
+defineOptions({ name: 'ParrotVirtualTable' })
+</script>
+
+<style lang="scss">
+.parrot-virtual-table {
+  /* TODO */
+}
+</style>

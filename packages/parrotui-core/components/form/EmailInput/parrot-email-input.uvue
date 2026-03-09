@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-email-input">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotEmailInput — parrot-email-input
+ */
+defineOptions({ name: 'ParrotEmailInput' })
+</script>
+
+<style lang="scss">
+.parrot-email-input {
+  /* TODO */
+}
+</style>

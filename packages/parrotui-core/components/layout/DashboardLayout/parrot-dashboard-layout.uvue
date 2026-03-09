@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-dashboard-layout">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotDashboardLayout — parrot-dashboard-layout
+ */
+defineOptions({ name: 'ParrotDashboardLayout' })
+</script>
+
+<style lang="scss">
+.parrot-dashboard-layout {
+  /* TODO */
+}
+</style>

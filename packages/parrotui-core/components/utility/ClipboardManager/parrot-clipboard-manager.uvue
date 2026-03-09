@@ -1,0 +1,18 @@
+<template>
+  <view class="parrot-clipboard-manager">
+    <slot />
+  </view>
+</template>
+
+<script setup lang="uts">
+/**
+ * ParrotClipboardManager — parrot-clipboard-manager
+ */
+defineOptions({ name: 'ParrotClipboardManager' })
+</script>
+
+<style lang="scss">
+.parrot-clipboard-manager {
+  /* TODO */
+}
+</style>
