@@ -235,6 +235,8 @@
 /* ─── 内容区域样式 ──────────────────────────────────────────── */
 .VPDoc .container {
   max-width: 100% !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* 正文标题锚点悬停 */
@@ -1136,14 +1138,6 @@ div[class*='language-'] {
   display: inline-block;
   vertical-align: middle;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* ─── 修复标题锚点滚动偏移（防止被固定导航遮挡）──────────────── */
-.vp-doc h1,
-.vp-doc h2,
-.vp-doc h3,
-.vp-doc h4 {
-  scroll-margin-top: 80px !important;
 }
 
 /* ─── 小屏设备内容顶部补充 padding ───────────────────────────── */
