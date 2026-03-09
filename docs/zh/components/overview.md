@@ -1,10 +1,3 @@
-<script setup>
-import { onMounted } from 'vue'
-onMounted(() => {
-  document.querySelectorAll('.vp-doc details.details').forEach(el => { el.open = true })
-})
-</script>
-
 # 组件概览
 
 > Parrot UI Core — **14 分类 · 165 个组件** + 4 Composables + 3 Directives + 4 Utils + Design Tokens
