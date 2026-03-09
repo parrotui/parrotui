@@ -1,305 +1,220 @@
+<script setup>
+import { onMounted } from 'vue'
+onMounted(() => {
+  document.querySelectorAll('.vp-doc details.details').forEach(el => { el.open = true })
+})
+</script>
+
 # 组件预览概述
 
-> Parrot UI 共包含 **14 个分类 · 165 个组件**，覆盖基础元素、数据录入、信息展示、操作反馈、导航、弹层、布局、动效、画布、工具、扩展、实验及系统等全场景。
+> Parrot UI 共包含 **14 个分类 · 165 个组件**，覆盖基础元素、数据录入、信息展示、操作反馈、导航、弹层、布局、动效、画布、工具、扩展、实验及系统等全场景。点击分类标题可折叠/展开。
 
-<style>
-.pui-tree { font-size: 14px; line-height: 1.8; }
-.pui-tree details { margin-bottom: 4px; }
-.pui-tree summary {
-  cursor: pointer;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-  user-select: none;
-}
-.pui-tree summary:hover { background: var(--vp-c-bg-soft); }
-.pui-tree .tree-list {
-  padding-left: 20px;
-  margin: 2px 0 6px 10px;
-  border-left: 2px solid var(--vp-c-divider);
-  list-style: none;
-}
-.pui-tree .tree-list li {
-  position: relative;
-  padding: 1px 0 1px 14px;
-  color: var(--vp-c-text-2);
-  font-size: 13px;
-}
-.pui-tree .tree-list li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 12px;
-  width: 10px;
-  border-top: 2px solid var(--vp-c-divider);
-}
-.pui-tree .tree-list code {
-  font-size: 12px;
-  padding: 1px 4px;
-  border-radius: 3px;
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-brand-1);
-}
-.pui-tree .cat-count {
-  font-weight: 400;
-  font-size: 12px;
-  color: var(--vp-c-text-3);
-  margin-left: 4px;
-}
-</style>
+::: details basic 基础组件 (25)
+- `Button` 按钮 — solid/outline/ghost/link/text 变体，图标、长按
+- `Icon` 图标 — 旋转、脉冲/弹跳动画、翻转、徽标
+- `Text` 文本 — link/price/phone/name 模式，h1-h6 标题，可复制
+- `Color` 颜色 — swatch 色块、主题令牌、透明度
+- `Number` 数字 — 统计卡片模式、趋势指示、前后缀
+- `Footer` 页脚 — default/branded/minimal 变体，安全区适配
+- `Heading` 标题 — h1-h6 六级，4 种颜色类型
+- `Paragraph` 段落 — 3 种尺寸、缩进、对齐
+- `Caption` 说明文字 — 固定 22rpx，4 种颜色
+- `Code` 代码块 — 行号、复制按钮、暗色主题
+- `Quote` 引用 — 边框/背景/图标 3 种类型
+- `Statistic` 统计数值 — 趋势、精度、千分位
+- `Counter` 动画计数器 — 数字递增动画
+- `Currency` 货币 — 符号、千分位、5 种尺寸
+- `Percentage` 百分比 — 趋势箭头、涨跌配色
+- `IconButton` 图标按钮 — circle/square/round，徽标
+- `ButtonGroup` 按钮组 — 水平/垂直，相邻边框合并
+- `Chip` 标签片 — 可选中、可关闭、图标+文本
+- `Spacer` 间距占位 — 水平/垂直方向
+- `Image` 图片 — 加载/错误占位、圆形、预览、懒加载
+- `Picture` 图文 — 图片+说明文字
+- `AspectRatio` 宽高比容器 — 比例锁定
+- `RangeSlider` 双滑块 — 触摸事件、范围选择
+- `Highlight` 关键词高亮 — 正则匹配、自定义样式
+- `SvgIcon` SVG 图标 — 旋转、旋转动画
+:::
 
-<div class="pui-tree">
+::: details display 展示组件 (16)
+- `Badge` 徽标数 — 数字/圆点/自定义内容
+- `Tag` 标签 — 多色、可关闭
+- `Avatar` 头像 — 圆形/方形、图片/文字
+- `AvatarGroup` 头像组 — 重叠展示、+N 计数
+- `Divider` 分割线 — 水平/垂直、文字分割
+- `Section` 章节容器 — 标题+内容区块
+- `Skeleton` 骨架屏 — 加载占位动画
+- `NoticeBar` 通知栏 — 滚动/静态、可关闭
+- `FooterLinks` 页脚链接 — 底部导航链接组
+- `TimeAxis` 时间轴 — 纵向时间线
+- `IndexCard` 首页卡片 — 首页业务卡片
+- `ProductCard` 商品卡片 — 商品展示
+- `TradeItem` 交易条目 — 订单/交易记录
+- `DataTag` 数据标签 — 数据展示标签
+- `SwiperDot` 轮播指示器 — 轮播图点/条指示
+- `Result` 结果页 — 成功/失败/空状态
+:::
 
-<details open>
-<summary>basic 基础组件 <span class="cat-count">(25)</span></summary>
-<ul class="tree-list">
-<li><code>Button</code> 按钮 — solid/outline/ghost/link/text 变体，图标、长按</li>
-<li><code>Icon</code> 图标 — 旋转、脉冲/弹跳动画、翻转、徽标</li>
-<li><code>Text</code> 文本 — link/price/phone/name 模式，h1-h6 标题，可复制</li>
-<li><code>Color</code> 颜色 — swatch 色块、主题令牌、透明度</li>
-<li><code>Number</code> 数字 — 统计卡片模式、趋势指示、前后缀</li>
-<li><code>Footer</code> 页脚 — default/branded/minimal 变体，安全区适配</li>
-<li><code>Heading</code> 标题 — h1-h6 六级，4 种颜色类型</li>
-<li><code>Paragraph</code> 段落 — 3 种尺寸、缩进、对齐</li>
-<li><code>Caption</code> 说明文字 — 固定 22rpx，4 种颜色</li>
-<li><code>Code</code> 代码块 — 行号、复制按钮、暗色主题</li>
-<li><code>Quote</code> 引用 — 边框/背景/图标 3 种类型</li>
-<li><code>Statistic</code> 统计数值 — 趋势、精度、千分位</li>
-<li><code>Counter</code> 动画计数器 — 数字递增动画</li>
-<li><code>Currency</code> 货币 — 符号、千分位、5 种尺寸</li>
-<li><code>Percentage</code> 百分比 — 趋势箭头、涨跌配色</li>
-<li><code>IconButton</code> 图标按钮 — circle/square/round，徽标</li>
-<li><code>ButtonGroup</code> 按钮组 — 水平/垂直，相邻边框合并</li>
-<li><code>Chip</code> 标签片 — 可选中、可关闭、图标+文本</li>
-<li><code>Spacer</code> 间距占位 — 水平/垂直方向</li>
-<li><code>Image</code> 图片 — 加载/错误占位、圆形、预览、懒加载</li>
-<li><code>Picture</code> 图文 — 图片+说明文字</li>
-<li><code>AspectRatio</code> 宽高比容器 — 比例锁定</li>
-<li><code>RangeSlider</code> 双滑块 — 触摸事件、范围选择</li>
-<li><code>Highlight</code> 关键词高亮 — 正则匹配、自定义样式</li>
-<li><code>SvgIcon</code> SVG 图标 — 旋转、旋转动画</li>
-</ul>
-</details>
+::: details form 表单组件 (24)
+- `Input` 输入框 — 文本/密码/数字输入
+- `Label` 表单标签 — 表单字段标签
+- `Form` 表单容器 — 表单整体容器
+- `FormItem` 表单项 — 单个表单字段包装
+- `Select` 下拉选择 — 单选/多选下拉
+- `Picker` 选择器 — 滚动选择器
+- `DatePicker` 日期选择 — 年月日选择
+- `Calendar` 日历 — 日历面板
+- `Cascader` 级联选择 — 多级联动
+- `Rate` 评分 — 星星评分
+- `Upload` 图片上传 — 图片选择+上传
+- `UploadVideo` 视频上传 — 视频选择+上传
+- `InputNumber` 数字输入 — 步进器
+- `Slider` 滑块 — 单滑块选择
+- `Textarea` 文本域 — 多行文本
+- `CheckboxGroup` 复选框组 — 多选容器
+- `Checkbox` 复选框 — 单个复选
+- `RadioGroup` 单选框组 — 单选容器
+- `Radio` 单选框 — 单个单选
+- `Switch` 开关 — 布尔切换
+- `SearchBar` 搜索栏 — 搜索输入
+- `DigitalKeyboard` 数字键盘 — 虚拟数字键盘
+- `SingleInput` 单格输入 — 验证码单格
+- `LicensePlate` 车牌输入 — 车牌号键盘
+:::
 
-<details open>
-<summary>display 展示组件 <span class="cat-count">(16)</span></summary>
-<ul class="tree-list">
-<li><code>Badge</code> 徽标数</li>
-<li><code>Tag</code> 标签</li>
-<li><code>Avatar</code> 头像</li>
-<li><code>AvatarGroup</code> 头像组</li>
-<li><code>Divider</code> 分割线</li>
-<li><code>Section</code> 章节容器</li>
-<li><code>Skeleton</code> 骨架屏</li>
-<li><code>NoticeBar</code> 通知栏</li>
-<li><code>FooterLinks</code> 页脚链接</li>
-<li><code>TimeAxis</code> 时间轴</li>
-<li><code>IndexCard</code> 首页卡片</li>
-<li><code>ProductCard</code> 商品卡片</li>
-<li><code>TradeItem</code> 交易条目</li>
-<li><code>DataTag</code> 数据标签</li>
-<li><code>SwiperDot</code> 轮播指示器</li>
-<li><code>Result</code> 结果页</li>
-</ul>
-</details>
+::: details data 数据组件 (7)
+- `List` 列表容器 — 列表整体容器
+- `ListCell` 列表单元 — 单行列表项
+- `Pagination` 分页器 — 页码导航
+- `Table` 表格 — 数据表格
+- `Progress` 进度条 — 线性进度
+- `Circle` 环形进度 — 圆形进度
+- `CountDown` 倒计时 — 时间倒计时
+:::
 
-<details open>
-<summary>form 表单组件 <span class="cat-count">(24)</span></summary>
-<ul class="tree-list">
-<li><code>Input</code> 输入框</li>
-<li><code>Label</code> 表单标签</li>
-<li><code>Form</code> 表单容器</li>
-<li><code>FormItem</code> 表单项</li>
-<li><code>Select</code> 下拉选择</li>
-<li><code>Picker</code> 选择器</li>
-<li><code>DatePicker</code> 日期选择</li>
-<li><code>Calendar</code> 日历</li>
-<li><code>Cascader</code> 级联选择</li>
-<li><code>Rate</code> 评分</li>
-<li><code>Upload</code> 图片上传</li>
-<li><code>UploadVideo</code> 视频上传</li>
-<li><code>InputNumber</code> 数字输入</li>
-<li><code>Slider</code> 滑块</li>
-<li><code>Textarea</code> 文本域</li>
-<li><code>CheckboxGroup</code> 复选框组</li>
-<li><code>Checkbox</code> 复选框</li>
-<li><code>RadioGroup</code> 单选框组</li>
-<li><code>Radio</code> 单选框</li>
-<li><code>Switch</code> 开关</li>
-<li><code>SearchBar</code> 搜索栏</li>
-<li><code>DigitalKeyboard</code> 数字键盘</li>
-<li><code>SingleInput</code> 单格输入</li>
-<li><code>LicensePlate</code> 车牌输入</li>
-</ul>
-</details>
+::: details feedback 操作反馈 (6)
+- `Message` 消息提示 — 全局提示信息
+- `Toast` 轻提示 — 短暂提示
+- `Alert` 警告提示 — 页内警告
+- `Loading` 加载状态 — 加载中提示
+- `Spin` 旋转加载 — 旋转加载动画
+- `LoadAni` 加载动画 — 自定义加载动画
+:::
 
-<details open>
-<summary>data 数据组件 <span class="cat-count">(7)</span></summary>
-<ul class="tree-list">
-<li><code>List</code> 列表容器</li>
-<li><code>ListCell</code> 列表单元</li>
-<li><code>Pagination</code> 分页器</li>
-<li><code>Table</code> 表格</li>
-<li><code>Progress</code> 进度条</li>
-<li><code>Circle</code> 环形进度</li>
-<li><code>CountDown</code> 倒计时</li>
-</ul>
-</details>
+::: details navigation 导航组件 (18)
+- `NavBar` 导航栏 — 顶部导航
+- `Tab` 标签页 — 选项卡切换
+- `Tabs` 标签页容器 — 多标签容器
+- `Tabbar` 底部标签栏 — 底部 Tab
+- `BottomNavbar` 底部导航 — 底部导航栏
+- `Breadcrumb` 面包屑 — 路径导航
+- `Steps` 步骤条 — 流程步骤
+- `Link` 链接 — 文字链接
+- `Menu` 菜单 — 导航菜单
+- `DropdownMenu` 下拉菜单 — 下拉操作
+- `DropdownList` 下拉列表 — 下拉选项
+- `Vtabs` 纵向标签页 — 左右分栏
+- `SegmentedControl` 分段控制 — 分段选择器
+- `IndexList` 索引列表 — 字母索引
+- `Loadmore` 加载更多 — 上拉加载
+- `Sticky` 粘性定位 — 吸顶组件
+- `SwipeAction` 滑动操作 — 侧滑按钮
+- `Fab` 浮动按钮 — 悬浮操作
+:::
 
-<details open>
-<summary>feedback 操作反馈 <span class="cat-count">(6)</span></summary>
-<ul class="tree-list">
-<li><code>Message</code> 消息提示</li>
-<li><code>Toast</code> 轻提示</li>
-<li><code>Alert</code> 警告提示</li>
-<li><code>Loading</code> 加载状态</li>
-<li><code>Spin</code> 旋转加载</li>
-<li><code>LoadAni</code> 加载动画</li>
-</ul>
-</details>
+::: details overlay 弹层组件 (13)
+- `Backdrop` 遮罩层 — 背景遮罩
+- `ActionSheet` 操作面板 — 底部操作项
+- `Dialog` 对话框 — 确认对话
+- `Drawer` 抽屉 — 侧边抽屉
+- `Popup` 弹出层 — 通用弹出
+- `Modal` 模态框 — 模态对话
+- `BottomPopup` 底部弹层 — 底部抽屉
+- `TopPopup` 顶部弹层 — 顶部下拉
+- `Gallery` 图片浏览 — 图片预览
+- `Landscape` 横屏弹层 — 横屏展示
+- `FilterDrawer` 筛选抽屉 — 筛选面板
+- `BubbleBox` 气泡框 — 气泡提示
+- `ShareSheet` 分享面板 — 分享操作
+:::
 
-<details open>
-<summary>navigation 导航组件 <span class="cat-count">(18)</span></summary>
-<ul class="tree-list">
-<li><code>NavBar</code> 导航栏</li>
-<li><code>Tab</code> 标签页</li>
-<li><code>Tabs</code> 标签页容器</li>
-<li><code>Tabbar</code> 底部标签栏</li>
-<li><code>BottomNavbar</code> 底部导航</li>
-<li><code>Breadcrumb</code> 面包屑</li>
-<li><code>Steps</code> 步骤条</li>
-<li><code>Link</code> 链接</li>
-<li><code>Menu</code> 菜单</li>
-<li><code>DropdownMenu</code> 下拉菜单</li>
-<li><code>DropdownList</code> 下拉列表</li>
-<li><code>Vtabs</code> 纵向标签页</li>
-<li><code>SegmentedControl</code> 分段控制</li>
-<li><code>IndexList</code> 索引列表</li>
-<li><code>Loadmore</code> 加载更多</li>
-<li><code>Sticky</code> 粘性定位</li>
-<li><code>SwipeAction</code> 滑动操作</li>
-<li><code>Fab</code> 浮动按钮</li>
-</ul>
-</details>
+::: details layout 布局组件 (16)
+- `Layout` 整体布局 — 页面骨架
+- `Grid` 宫格 — 等分网格
+- `GridItem` 宫格项 — 网格单元
+- `Card` 卡片 — 信息卡片
+- `Row` 行容器 — 水平排列
+- `Col` 列容器 — 栅格列
+- `Collapse` 折叠面板 — 手风琴
+- `CollapseItem` 折叠面板项 — 面板单元
+- `Empty` 空状态 — 无数据提示
+- `Panel` 面板 — 内容面板
+- `MovableView` 可拖拽视图 — 自由拖动
+- `Preview` 预览 — 内容预览
+- `HorizontalScroll` 横向滚动 — 横向滑动
+- `BackgroundImage` 背景图 — 背景图容器
+- `BannerArc` 弧形横幅 — 弧形头部
+- `Waterfall` 瀑布流 — 瀑布式布局
+:::
 
-<details open>
-<summary>overlay 弹层组件 <span class="cat-count">(13)</span></summary>
-<ul class="tree-list">
-<li><code>Backdrop</code> 遮罩层</li>
-<li><code>ActionSheet</code> 操作面板</li>
-<li><code>Dialog</code> 对话框</li>
-<li><code>Drawer</code> 抽屉</li>
-<li><code>Popup</code> 弹出层</li>
-<li><code>Modal</code> 模态框</li>
-<li><code>BottomPopup</code> 底部弹层</li>
-<li><code>TopPopup</code> 顶部弹层</li>
-<li><code>Gallery</code> 图片浏览</li>
-<li><code>Landscape</code> 横屏弹层</li>
-<li><code>FilterDrawer</code> 筛选抽屉</li>
-<li><code>BubbleBox</code> 气泡框</li>
-<li><code>ShareSheet</code> 分享面板</li>
-</ul>
-</details>
+::: details motion 动效组件 (4)
+- `Animation` 动画容器 — CSS 动画包装
+- `Lottie` Lottie 动画 — Lottie JSON 播放
+- `DigitalRoller` 数字滚轮 — 数字滚动效果
+- `CubicBezier` 贝塞尔曲线 — 缓动函数可视化
+:::
 
-<details open>
-<summary>layout 布局组件 <span class="cat-count">(16)</span></summary>
-<ul class="tree-list">
-<li><code>Layout</code> 整体布局</li>
-<li><code>Grid</code> 宫格</li>
-<li><code>GridItem</code> 宫格项</li>
-<li><code>Card</code> 卡片</li>
-<li><code>Row</code> 行容器</li>
-<li><code>Col</code> 列容器</li>
-<li><code>Collapse</code> 折叠面板</li>
-<li><code>CollapseItem</code> 折叠面板项</li>
-<li><code>Empty</code> 空状态</li>
-<li><code>Panel</code> 面板</li>
-<li><code>MovableView</code> 可拖拽视图</li>
-<li><code>Preview</code> 预览</li>
-<li><code>HorizontalScroll</code> 横向滚动</li>
-<li><code>BackgroundImage</code> 背景图</li>
-<li><code>BannerArc</code> 弧形横幅</li>
-<li><code>Waterfall</code> 瀑布流</li>
-</ul>
-</details>
+::: details canvas 画布组件 (4)
+- `Poster` 海报生成 — Canvas 海报
+- `Qrcode` 二维码 — 二维码生成
+- `Barcode` 条形码 — 条形码生成
+- `Autograph` 手写签名 — 触摸签名板
+:::
 
-<details open>
-<summary>motion 动效组件 <span class="cat-count">(4)</span></summary>
-<ul class="tree-list">
-<li><code>Animation</code> 动画容器</li>
-<li><code>Lottie</code> Lottie 动画</li>
-<li><code>DigitalRoller</code> 数字滚轮</li>
-<li><code>CubicBezier</code> 贝塞尔曲线</li>
-</ul>
-</details>
+::: details utility 工具组件 (13)
+- `StatusBar` 状态栏占位 — 状态栏高度占位
+- `WhiteSpace` 垂直留白 — 垂直间距
+- `WingBlank` 水平留白 — 水平间距
+- `Css` CSS 注入 — 动态 CSS
+- `ThemeToggle` 主题切换 — 亮暗切换开关
+- `CopyText` 复制文本 — 点击复制
+- `Backtop` 回到顶部 — 滚动返回顶部
+- `SafeArea` 安全区域 — 安全区占位
+- `Lazyload` 懒加载 — 延迟加载
+- `Timer` 定时器 — 计时器组件
+- `CountdownVerify` 验证码倒计时 — 发送验证码
+- `Parse` 富文本解析 — HTML 富文本渲染
+- `OverflowHidden` 溢出隐藏 — 内容截断
+:::
 
-<details open>
-<summary>canvas 画布组件 <span class="cat-count">(4)</span></summary>
-<ul class="tree-list">
-<li><code>Poster</code> 海报生成</li>
-<li><code>Qrcode</code> 二维码</li>
-<li><code>Barcode</code> 条形码</li>
-<li><code>Autograph</code> 手写签名</li>
-</ul>
-</details>
+::: details extended 扩展组件 (8)
+- `FilterBar` 筛选栏 — 条件筛选
+- `SlideVerify` 滑动验证 — 滑块验证码
+- `RotateVerify` 旋转验证 — 旋转图片验证
+- `SliderCaptcha` 滑块验证码 — 拼图滑块
+- `PuzzleVerify` 拼图验证 — 拼图验证码
+- `ImageCropper` 图片裁剪 — 图片剪切
+- `Drag` 拖拽排序 — 拖拽重排
+- `TableWeex` Weex 表格 — Weex 原生表格
+:::
 
-<details open>
-<summary>utility 工具组件 <span class="cat-count">(13)</span></summary>
-<ul class="tree-list">
-<li><code>StatusBar</code> 状态栏占位</li>
-<li><code>WhiteSpace</code> 垂直留白</li>
-<li><code>WingBlank</code> 水平留白</li>
-<li><code>Css</code> CSS 注入</li>
-<li><code>ThemeToggle</code> 主题切换</li>
-<li><code>CopyText</code> 复制文本</li>
-<li><code>Backtop</code> 回到顶部</li>
-<li><code>SafeArea</code> 安全区域</li>
-<li><code>Lazyload</code> 懒加载</li>
-<li><code>Timer</code> 定时器</li>
-<li><code>CountdownVerify</code> 验证码倒计时</li>
-<li><code>Parse</code> 富文本解析</li>
-<li><code>OverflowHidden</code> 溢出隐藏</li>
-</ul>
-</details>
+::: details experimental 实验组件 (5)
+- `GestureHandler` 手势处理 — 多指手势识别
+- `VirtualList` 虚拟列表 — 大数据列表
+- `Skeleton3D` 3D 骨架屏 — 3D 加载占位
+- `VoiceInput` 语音输入 — 语音转文字
+- `AIAssist` AI 辅助 — AI 智能助手
+:::
 
-<details open>
-<summary>extended 扩展组件 <span class="cat-count">(8)</span></summary>
-<ul class="tree-list">
-<li><code>FilterBar</code> 筛选栏</li>
-<li><code>SlideVerify</code> 滑动验证</li>
-<li><code>RotateVerify</code> 旋转验证</li>
-<li><code>SliderCaptcha</code> 滑块验证码</li>
-<li><code>PuzzleVerify</code> 拼图验证</li>
-<li><code>ImageCropper</code> 图片裁剪</li>
-<li><code>Drag</code> 拖拽排序</li>
-<li><code>TableWeex</code> Weex 表格</li>
-</ul>
-</details>
-
-<details open>
-<summary>experimental 实验组件 <span class="cat-count">(5)</span></summary>
-<ul class="tree-list">
-<li><code>GestureHandler</code> 手势处理</li>
-<li><code>VirtualList</code> 虚拟列表</li>
-<li><code>Skeleton3D</code> 3D 骨架屏</li>
-<li><code>VoiceInput</code> 语音输入</li>
-<li><code>AIAssist</code> AI 辅助</li>
-</ul>
-</details>
-
-<details open>
-<summary>system 系统组件 <span class="cat-count">(6)</span></summary>
-<ul class="tree-list">
-<li><code>Notification</code> 系统通知</li>
-<li><code>Auth</code> 认证授权</li>
-<li><code>Permission</code> 权限控制</li>
-<li><code>Logger</code> 日志记录</li>
-<li><code>Settings</code> 系统设置</li>
-<li><code>Updater</code> 版本更新</li>
-</ul>
-</details>
-
-</div>
+::: details system 系统组件 (6)
+- `Notification` 系统通知 — 消息推送
+- `Auth` 认证授权 — 登录/注册/授权
+- `Permission` 权限控制 — 功能权限管理
+- `Logger` 日志记录 — 运行日志
+- `Settings` 系统设置 — 设置面板
+- `Updater` 版本更新 — 热更新/版本检测
+:::
 
 ---
 
