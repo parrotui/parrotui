@@ -259,13 +259,14 @@ div[class*='language-'] {
   font-size: 0.875em;
 }
 
-/* 提示块 */
-/* 修复标题锚点滚动偏移 */
+/* 修复标题锚点滚动偏移：使用 VitePress 内置变量自动适配导航栏高度，额外留 16px 间距 */
 .vp-doc h1,
 .vp-doc h2,
 .vp-doc h3,
-.vp-doc h4 {
-  scroll-margin-top: 80px !important; /* 根据顶部导航栏的高度调整 */
+.vp-doc h4,
+.vp-doc h5,
+.vp-doc h6 {
+  scroll-margin-top: calc(var(--vp-nav-height) + 16px) !important;
 }
 .vp-doc .tip, .vp-doc .warning, .vp-doc .danger {
   border-radius: 8px;

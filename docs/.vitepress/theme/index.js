@@ -12,19 +12,16 @@ export default {
     app.component('PhonePreview', PhonePreview)
     app.component('PlatformTable', PlatformTable)
 
-    // 每次路由切换后：延迟 50ms 执行，确保内容加载完毕后再滚动到顶部
-    // 同时强制触发浏览器布局重排，解决固定头部遮挡内容或页面空白问题
+    // 每次路由切换后回到顶部
+    // 使用 requestAnimationFrame 确保 DOM 渲染完成后再滚动，避免固定导航遮挡顶部内容
     router.onAfterRouteChanged = () => {
       if (typeof window === 'undefined') return
-      setTimeout(() => {
-        // 强制触发页面重排，确保布局正确计算
-        document.body.style.display = 'none'
-        // 读取 offsetHeight 触发同步重排（此行勿删）
-        void document.body.offsetHeight
-        document.body.style.display = ''
-        // 回到顶部
-        window.scrollTo(0, 0)
-      }, 50)
+      // 等待两帧，确保 VitePress 内部锚点定位逻辑执行完毕后再覆盖
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' })
+        })
+      })
     }
   }
 }
