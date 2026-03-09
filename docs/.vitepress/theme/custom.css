@@ -241,6 +241,26 @@
   max-width: 100% !important;
 }
 
+/* 覆盖 VitePress 内置的 .content min-width: 640px 限制
+   让内容区在三栏布局（侧边栏+内容+TOC）时自适应剩余空间，
+   只保留左右 padding，不产生横向溢出 */
+@media (min-width: 1280px) {
+  .VPDoc .content {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    max-width: 100% !important;
+    padding: 0 32px !important;
+  }
+}
+@media (min-width: 960px) and (max-width: 1279px) {
+  .VPDoc .content {
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    max-width: 100% !important;
+    padding: 0 24px !important;
+  }
+}
+
 /* 页面首个 h1 与顶部保留合适间距 */
 .vp-doc > div > h1:first-child {
   margin-top: 0 !important;
