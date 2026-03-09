@@ -1,6 +1,6 @@
 <template>
-  <view class="parrot-color">
-    <slot />
+  <view class="parrot-color" :style="{ backgroundColor: props.color, width: props.size, height: props.size, borderRadius: props.round ? '50%' : '8rpx', opacity: props.opacity }">
+    <text v-if="props.showValue" class="parrot-color__value">{{ props.color }}</text>
   </view>
 </template>
 
@@ -9,10 +9,27 @@
  * ParrotColor — parrot-color
  */
 defineOptions({ name: 'ParrotColor' })
+
+const props = defineProps({
+  color: { type: String, default: '#1a7eff' },
+  size: { type: String, default: '80rpx' },
+  round: { type: Boolean, default: false },
+  showValue: { type: Boolean, default: false },
+  opacity: { type: Number, default: 1 },
+})
+
 </script>
 
 <style lang="scss">
 .parrot-color {
-  /* TODO */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid rgba(0,0,0,0.1);
+}
+.parrot-color__value {
+  font-size: 20rpx;
+  color: #fff;
+  text-shadow: 0 1rpx 2rpx rgba(0,0,0,0.3);
 }
 </style>

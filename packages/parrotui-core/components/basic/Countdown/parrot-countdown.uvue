@@ -1,6 +1,6 @@
 <template>
   <view class="parrot-countdown">
-    <slot />
+    <text class="parrot-countdown__text" :style="{ fontSize: sizeMap[props.size] || '28rpx' }">{{ formatted() }}</text>
   </view>
 </template>
 
@@ -9,10 +9,45 @@
  * ParrotCountdown — parrot-countdown
  */
 defineOptions({ name: 'ParrotCountdown' })
+
+import { ref, onMounted, onUnmounted } from 'vue'
+const props = defineProps({
+  time: { type: Number, default: 0 },
+  format: { type: String, default: 'HH:mm:ss' },
+  autoStart: { type: Boolean, default: true },
+  size: { type: String, default: 'md' },
+})
+const emit = defineEmits(['finish', 'change'])
+const remaining = ref(props.time)
+let timer: number | null = null
+const sizeMap: Record<string, string> = { sm: '24rpx', md: '28rpx', lg: '36rpx' }
+function pad(n: number): string { return n < 10 ? '0' + n : String(n) }
+function formatted(): string {
+  const t = Math.max(0, remaining.value)
+  const d = Math.floor(t / 86400000)
+  const h = Math.floor((t % 86400000) / 3600000)
+  const m = Math.floor((t % 3600000) / 60000)
+  const s = Math.floor((t % 60000) / 1000)
+  let f = props.format
+  f = f.replace('DD', pad(d)).replace('HH', pad(h)).replace('mm', pad(m)).replace('ss', pad(s))
+  return f
+}
+function start() {
+  if (timer) return
+  timer = setInterval(() => {
+    remaining.value -= 1000
+    emit('change', remaining.value)
+    if (remaining.value <= 0) { remaining.value = 0; stop(); emit('finish') }
+  }, 1000)
+}
+function stop() { if (timer) { clearInterval(timer); timer = null } }
+onMounted(() => { if (props.autoStart) start() })
+onUnmounted(() => stop())
+defineExpose({ start, stop })
+
 </script>
 
 <style lang="scss">
-.parrot-countdown {
-  /* TODO */
-}
+.parrot-countdown { display: inline-flex; }
+.parrot-countdown__text { font-family: monospace; font-weight: bold; color: #333; }
 </style>

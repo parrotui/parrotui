@@ -1,6 +1,7 @@
 <template>
   <view class="parrot-currency">
-    <slot />
+    <text class="parrot-currency__symbol" :style="{ color: props.color, fontSize: sizeMap[props.size] || '28rpx' }">{{ props.symbol }}</text>
+    <text class="parrot-currency__value" :style="{ color: props.color, fontSize: sizeMap[props.size] || '28rpx' }">{{ fmt() }}</text>
   </view>
 </template>
 
@@ -9,10 +10,25 @@
  * ParrotCurrency — parrot-currency
  */
 defineOptions({ name: 'ParrotCurrency' })
+
+const props = defineProps({
+  value: { type: Number, default: 0 },
+  symbol: { type: String, default: '¥' },
+  precision: { type: Number, default: 2 },
+  size: { type: String, default: 'md' },
+  color: { type: String, default: '#ef4444' },
+})
+const sizeMap: Record<string, string> = { xs: '22rpx', sm: '24rpx', md: '28rpx', lg: '36rpx', xl: '48rpx' }
+function fmt(): string {
+  const v = props.value.toFixed(props.precision)
+  const p = v.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return p.join('.')
+}
+
 </script>
 
 <style lang="scss">
-.parrot-currency {
-  /* TODO */
-}
+.parrot-currency { display: inline-flex; flex-direction: row; align-items: baseline; }
+.parrot-currency__symbol { font-size: 22rpx; margin-right: 2rpx; }
+.parrot-currency__value { font-weight: bold; }
 </style>

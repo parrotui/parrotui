@@ -1,6 +1,8 @@
 <template>
-  <view class="parrot-aspect-ratio">
-    <slot />
+  <view class="parrot-aspect-ratio" :style="{ paddingTop: (1 / props.ratio * 100) + '%', position: 'relative' }">
+    <view class="parrot-aspect-ratio__content">
+      <slot />
+    </view>
   </view>
 </template>
 
@@ -9,10 +11,14 @@
  * ParrotAspectRatio — parrot-aspect-ratio
  */
 defineOptions({ name: 'ParrotAspectRatio' })
+
+const props = defineProps({
+  ratio: { type: Number, default: 1 },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-aspect-ratio {
-  /* TODO */
-}
+.parrot-aspect-ratio { width: 100%; }
+.parrot-aspect-ratio__content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 </style>

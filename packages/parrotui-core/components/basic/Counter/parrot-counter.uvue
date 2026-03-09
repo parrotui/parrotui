@@ -1,6 +1,8 @@
 <template>
   <view class="parrot-counter">
-    <slot />
+    <text v-if="props.prefix" class="parrot-counter__affix">{{ props.prefix }}</text>
+    <text class="parrot-counter__value" :style="{ fontSize: sizeMap[props.size] || '40rpx' }">{{ props.precision > 0 ? current.toFixed(props.precision) : Math.round(current) }}</text>
+    <text v-if="props.suffix" class="parrot-counter__affix">{{ props.suffix }}</text>
   </view>
 </template>
 
@@ -9,10 +11,39 @@
  * ParrotCounter — parrot-counter
  */
 defineOptions({ name: 'ParrotCounter' })
+
+import { ref, watch, onMounted } from 'vue'
+const props = defineProps({
+  endValue: { type: Number, default: 0 },
+  startValue: { type: Number, default: 0 },
+  duration: { type: Number, default: 2000 },
+  precision: { type: Number, default: 0 },
+  prefix: { type: String, default: '' },
+  suffix: { type: String, default: '' },
+  autoPlay: { type: Boolean, default: true },
+  size: { type: String, default: 'md' },
+})
+const emit = defineEmits(['finished'])
+const current = ref(props.startValue)
+const sizeMap: Record<string, string> = { sm: '28rpx', md: '40rpx', lg: '56rpx' }
+function animate() {
+  const start = props.startValue
+  const end = props.endValue
+  const steps = 60
+  const increment = (end - start) / steps
+  let step = 0
+  const timer = setInterval(() => {
+    step++
+    current.value = step >= steps ? end : start + increment * step
+    if (step >= steps) { clearInterval(timer); emit('finished') }
+  }, props.duration / steps)
+}
+onMounted(() => { if (props.autoPlay) animate() })
+
 </script>
 
 <style lang="scss">
-.parrot-counter {
-  /* TODO */
-}
+.parrot-counter { display: inline-flex; flex-direction: row; align-items: baseline; }
+.parrot-counter__value { font-weight: bold; color: #1a7eff; }
+.parrot-counter__affix { font-size: 24rpx; color: #666; margin: 0 4rpx; }
 </style>

@@ -1,7 +1,10 @@
 <template>
-  <view class="parrot-divider">
-    <slot />
+  <view v-if="props.direction === 'horizontal'" class="parrot-divider" :style="{ margin: props.margin + ' 0' }">
+    <view class="parrot-divider__line" :style="{ backgroundColor: props.color, height: props.thickness, flex: props.textPosition === 'left' ? '0.2' : '1' }"></view>
+    <text v-if="props.text" class="parrot-divider__text">{{ props.text }}<slot /></text>
+    <view v-if="props.text" class="parrot-divider__line" :style="{ backgroundColor: props.color, height: props.thickness, flex: props.textPosition === 'right' ? '0.2' : '1' }"></view>
   </view>
+  <view v-else class="parrot-divider--vertical" :style="{ backgroundColor: props.color, width: props.thickness, margin: '0 ' + props.margin }"></view>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +12,21 @@
  * ParrotDivider — parrot-divider
  */
 defineOptions({ name: 'ParrotDivider' })
+
+const props = defineProps({
+  direction: { type: String, default: 'horizontal' },
+  text: { type: String, default: '' },
+  textPosition: { type: String, default: 'center' },
+  color: { type: String, default: '#e5e7eb' },
+  thickness: { type: String, default: '2rpx' },
+  margin: { type: String, default: '24rpx' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-divider {
-  /* TODO */
-}
+.parrot-divider { display: flex; flex-direction: row; align-items: center; }
+.parrot-divider__line { flex: 1; }
+.parrot-divider__text { padding: 0 20rpx; font-size: 24rpx; color: #999; white-space: nowrap; }
+.parrot-divider--vertical { display: inline-block; height: 1em; vertical-align: middle; }
 </style>

@@ -1,6 +1,9 @@
 <template>
   <view class="parrot-range-slider">
-    <slot />
+    <view class="parrot-range-slider__track">
+      <view class="parrot-range-slider__active" :style="{ left: leftPct(), width: widthPct(), backgroundColor: props.activeColor }"></view>
+    </view>
+    <text class="parrot-range-slider__label">{{ props.minValue }} - {{ props.maxValue }}</text>
   </view>
 </template>
 
@@ -9,10 +12,24 @@
  * ParrotRangeSlider — parrot-range-slider
  */
 defineOptions({ name: 'ParrotRangeSlider' })
+
+const props = defineProps({
+  minValue: { type: Number, default: 20 },
+  maxValue: { type: Number, default: 80 },
+  min: { type: Number, default: 0 },
+  max: { type: Number, default: 100 },
+  step: { type: Number, default: 1 },
+  activeColor: { type: String, default: '#1a7eff' },
+})
+const emit = defineEmits(['change'])
+function leftPct(): string { return ((props.minValue - props.min) / (props.max - props.min) * 100) + '%' }
+function widthPct(): string { return ((props.maxValue - props.minValue) / (props.max - props.min) * 100) + '%' }
+
 </script>
 
 <style lang="scss">
-.parrot-range-slider {
-  /* TODO */
-}
+.parrot-range-slider { width: 100%; padding: 20rpx 0; }
+.parrot-range-slider__track { height: 8rpx; background-color: #e5e7eb; border-radius: 4rpx; position: relative; }
+.parrot-range-slider__active { position: absolute; height: 100%; border-radius: 4rpx; }
+.parrot-range-slider__label { font-size: 22rpx; color: #666; margin-top: 12rpx; text-align: center; display: block; }
 </style>

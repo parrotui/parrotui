@@ -1,6 +1,6 @@
 # Button 按钮
 
-按钮用于触发一个操作，如提交表单、打开对话框、取消操作或执行删除操作等。
+按钮用于触发操作，支持 solid/outline/ghost 变体，多种尺寸和形状。
 
 ## 基础用法
 
@@ -11,7 +11,6 @@
   <parrot-button type="success">成功按钮</parrot-button>
   <parrot-button type="warning">警告按钮</parrot-button>
   <parrot-button type="danger">危险按钮</parrot-button>
-  <parrot-button type="info">信息按钮</parrot-button>
 </template>
 ```
 
@@ -20,7 +19,6 @@
 ```vue
 <parrot-button plain>默认线框</parrot-button>
 <parrot-button type="primary" plain>主要线框</parrot-button>
-<parrot-button type="danger" plain>危险线框</parrot-button>
 ```
 
 ## 尺寸
@@ -32,39 +30,19 @@
 <parrot-button size="lg">大号</parrot-button>
 ```
 
-## 圆角按钮
+## 圆角 / 圆形
 
 ```vue
-<parrot-button round>圆角</parrot-button>
-<parrot-button type="primary" round>主要圆角</parrot-button>
+<parrot-button round type="primary">圆角按钮</parrot-button>
+<parrot-button circle type="primary" icon="★" />
 ```
 
-## 图标按钮
+## 加载 / 禁用 / 块级
 
 ```vue
-<parrot-button icon="search">搜索</parrot-button>
-<parrot-button type="primary" icon="plus">添加</parrot-button>
-```
-
-## 加载状态
-
-```vue
-<parrot-button :loading="true">加载中</parrot-button>
-<parrot-button type="primary" :loading="true">提交中</parrot-button>
-```
-
-## 禁用状态
-
-```vue
-<parrot-button disabled>禁用</parrot-button>
-<parrot-button type="primary" disabled>主要禁用</parrot-button>
-```
-
-## 块级按钮
-
-```vue
-<parrot-button block>块级按钮</parrot-button>
-<parrot-button type="primary" block>块级主要按钮</parrot-button>
+<parrot-button :loading="true" type="primary">加载中</parrot-button>
+<parrot-button disabled type="primary">禁用</parrot-button>
+<parrot-button block type="primary">块级按钮</parrot-button>
 ```
 
 ## API
@@ -73,37 +51,18 @@
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `type` | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger' \| 'info'` | `'default'` | 按钮类型 |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | 按钮尺寸 |
-| `plain` | `boolean` | `false` | 是否线框样式 |
-| `round` | `boolean` | `false` | 是否圆角 |
-| `circle` | `boolean` | `false` | 是否圆形（正方形图标按钮） |
-| `disabled` | `boolean` | `false` | 是否禁用 |
-| `loading` | `boolean` | `false` | 是否加载中 |
-| `block` | `boolean` | `false` | 是否块级（宽度100%） |
-| `icon` | `string` | — | 图标名称 |
-| `iconRight` | `boolean` | `false` | 图标是否在右侧 |
+| `type` | `string` | `'default'` | 类型：default/primary/success/warning/danger/info |
+| `size` | `string` | `'md'` | 尺寸：xs/sm/md/lg |
+| `plain` | `boolean` | `false` | 线框样式 |
+| `round` | `boolean` | `false` | 圆角 |
+| `circle` | `boolean` | `false` | 圆形 |
+| `disabled` | `boolean` | `false` | 禁用 |
+| `loading` | `boolean` | `false` | 加载中 |
+| `block` | `boolean` | `false` | 块级 |
+| `icon` | `string` | `''` | 图标 |
 
 ### Events
 
-| 事件 | 说明 | 回调参数 |
-|------|------|---------|
-| `click` | 点击事件（非禁用/加载时触发） | `(event: Event)` |
-
-### Slots
-
-| 插槽 | 说明 |
+| 事件 | 说明 |
 |------|------|
-| `default` | 按钮文字内容 |
-| `icon` | 自定义图标 |
-
-## 主题变量
-
-可通过 CSS 变量覆盖按钮样式：
-
-```css
-:root {
-  --pui-primary: #7c3aed;
-  --pui-primary-dark: #6d28d9;
-}
-```
+| `click` | 点击（非禁用/加载时） |

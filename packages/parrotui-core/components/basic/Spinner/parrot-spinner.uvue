@@ -1,6 +1,6 @@
 <template>
-  <view class="parrot-spinner">
-    <slot />
+  <view class="parrot-spinner" :style="{ width: props.size, height: props.size }">
+    <view class="parrot-spinner__circle" :style="{ width: props.size, height: props.size, borderColor: props.color + '30', borderTopColor: props.color, borderWidth: '4rpx' }"></view>
   </view>
 </template>
 
@@ -9,10 +9,17 @@
  * ParrotSpinner — parrot-spinner
  */
 defineOptions({ name: 'ParrotSpinner' })
+
+const props = defineProps({
+  size: { type: String, default: '48rpx' },
+  color: { type: String, default: '#1a7eff' },
+  type: { type: String, default: 'circular' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-spinner {
-  /* TODO */
-}
+.parrot-spinner { display: inline-flex; align-items: center; justify-content: center; }
+.parrot-spinner__circle { border-radius: 50%; border-style: solid; animation: parrot-spin 0.8s linear infinite; box-sizing: border-box; }
+@keyframes parrot-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>

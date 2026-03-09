@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-icon">
-    <slot />
-  </view>
+  <text class="parrot-icon" :class="[props.spin ? 'parrot-icon--spin' : '']" :style="{ fontSize: props.size, color: props.color, transform: props.rotate ? 'rotate(' + props.rotate + 'deg)' : 'none' }" @click="emit('click', $event)">{{ props.name }}</text>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,20 @@
  * ParrotIcon — parrot-icon
  */
 defineOptions({ name: 'ParrotIcon' })
+
+const props = defineProps({
+  name: { type: String, default: '' },
+  size: { type: String, default: '40rpx' },
+  color: { type: String, default: '#333' },
+  spin: { type: Boolean, default: false },
+  rotate: { type: Number, default: 0 },
+})
+const emit = defineEmits(['click'])
+
 </script>
 
 <style lang="scss">
-.parrot-icon {
-  /* TODO */
-}
+.parrot-icon { display: inline-block; font-style: normal; text-rendering: auto; -webkit-font-smoothing: antialiased; }
+.parrot-icon--spin { animation: parrot-spin 1s linear infinite; }
+@keyframes parrot-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>

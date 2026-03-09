@@ -1,6 +1,8 @@
 <template>
-  <view class="parrot-chip">
-    <slot />
+  <view class="parrot-chip" :class="[props.selected ? 'parrot-chip--selected' : '']" :style="{ opacity: props.disabled ? 0.5 : 1, backgroundColor: props.selected ? '#1a7eff' : '#f5f5f5', borderRadius: '999rpx' }" @click="!props.disabled && emit('click', $event)">
+    <text v-if="props.icon" class="parrot-chip__icon">{{ props.icon }} </text>
+    <text class="parrot-chip__text" :style="{ color: props.selected ? '#fff' : '#333' }">{{ props.text }}<slot /></text>
+    <text v-if="props.closeable" class="parrot-chip__close" :style="{ color: props.selected ? '#fff' : '#999' }" @click.stop="emit('close')"> ✕</text>
   </view>
 </template>
 
@@ -9,10 +11,22 @@
  * ParrotChip — parrot-chip
  */
 defineOptions({ name: 'ParrotChip' })
+
+const props = defineProps({
+  text: { type: String, default: '' },
+  icon: { type: String, default: '' },
+  closeable: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  type: { type: String, default: 'default' },
+})
+const emit = defineEmits(['click', 'close'])
+
 </script>
 
 <style lang="scss">
-.parrot-chip {
-  /* TODO */
-}
+.parrot-chip { display: inline-flex; flex-direction: row; align-items: center; height: 56rpx; padding: 0 24rpx; box-sizing: border-box; }
+.parrot-chip__text { font-size: 24rpx; }
+.parrot-chip__icon { font-size: 28rpx; }
+.parrot-chip__close { font-size: 20rpx; margin-left: 8rpx; }
 </style>

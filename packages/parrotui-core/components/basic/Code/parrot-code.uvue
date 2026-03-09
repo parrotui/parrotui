@@ -1,6 +1,11 @@
 <template>
-  <view class="parrot-code">
-    <slot />
+  <text v-if="props.inline" class="parrot-code--inline">{{ props.code }}<slot /></text>
+  <view v-else class="parrot-code">
+    <view v-if="props.lang" class="parrot-code__lang"><text class="parrot-code__lang-text">{{ props.lang }}</text></view>
+    <view v-if="props.copyable" class="parrot-code__copy" @click="handleCopy"><text class="parrot-code__copy-text">复制</text></view>
+    <scroll-view scroll-x class="parrot-code__body">
+      <text class="parrot-code__content">{{ props.code }}<slot /></text>
+    </scroll-view>
   </view>
 </template>
 
@@ -9,10 +14,25 @@
  * ParrotCode — parrot-code
  */
 defineOptions({ name: 'ParrotCode' })
+
+const props = defineProps({
+  code: { type: String, default: '' },
+  lang: { type: String, default: '' },
+  copyable: { type: Boolean, default: true },
+  inline: { type: Boolean, default: false },
+})
+const emit = defineEmits(['copy'])
+function handleCopy() { if (props.code) { uni.setClipboardData({ data: props.code }); emit('copy', props.code) } }
+
 </script>
 
 <style lang="scss">
-.parrot-code {
-  /* TODO */
-}
+.parrot-code--inline { font-family: monospace; font-size: 24rpx; background-color: #f3f4f6; color: #ef4444; padding: 4rpx 12rpx; border-radius: 6rpx; }
+.parrot-code { position: relative; background-color: #1e1e2e; border-radius: 12rpx; overflow: hidden; margin-bottom: 20rpx; }
+.parrot-code__lang { position: absolute; top: 12rpx; left: 20rpx; }
+.parrot-code__lang-text { font-size: 20rpx; color: #888; }
+.parrot-code__copy { position: absolute; top: 12rpx; right: 20rpx; }
+.parrot-code__copy-text { font-size: 22rpx; color: #1a7eff; }
+.parrot-code__body { padding: 40rpx 24rpx 24rpx; }
+.parrot-code__content { font-family: monospace; font-size: 24rpx; color: #e2e8f0; line-height: 1.7; white-space: pre; }
 </style>

@@ -1,6 +1,7 @@
 <template>
-  <view class="parrot-icon-button">
-    <slot />
+  <view class="parrot-icon-button" :style="{ width: sizeMap[props.size], height: sizeMap[props.size], borderRadius: props.shape === 'circle' ? '50%' : props.shape === 'round' ? '16rpx' : '8rpx', backgroundColor: bgMap[props.type] || '#f5f5f5', opacity: props.disabled ? 0.5 : 1 }" @click="handleClick">
+    <text class="parrot-icon-button__icon" :style="{ fontSize: iconSizeMap[props.size], color: colorM[props.type] || '#333' }">{{ props.icon }}</text>
+    <view v-if="props.badge !== ''" class="parrot-icon-button__badge"><text class="parrot-icon-button__badge-text">{{ props.badge }}</text></view>
   </view>
 </template>
 
@@ -9,10 +10,26 @@
  * ParrotIconButton — parrot-icon-button
  */
 defineOptions({ name: 'ParrotIconButton' })
+
+const props = defineProps({
+  icon: { type: String, default: '' },
+  shape: { type: String, default: 'circle' },
+  size: { type: String, default: 'md' },
+  type: { type: String, default: 'default' },
+  disabled: { type: Boolean, default: false },
+  badge: { type: [String, Number], default: '' },
+})
+const emit = defineEmits(['click'])
+const sizeMap: Record<string, string> = { sm: '56rpx', md: '72rpx', lg: '88rpx' }
+const iconSizeMap: Record<string, string> = { sm: '28rpx', md: '36rpx', lg: '44rpx' }
+const bgMap: Record<string, string> = { default: '#f5f5f5', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
+const colorM: Record<string, string> = { default: '#333', primary: '#fff', success: '#fff', warning: '#fff', danger: '#fff' }
+function handleClick(e: Event) { if (!props.disabled) emit('click', e) }
+
 </script>
 
 <style lang="scss">
-.parrot-icon-button {
-  /* TODO */
-}
+.parrot-icon-button { display: inline-flex; align-items: center; justify-content: center; position: relative; }
+.parrot-icon-button__badge { position: absolute; top: -8rpx; right: -8rpx; background-color: #ef4444; border-radius: 50%; min-width: 32rpx; height: 32rpx; display: flex; align-items: center; justify-content: center; }
+.parrot-icon-button__badge-text { font-size: 18rpx; color: #fff; }
 </style>

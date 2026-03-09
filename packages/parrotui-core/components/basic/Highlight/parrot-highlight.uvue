@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-highlight">
-    <slot />
-  </view>
+  <text class="parrot-highlight"><template v-for="(seg, i) in segments()" :key="i"><text v-if="seg.highlight" :style="{ color: props.color, fontWeight: props.bold ? 'bold' : 'normal' }">{{ seg.text }}</text><text v-else>{{ seg.text }}</text></template></text>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,32 @@
  * ParrotHighlight — parrot-highlight
  */
 defineOptions({ name: 'ParrotHighlight' })
+
+const props = defineProps({
+  text: { type: String, default: '' },
+  keyword: { type: String, default: '' },
+  color: { type: String, default: '#1a7eff' },
+  bold: { type: Boolean, default: true },
+})
+function segments(): Array<{text: string, highlight: boolean}> {
+  if (!props.keyword || !props.text) return [{ text: props.text, highlight: false }]
+  const parts: Array<{text: string, highlight: boolean}> = []
+  const lower = props.text.toLowerCase()
+  const kw = props.keyword.toLowerCase()
+  let idx = 0
+  let pos = lower.indexOf(kw, idx)
+  while (pos >= 0) {
+    if (pos > idx) parts.push({ text: props.text.substring(idx, pos), highlight: false })
+    parts.push({ text: props.text.substring(pos, pos + kw.length), highlight: true })
+    idx = pos + kw.length
+    pos = lower.indexOf(kw, idx)
+  }
+  if (idx < props.text.length) parts.push({ text: props.text.substring(idx), highlight: false })
+  return parts
+}
+
 </script>
 
 <style lang="scss">
-.parrot-highlight {
-  /* TODO */
-}
+.parrot-highlight { display: inline; font-size: 28rpx; color: #333; line-height: 1.6; }
 </style>

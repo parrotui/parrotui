@@ -1,6 +1,7 @@
 <template>
   <view class="parrot-percentage">
-    <slot />
+    <text class="parrot-percentage__value" :style="{ color: getColor(), fontSize: sizeMap[props.size] || '28rpx', fontWeight: 'bold' }">{{ props.value > 0 ? '+' : '' }}{{ props.value.toFixed(props.precision) }}%</text>
+    <text v-if="props.showSign && getSign()" class="parrot-percentage__sign" :style="{ color: getColor() }"> {{ getSign() }}</text>
   </view>
 </template>
 
@@ -9,10 +10,20 @@
  * ParrotPercentage — parrot-percentage
  */
 defineOptions({ name: 'ParrotPercentage' })
+
+const props = defineProps({
+  value: { type: Number, default: 0 },
+  precision: { type: Number, default: 1 },
+  showSign: { type: Boolean, default: true },
+  size: { type: String, default: 'md' },
+})
+const sizeMap: Record<string, string> = { sm: '24rpx', md: '28rpx', lg: '36rpx' }
+function getColor(): string { return props.value > 0 ? '#10b981' : props.value < 0 ? '#ef4444' : '#999' }
+function getSign(): string { return props.value > 0 ? '↑' : props.value < 0 ? '↓' : '' }
+
 </script>
 
 <style lang="scss">
-.parrot-percentage {
-  /* TODO */
-}
+.parrot-percentage { display: inline-flex; flex-direction: row; align-items: center; }
+.parrot-percentage__sign { font-size: 22rpx; font-weight: bold; }
 </style>

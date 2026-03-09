@@ -1,6 +1,13 @@
 <template>
   <view class="parrot-statistic">
-    <slot />
+    <text v-if="props.title" class="parrot-statistic__title">{{ props.title }}</text>
+    <view class="parrot-statistic__content">
+      <text v-if="props.prefix" class="parrot-statistic__affix">{{ props.prefix }}</text>
+      <text class="parrot-statistic__value" :style="{ color: props.trend === 'up' ? '#10b981' : props.trend === 'down' ? '#ef4444' : '#1a1a2e' }">{{ fmt() }}</text>
+      <text v-if="props.trend === 'up'" class="parrot-statistic__trend-icon" :style="{ color: '#10b981' }"> ↑</text>
+      <text v-if="props.trend === 'down'" class="parrot-statistic__trend-icon" :style="{ color: '#ef4444' }"> ↓</text>
+      <text v-if="props.suffix" class="parrot-statistic__affix">{{ props.suffix }}</text>
+    </view>
   </view>
 </template>
 
@@ -9,10 +16,29 @@
  * ParrotStatistic — parrot-statistic
  */
 defineOptions({ name: 'ParrotStatistic' })
+
+const props = defineProps({
+  title: { type: String, default: '' },
+  value: { type: Number, default: 0 },
+  precision: { type: Number, default: 0 },
+  prefix: { type: String, default: '' },
+  suffix: { type: String, default: '' },
+  trend: { type: String, default: '' },
+  groupSeparator: { type: Boolean, default: true },
+})
+function fmt(): string {
+  let v = props.precision > 0 ? props.value.toFixed(props.precision) : String(props.value)
+  if (props.groupSeparator) { const p = v.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); v = p.join('.') }
+  return v
+}
+
 </script>
 
 <style lang="scss">
-.parrot-statistic {
-  /* TODO */
-}
+.parrot-statistic { display: flex; flex-direction: column; }
+.parrot-statistic__title { font-size: 24rpx; color: #999; margin-bottom: 8rpx; }
+.parrot-statistic__content { display: flex; flex-direction: row; align-items: baseline; }
+.parrot-statistic__value { font-size: 48rpx; font-weight: bold; }
+.parrot-statistic__affix { font-size: 28rpx; color: #666; margin: 0 8rpx; }
+.parrot-statistic__trend-icon { font-size: 28rpx; font-weight: bold; }
 </style>

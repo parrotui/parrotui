@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-link">
-    <slot />
-  </view>
+  <text class="parrot-link" :style="{ color: colorMap[props.type] || '#1a7eff', textDecoration: props.underline ? 'underline' : 'none', opacity: props.disabled ? 0.5 : 1 }" @click="handleClick">{{ props.icon }}<slot /></text>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,24 @@
  * ParrotLink — parrot-link
  */
 defineOptions({ name: 'ParrotLink' })
+
+const props = defineProps({
+  href: { type: String, default: '' },
+  type: { type: String, default: 'primary' },
+  underline: { type: Boolean, default: true },
+  disabled: { type: Boolean, default: false },
+  icon: { type: String, default: '' },
+})
+const emit = defineEmits(['click'])
+const colorMap: Record<string, string> = { default: '#333', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
+function handleClick(e: Event) {
+  if (props.disabled) return
+  emit('click', e)
+  if (props.href) uni.navigateTo({ url: props.href })
+}
+
 </script>
 
 <style lang="scss">
-.parrot-link {
-  /* TODO */
-}
+.parrot-link { display: inline; font-size: 28rpx; cursor: pointer; }
 </style>

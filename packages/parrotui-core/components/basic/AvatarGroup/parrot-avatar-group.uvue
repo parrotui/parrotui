@@ -1,5 +1,5 @@
 <template>
-  <view class="parrot-avatar-group">
+  <view class="parrot-avatar-group" :style="{ display: 'flex', flexDirection: 'row' }">
     <slot />
   </view>
 </template>
@@ -9,10 +9,17 @@
  * ParrotAvatarGroup — parrot-avatar-group
  */
 defineOptions({ name: 'ParrotAvatarGroup' })
+
+const props = defineProps({
+  max: { type: Number, default: 5 },
+  size: { type: String, default: '72rpx' },
+  overlap: { type: String, default: '-20rpx' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-avatar-group {
-  /* TODO */
-}
+.parrot-avatar-group { display: flex; flex-direction: row; }
+.parrot-avatar-group > :deep(.parrot-avatar) { margin-left: -20rpx; border: 4rpx solid #fff; }
+.parrot-avatar-group > :deep(.parrot-avatar:first-child) { margin-left: 0; }
 </style>

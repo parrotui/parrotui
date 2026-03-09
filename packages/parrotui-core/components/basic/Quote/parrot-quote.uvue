@@ -1,5 +1,5 @@
 <template>
-  <view class="parrot-quote">
+  <view class="parrot-quote" :class="['parrot-quote--' + props.type]" :style="{ borderLeftColor: props.type === 'border' ? props.color : 'transparent', backgroundColor: props.type === 'background' ? props.color + '15' : '#f8fafc' }">
     <slot />
   </view>
 </template>
@@ -9,10 +9,16 @@
  * ParrotQuote — parrot-quote
  */
 defineOptions({ name: 'ParrotQuote' })
+
+const props = defineProps({
+  type: { type: String, default: 'border' },
+  color: { type: String, default: '#1a7eff' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-quote {
-  /* TODO */
-}
+.parrot-quote { padding: 20rpx 24rpx; margin-bottom: 20rpx; font-size: 28rpx; color: #555; line-height: 1.7; }
+.parrot-quote--border { border-left: 6rpx solid #1a7eff; background-color: #f8fafc; }
+.parrot-quote--background { border-radius: 12rpx; border-left: none; }
 </style>

@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-spacer">
-    <slot />
-  </view>
+  <view class="parrot-spacer" :style="{ width: props.direction === 'horizontal' ? props.size : '100%', height: props.direction === 'vertical' ? props.size : '1rpx' }"></view>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,14 @@
  * ParrotSpacer — parrot-spacer
  */
 defineOptions({ name: 'ParrotSpacer' })
+
+const props = defineProps({
+  size: { type: String, default: '20rpx' },
+  direction: { type: String, default: 'vertical' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-spacer {
-  /* TODO */
-}
+.parrot-spacer { flex-shrink: 0; }
 </style>

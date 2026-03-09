@@ -1,6 +1,6 @@
 <template>
   <view class="parrot-rating">
-    <slot />
+    <text v-for="i in props.count" :key="i" class="parrot-rating__star" :style="{ fontSize: props.size, color: i <= props.modelValue ? props.activeColor : props.inactiveColor }" @click="handleClick(i - 1)">{{ props.icon }}</text>
   </view>
 </template>
 
@@ -9,10 +9,29 @@
  * ParrotRating — parrot-rating
  */
 defineOptions({ name: 'ParrotRating' })
+
+import { ref, watch } from 'vue'
+const props = defineProps({
+  modelValue: { type: Number, default: 0 },
+  count: { type: Number, default: 5 },
+  size: { type: String, default: '40rpx' },
+  allowHalf: { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false },
+  icon: { type: String, default: '★' },
+  activeColor: { type: String, default: '#f59e0b' },
+  inactiveColor: { type: String, default: '#e5e7eb' },
+})
+const emit = defineEmits(['update:modelValue', 'change'])
+function handleClick(i: number) {
+  if (props.readonly) return
+  const v = i + 1
+  emit('update:modelValue', v)
+  emit('change', v)
+}
+
 </script>
 
 <style lang="scss">
-.parrot-rating {
-  /* TODO */
-}
+.parrot-rating { display: inline-flex; flex-direction: row; gap: 4rpx; }
+.parrot-rating__star { cursor: pointer; }
 </style>

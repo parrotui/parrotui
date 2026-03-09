@@ -1,6 +1,9 @@
 <template>
   <view class="parrot-progress">
-    <slot />
+    <view class="parrot-progress__track" :style="{ height: props.height, backgroundColor: props.trackColor, borderRadius: props.height }">
+      <view class="parrot-progress__bar" :style="{ width: Math.min(100, Math.max(0, props.percent)) + '%', height: '100%', backgroundColor: barColor(), borderRadius: props.height }"></view>
+    </view>
+    <text v-if="props.showText" class="parrot-progress__text">{{ Math.round(props.percent) }}%</text>
   </view>
 </template>
 
@@ -9,10 +12,23 @@
  * ParrotProgress — parrot-progress
  */
 defineOptions({ name: 'ParrotProgress' })
+
+const props = defineProps({
+  percent: { type: Number, default: 0 },
+  color: { type: String, default: '#1a7eff' },
+  trackColor: { type: String, default: '#e5e7eb' },
+  height: { type: String, default: '12rpx' },
+  showText: { type: Boolean, default: true },
+  status: { type: String, default: '' },
+})
+const statusColor: Record<string, string> = { success: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
+function barColor(): string { return statusColor[props.status] || props.color }
+
 </script>
 
 <style lang="scss">
-.parrot-progress {
-  /* TODO */
-}
+.parrot-progress { display: flex; flex-direction: row; align-items: center; }
+.parrot-progress__track { flex: 1; overflow: hidden; }
+.parrot-progress__bar { transition: width 0.3s ease; }
+.parrot-progress__text { font-size: 22rpx; color: #666; margin-left: 12rpx; min-width: 60rpx; }
 </style>

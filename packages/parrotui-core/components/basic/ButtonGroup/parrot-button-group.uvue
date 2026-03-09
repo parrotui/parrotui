@@ -1,5 +1,5 @@
 <template>
-  <view class="parrot-button-group">
+  <view class="parrot-button-group" :style="{ flexDirection: props.direction === 'vertical' ? 'column' : 'row', gap: props.gap }">
     <slot />
   </view>
 </template>
@@ -9,10 +9,14 @@
  * ParrotButtonGroup — parrot-button-group
  */
 defineOptions({ name: 'ParrotButtonGroup' })
+
+const props = defineProps({
+  direction: { type: String, default: 'horizontal' },
+  gap: { type: String, default: '0' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-button-group {
-  /* TODO */
-}
+.parrot-button-group { display: inline-flex; }
 </style>

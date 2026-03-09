@@ -1,7 +1,12 @@
 <template>
-  <view class="parrot-skeleton">
-    <slot />
+  <view v-if="props.loading" class="parrot-skeleton" :class="[props.animate ? 'parrot-skeleton--animate' : '']">
+    <view v-if="props.avatar" class="parrot-skeleton__avatar"></view>
+    <view class="parrot-skeleton__content">
+      <view v-if="props.title" class="parrot-skeleton__title"></view>
+      <view v-for="i in props.rows" :key="i" class="parrot-skeleton__row" :style="{ width: i === props.rows ? '60%' : '100%' }"></view>
+    </view>
   </view>
+  <slot v-else />
 </template>
 
 <script setup lang="uts">
@@ -9,10 +14,25 @@
  * ParrotSkeleton — parrot-skeleton
  */
 defineOptions({ name: 'ParrotSkeleton' })
+
+const props = defineProps({
+  rows: { type: Number, default: 3 },
+  avatar: { type: Boolean, default: false },
+  title: { type: Boolean, default: true },
+  animate: { type: Boolean, default: true },
+  loading: { type: Boolean, default: true },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-skeleton {
-  /* TODO */
-}
+.parrot-skeleton { display: flex; flex-direction: row; padding: 20rpx; }
+.parrot-skeleton__avatar { width: 80rpx; height: 80rpx; border-radius: 50%; background-color: #e5e7eb; margin-right: 20rpx; flex-shrink: 0; }
+.parrot-skeleton__content { flex: 1; }
+.parrot-skeleton__title { height: 32rpx; background-color: #e5e7eb; border-radius: 6rpx; margin-bottom: 20rpx; width: 50%; }
+.parrot-skeleton__row { height: 24rpx; background-color: #e5e7eb; border-radius: 6rpx; margin-bottom: 16rpx; }
+.parrot-skeleton--animate .parrot-skeleton__avatar,
+.parrot-skeleton--animate .parrot-skeleton__title,
+.parrot-skeleton--animate .parrot-skeleton__row { animation: parrot-skeleton-pulse 1.5s ease-in-out infinite; }
+@keyframes parrot-skeleton-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 </style>

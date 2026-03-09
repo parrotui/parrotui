@@ -1,6 +1,6 @@
 <template>
-  <view class="parrot-copy-button">
-    <slot />
+  <view class="parrot-copy-button" @click="handleCopy">
+    <text class="parrot-copy-button__text" :style="{ fontSize: sizeF[props.size] || '26rpx', color: copied ? '#10b981' : '#1a7eff' }">{{ copied ? props.successText : '复制' }}</text>
   </view>
 </template>
 
@@ -9,10 +9,26 @@
  * ParrotCopyButton — parrot-copy-button
  */
 defineOptions({ name: 'ParrotCopyButton' })
+
+import { ref } from 'vue'
+const props = defineProps({
+  text: { type: String, default: '' },
+  successText: { type: String, default: '已复制' },
+  size: { type: String, default: 'md' },
+})
+const emit = defineEmits(['copy'])
+const copied = ref(false)
+const sizeF: Record<string, string> = { sm: '22rpx', md: '26rpx', lg: '30rpx' }
+function handleCopy() {
+  if (!props.text) return
+  uni.setClipboardData({ data: props.text })
+  copied.value = true
+  emit('copy', props.text)
+  setTimeout(() => { copied.value = false }, 2000)
+}
+
 </script>
 
 <style lang="scss">
-.parrot-copy-button {
-  /* TODO */
-}
+.parrot-copy-button { display: inline-flex; cursor: pointer; padding: 8rpx 16rpx; border-radius: 8rpx; background-color: #f5f5f5; }
 </style>

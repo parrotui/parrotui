@@ -1,5 +1,5 @@
 <template>
-  <view class="parrot-clipboard">
+  <view class="parrot-clipboard" @click="copy">
     <slot />
   </view>
 </template>
@@ -9,10 +9,23 @@
  * ParrotClipboard — parrot-clipboard
  */
 defineOptions({ name: 'ParrotClipboard' })
+
+const props = defineProps({
+  text: { type: String, default: '' },
+})
+const emit = defineEmits(['success', 'error'])
+function copy() {
+  if (!props.text) return
+  uni.setClipboardData({
+    data: props.text,
+    success: () => emit('success', props.text),
+    fail: (err: any) => emit('error', err),
+  })
+}
+defineExpose({ copy })
+
 </script>
 
 <style lang="scss">
-.parrot-clipboard {
-  /* TODO */
-}
+.parrot-clipboard { display: inline-flex; cursor: pointer; }
 </style>

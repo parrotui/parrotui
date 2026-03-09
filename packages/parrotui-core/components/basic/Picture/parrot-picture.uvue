@@ -1,5 +1,10 @@
 <template>
   <view class="parrot-picture">
+    <image class="parrot-picture__img" :src="props.src" mode="aspectFill" :style="{ width: props.width, height: props.height }" />
+    <view v-if="props.title || props.desc" class="parrot-picture__info">
+      <text v-if="props.title" class="parrot-picture__title">{{ props.title }}</text>
+      <text v-if="props.desc" class="parrot-picture__desc">{{ props.desc }}</text>
+    </view>
     <slot />
   </view>
 </template>
@@ -9,10 +14,20 @@
  * ParrotPicture — parrot-picture
  */
 defineOptions({ name: 'ParrotPicture' })
+
+const props = defineProps({
+  src: { type: String, default: '' },
+  title: { type: String, default: '' },
+  desc: { type: String, default: '' },
+  width: { type: String, default: '100%' },
+  height: { type: String, default: '300rpx' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-picture {
-  /* TODO */
-}
+.parrot-picture { display: flex; flex-direction: column; border-radius: 12rpx; overflow: hidden; background-color: #fff; }
+.parrot-picture__info { padding: 16rpx 20rpx; }
+.parrot-picture__title { font-size: 28rpx; color: #333; font-weight: bold; }
+.parrot-picture__desc { font-size: 24rpx; color: #999; margin-top: 8rpx; }
 </style>

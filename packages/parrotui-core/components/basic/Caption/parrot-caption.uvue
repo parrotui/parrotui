@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-caption">
-    <slot />
-  </view>
+  <text class="parrot-caption" :style="{ color: colorMap[props.type] || '#999' }">{{ props.text }}<slot /></text>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,15 @@
  * ParrotCaption — parrot-caption
  */
 defineOptions({ name: 'ParrotCaption' })
+
+const props = defineProps({
+  type: { type: String, default: 'default' },
+  text: { type: String, default: '' },
+})
+const colorMap: Record<string, string> = { default: '#999', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
+
 </script>
 
 <style lang="scss">
-.parrot-caption {
-  /* TODO */
-}
+.parrot-caption { font-size: 22rpx; line-height: 1.4; }
 </style>

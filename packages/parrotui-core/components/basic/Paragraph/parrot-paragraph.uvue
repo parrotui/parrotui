@@ -1,6 +1,6 @@
 <template>
   <view class="parrot-paragraph">
-    <slot />
+    <text class="parrot-paragraph__text" :style="{ fontSize: sizeMap[props.size] || props.size, textIndent: props.indent ? '2em' : '0', textAlign: props.align, lineHeight: props.lineHeight, color: props.color }"><slot /></text>
   </view>
 </template>
 
@@ -9,10 +9,19 @@
  * ParrotParagraph — parrot-paragraph
  */
 defineOptions({ name: 'ParrotParagraph' })
+
+const props = defineProps({
+  size: { type: String, default: 'md' },
+  indent: { type: Boolean, default: false },
+  align: { type: String, default: 'left' },
+  lineHeight: { type: String, default: '1.8' },
+  color: { type: String, default: '#333333' },
+})
+const sizeMap: Record<string, string> = { sm: '24rpx', md: '28rpx', lg: '32rpx' }
+
 </script>
 
 <style lang="scss">
-.parrot-paragraph {
-  /* TODO */
-}
+.parrot-paragraph { margin-bottom: 20rpx; }
+.parrot-paragraph__text { display: block; }
 </style>

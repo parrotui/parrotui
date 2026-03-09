@@ -1,6 +1,10 @@
 <template>
   <view class="parrot-number">
-    <slot />
+    <text v-if="props.prefix" class="parrot-number__affix" :style="{ fontSize: sizeMap[props.size] }">{{ props.prefix }}</text>
+    <text class="parrot-number__value" :style="{ fontSize: sizeMap[props.size], color: props.trend === 'up' ? '#10b981' : props.trend === 'down' ? '#ef4444' : colorMap[props.type] || '#333', fontWeight: 'bold' }">{{ fmt() }}</text>
+    <text v-if="props.trend === 'up'" class="parrot-number__trend" :style="{ color: '#10b981' }"> ↑</text>
+    <text v-if="props.trend === 'down'" class="parrot-number__trend" :style="{ color: '#ef4444' }"> ↓</text>
+    <text v-if="props.suffix" class="parrot-number__affix" :style="{ fontSize: sizeMap[props.size] }">{{ props.suffix }}</text>
   </view>
 </template>
 
@@ -9,10 +13,29 @@
  * ParrotNumber — parrot-number
  */
 defineOptions({ name: 'ParrotNumber' })
+
+const props = defineProps({
+  value: { type: Number, default: 0 },
+  prefix: { type: String, default: '' },
+  suffix: { type: String, default: '' },
+  precision: { type: Number, default: 0 },
+  thousandSeparator: { type: Boolean, default: false },
+  size: { type: String, default: 'md' },
+  type: { type: String, default: 'default' },
+  trend: { type: String, default: '' },
+})
+const sizeMap: Record<string, string> = { sm: '24rpx', md: '32rpx', lg: '48rpx', xl: '64rpx' }
+const colorMap: Record<string, string> = { default: '#333', primary: '#1a7eff', success: '#10b981', danger: '#ef4444' }
+function fmt(): string {
+  let v = props.precision > 0 ? props.value.toFixed(props.precision) : String(props.value)
+  if (props.thousandSeparator) { const p = v.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); v = p.join('.') }
+  return v
+}
+
 </script>
 
 <style lang="scss">
-.parrot-number {
-  /* TODO */
-}
+.parrot-number { display: inline-flex; flex-direction: row; align-items: baseline; }
+.parrot-number__affix { color: #666; margin: 0 4rpx; }
+.parrot-number__trend { font-size: 24rpx; font-weight: bold; }
 </style>

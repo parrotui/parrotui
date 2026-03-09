@@ -1,6 +1,6 @@
 <template>
-  <view class="parrot-switch">
-    <slot />
+  <view class="parrot-switch" :style="{ width: sizeW[props.size], height: sizeH[props.size], backgroundColor: props.modelValue ? props.activeColor : props.inactiveColor, borderRadius: sizeH[props.size], opacity: props.disabled ? 0.5 : 1, position: 'relative' }" @click="toggle">
+    <view class="parrot-switch__dot" :style="{ width: dotSize[props.size], height: dotSize[props.size], borderRadius: '50%', backgroundColor: '#fff', position: 'absolute', top: '4rpx', left: props.modelValue ? 'calc(100% - ' + dotSize[props.size] + ' - 4rpx)' : '4rpx', transition: 'left 0.2s ease' }"></view>
   </view>
 </template>
 
@@ -9,10 +9,29 @@
  * ParrotSwitch — parrot-switch
  */
 defineOptions({ name: 'ParrotSwitch' })
+
+const props = defineProps({
+  modelValue: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  size: { type: String, default: 'md' },
+  activeColor: { type: String, default: '#1a7eff' },
+  inactiveColor: { type: String, default: '#e5e7eb' },
+  activeText: { type: String, default: '' },
+  inactiveText: { type: String, default: '' },
+})
+const emit = defineEmits(['update:modelValue', 'change'])
+const sizeW: Record<string, string> = { sm: '80rpx', md: '100rpx', lg: '120rpx' }
+const sizeH: Record<string, string> = { sm: '40rpx', md: '48rpx', lg: '56rpx' }
+const dotSize: Record<string, string> = { sm: '32rpx', md: '40rpx', lg: '48rpx' }
+function toggle() {
+  if (props.disabled) return
+  const v = !props.modelValue
+  emit('update:modelValue', v)
+  emit('change', v)
+}
+
 </script>
 
 <style lang="scss">
-.parrot-switch {
-  /* TODO */
-}
+.parrot-switch { display: inline-flex; cursor: pointer; transition: background-color 0.2s ease; }
 </style>

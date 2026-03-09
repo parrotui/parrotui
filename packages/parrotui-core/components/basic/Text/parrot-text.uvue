@@ -1,7 +1,5 @@
 <template>
-  <view class="parrot-text">
-    <slot />
-  </view>
+  <text class="parrot-text" :style="{ fontSize: sizeMap[props.size] || props.size, color: colorMap[props.type] || props.type, fontWeight: props.bold ? 'bold' : 'normal', textAlign: props.align, textDecoration: props.delete ? 'line-through' : props.underline ? 'underline' : 'none' }" @click="handleClick">{{ props.text }}<slot /></text>
 </template>
 
 <script setup lang="uts">
@@ -9,10 +7,29 @@
  * ParrotText — parrot-text
  */
 defineOptions({ name: 'ParrotText' })
+
+const props = defineProps({
+  mode: { type: String, default: 'text' },
+  type: { type: String, default: 'default' },
+  size: { type: String, default: 'md' },
+  bold: { type: Boolean, default: false },
+  copy: { type: Boolean, default: false },
+  align: { type: String, default: 'left' },
+  lines: { type: Number, default: 0 },
+  text: { type: String, default: '' },
+  delete: { type: Boolean, default: false },
+  underline: { type: Boolean, default: false },
+})
+const emit = defineEmits(['click', 'copy'])
+const sizeMap: Record<string, string> = { xs: '22rpx', sm: '24rpx', md: '28rpx', lg: '32rpx', xl: '36rpx' }
+const colorMap: Record<string, string> = { default: '#333', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444', info: '#909399', muted: '#999' }
+function handleClick(e: Event) {
+  if (props.copy && props.text) { uni.setClipboardData({ data: props.text }); emit('copy', props.text) }
+  emit('click', e)
+}
+
 </script>
 
 <style lang="scss">
-.parrot-text {
-  /* TODO */
-}
+.parrot-text { display: inline; line-height: 1.6; }
 </style>

@@ -1,6 +1,8 @@
 <template>
-  <view class="parrot-label">
-    <slot />
+  <view class="parrot-label" :style="{ width: props.width || 'auto', textAlign: props.align }">
+    <text v-if="props.required" class="parrot-label__required">*</text>
+    <text class="parrot-label__text">{{ props.text }}<slot /></text>
+    <text v-if="props.colon" class="parrot-label__colon">:</text>
   </view>
 </template>
 
@@ -9,10 +11,20 @@
  * ParrotLabel — parrot-label
  */
 defineOptions({ name: 'ParrotLabel' })
+
+const props = defineProps({
+  text: { type: String, default: '' },
+  required: { type: Boolean, default: false },
+  colon: { type: Boolean, default: false },
+  width: { type: String, default: '' },
+  align: { type: String, default: 'left' },
+})
+
 </script>
 
 <style lang="scss">
-.parrot-label {
-  /* TODO */
-}
+.parrot-label { display: inline-flex; flex-direction: row; align-items: center; font-size: 28rpx; color: #333; }
+.parrot-label__required { color: #ef4444; margin-right: 4rpx; font-size: 28rpx; }
+.parrot-label__text { font-size: 28rpx; color: #333; }
+.parrot-label__colon { margin-left: 4rpx; }
 </style>

@@ -9,10 +9,10 @@
  * ParrotVisuallyHidden — parrot-visually-hidden
  */
 defineOptions({ name: 'ParrotVisuallyHidden' })
+
+
 </script>
 
 <style lang="scss">
-.parrot-visually-hidden {
-  /* TODO */
-}
+.parrot-visually-hidden { position: absolute; width: 1rpx; height: 1rpx; padding: 0; margin: -1rpx; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 </style>

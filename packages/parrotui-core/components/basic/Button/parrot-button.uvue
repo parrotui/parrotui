@@ -1,6 +1,8 @@
 <template>
-  <view class="parrot-button">
-    <slot />
+  <view class="parrot-button" :class="[props.block ? 'parrot-button--block' : '']" :style="{ height: sizeH[props.size] || '72rpx', padding: props.circle ? '0' : sizeP[props.size] || '0 32rpx', borderRadius: props.circle ? '50%' : props.round ? '999rpx' : '12rpx', backgroundColor: props.plain ? 'transparent' : bgMap[props.type] || '#fff', borderWidth: '2rpx', borderStyle: 'solid', borderColor: bgMap[props.type] || '#dcdfe6', opacity: props.disabled ? 0.5 : 1, width: props.circle ? sizeH[props.size] || '72rpx' : props.block ? '100%' : 'auto' }" @click="handleClick">
+    <text v-if="props.loading" class="parrot-button__loading">⟳ </text>
+    <text v-if="props.icon && !props.loading" class="parrot-button__icon" :style="{ fontSize: sizeF[props.size] || '28rpx', color: props.plain ? bgMap[props.type] || '#333' : colorM[props.type] || '#333' }">{{ props.icon }} </text>
+    <text class="parrot-button__text" :style="{ fontSize: sizeF[props.size] || '28rpx', color: props.plain ? bgMap[props.type] || '#333' : colorM[props.type] || '#333' }"><slot /></text>
   </view>
 </template>
 
@@ -9,10 +11,31 @@
  * ParrotButton — parrot-button
  */
 defineOptions({ name: 'ParrotButton' })
+
+const props = defineProps({
+  type: { type: String, default: 'default' },
+  size: { type: String, default: 'md' },
+  plain: { type: Boolean, default: false },
+  round: { type: Boolean, default: false },
+  circle: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  loading: { type: Boolean, default: false },
+  block: { type: Boolean, default: false },
+  icon: { type: String, default: '' },
+})
+const emit = defineEmits(['click'])
+const bgMap: Record<string, string> = { default: '#fff', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444', info: '#909399' }
+const colorM: Record<string, string> = { default: '#333', primary: '#fff', success: '#fff', warning: '#fff', danger: '#fff', info: '#fff' }
+const sizeH: Record<string, string> = { xs: '48rpx', sm: '56rpx', md: '72rpx', lg: '88rpx' }
+const sizeF: Record<string, string> = { xs: '22rpx', sm: '24rpx', md: '28rpx', lg: '32rpx' }
+const sizeP: Record<string, string> = { xs: '0 16rpx', sm: '0 20rpx', md: '0 32rpx', lg: '0 40rpx' }
+function handleClick(e: Event) { if (!props.disabled && !props.loading) emit('click', e) }
+
 </script>
 
 <style lang="scss">
-.parrot-button {
-  /* TODO */
-}
+.parrot-button { display: inline-flex; flex-direction: row; align-items: center; justify-content: center; box-sizing: border-box; }
+.parrot-button--block { display: flex; width: 100%; }
+.parrot-button__loading { font-size: 28rpx; color: #fff; animation: parrot-spin 1s linear infinite; }
+@keyframes parrot-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>

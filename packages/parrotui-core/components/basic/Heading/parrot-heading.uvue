@@ -1,6 +1,6 @@
 <template>
-  <view class="parrot-heading">
-    <slot />
+  <view class="parrot-heading" :class="[props.border ? 'parrot-heading--border' : '']">
+    <text class="parrot-heading__text" :style="{ fontSize: sizeMap[props.level] || '48rpx', color: colorMap[props.type] || '#1a1a2e', textAlign: props.align }"><slot /></text>
   </view>
 </template>
 
@@ -9,10 +9,20 @@
  * ParrotHeading — parrot-heading
  */
 defineOptions({ name: 'ParrotHeading' })
+
+const props = defineProps({
+  level: { type: Number, default: 1 },
+  type: { type: String, default: 'default' },
+  align: { type: String, default: 'left' },
+  border: { type: Boolean, default: false },
+})
+const sizeMap: Record<number, string> = { 1: '48rpx', 2: '40rpx', 3: '36rpx', 4: '32rpx', 5: '28rpx', 6: '24rpx' }
+const colorMap: Record<string, string> = { default: '#1a1a2e', primary: '#1a7eff', success: '#10b981', warning: '#f59e0b', danger: '#ef4444' }
+
 </script>
 
 <style lang="scss">
-.parrot-heading {
-  /* TODO */
-}
+.parrot-heading { margin-bottom: 16rpx; }
+.parrot-heading__text { font-weight: bold; line-height: 1.4; }
+.parrot-heading--border { padding-bottom: 16rpx; border-bottom: 2rpx solid #e5e7eb; }
 </style>
