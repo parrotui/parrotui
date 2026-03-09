@@ -242,6 +242,13 @@
 }
 
 /* ─── 内容区域样式 ──────────────────────────────────────────── */
+
+/* VPDoc 本身有 padding-top 补偿导航高度，清零使内容与侧边栏顶部齐平 */
+.VPDoc {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
 .VPDoc .container {
   max-width: 100% !important;
   margin-top: 0 !important;
@@ -256,7 +263,7 @@
   margin-top: 0 !important;
 }
 
-/* 页面首个 h1 与顶部导航之间保留合适间距（非锚点滚动场景） */
+/* 页面首个 h1 与顶部导航之间保留合适间距 */
 .vp-doc > div > h1:first-child {
   margin-top: 0 !important;
   padding-top: 24px;
