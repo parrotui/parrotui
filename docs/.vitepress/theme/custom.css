@@ -91,8 +91,19 @@
   background-color: rgba(20, 20, 20, 0.85) !important;
 }
 
-/* VPContent 不能修改 margin/padding，否则会破坏侧边栏与内容区的并排 flex 布局
-   顶部空白已通过 --vp-layout-top-height: 0px 从根源清零 */
+/*
+  精确修复顶部空白（已通过控制台确认数值）：
+  - VPContent padding-top: 64px（来自 VitePress scoped 样式 padding-top: var(--vp-nav-height)）
+  - VPDoc    padding-top: 40px（VitePress 内容区额外间距）
+  VitePress 用 scoped [data-v-xxx] 属性选择器，权重为 (0,2,0)。
+  使用 html body 前缀将权重提升到 (0,2,2)，稳定覆盖。
+*/
+html body #VPContent.has-sidebar {
+  padding-top: 0 !important;
+}
+html body .VPDoc.has-sidebar {
+  padding-top: 0 !important;
+}
 
 /* 导航栏 logo + 标题 */
 .VPNavBarTitle .title {
