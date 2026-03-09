@@ -616,7 +616,8 @@ div[class*='language-'] {
   width: 380px;
   flex-shrink: 0;
   position: sticky;
-  top: calc(var(--vp-nav-height, 64px) + 24px);
+  /* 导航栏高度 + layout-top 高度（公告栏，通常为 0）+ 24px 间距 */
+  top: calc(var(--vp-nav-height, 64px) + var(--vp-layout-top-height, 0px) + 24px);
   height: fit-content;
   align-self: flex-start;
 }
@@ -1115,6 +1116,10 @@ div[class*='language-'] {
   color: var(--vp-c-text-2);
   border-bottom: 2px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
+  /* 表头滚动时固定在顶部（导航栏高度 + 顶部公告栏高度） */
+  position: sticky;
+  top: calc(var(--vp-nav-height, 64px) + var(--vp-layout-top-height, 0px));
+  z-index: 10;
 }
 
 .doc-color-table td {
