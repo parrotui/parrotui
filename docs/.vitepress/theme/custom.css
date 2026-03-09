@@ -40,6 +40,9 @@
 
   /* 行高容器最大宽度 */
   --vp-layout-max-width: 1440px;
+
+  /* 清零公告栏高度变量，防止 VPContent 产生多余的 margin-top 顶部空白 */
+  --vp-layout-top-height: 0px;
 }
 
 /* ─── 暗色主题覆写 ──────────────────────────────────────────── */
@@ -86,6 +89,12 @@
 
 .dark .VPNav {
   background-color: rgba(20, 20, 20, 0.85) !important;
+}
+
+/* 兜底：强制清除 VPContent 因 --vp-layout-top-height 产生的顶部空白 */
+.VPContent {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* 导航栏 logo + 标题 */
