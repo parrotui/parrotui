@@ -1126,6 +1126,7 @@ div[class*='language-'] {
   border-collapse: collapse;
   margin: 12px 0 20px;
   font-size: 14px;
+  table-layout: fixed;
 }
 
 .doc-color-table th {
@@ -1135,16 +1136,14 @@ div[class*='language-'] {
   color: var(--vp-c-text-2);
   border-bottom: 2px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
-  /* 表头滚动时固定在顶部（导航栏高度 + 顶部公告栏高度） */
-  position: sticky;
-  top: calc(var(--vp-nav-height, 64px) + var(--vp-layout-top-height, 0px));
-  z-index: 10;
+  width: 50%;
 }
 
 .doc-color-table td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--vp-c-divider);
   vertical-align: middle;
+  width: 50%;
 }
 
 .doc-color-inline {
@@ -1158,18 +1157,43 @@ div[class*='language-'] {
   height: 28px;
   border-radius: 6px;
   display: inline-block;
+  flex-shrink: 0;
   vertical-align: middle;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   border: 1px solid rgba(0,0,0,0.06);
 }
 
+/* 暗黑模式：所有色块统一改为白色方框，颜色信息由旁边的 code 文字体现 */
+.dark .doc-color-dot {
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* 暗黑模式：渐变色块也改为白色方框 */
+.dark .doc-color-table .doc-gradient-block {
+  background: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.dark .doc-color-table td code,
+.dark .doc-color-table th {
+  color: var(--vp-c-text-1);
+}
+
 .doc-gradient-block {
-  width: 200px;
+  width: 100%;
+  max-width: 200px;
   height: 36px;
   border-radius: 8px;
   display: inline-block;
   vertical-align: middle;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* 暗黑模式：渐变色块保持不变，但加深阴影 */
+.dark .doc-gradient-block {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 /* ─── 小屏设备内容顶部补充 padding ───────────────────────────── */
