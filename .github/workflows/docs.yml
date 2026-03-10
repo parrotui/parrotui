@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,9 +37,15 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Build VitePress docs
-        run: npm run docs:build
-        env:
-          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          echo "::group::Build Info"
+          echo "Node: $(node -v) | npm: $(npm -v)"
+          echo "VitePress: $(npx vitepress --version 2>/dev/null || echo 'unknown')"
+          echo "Pages count: $(find docs -name '*.md' | wc -l)"
+          echo "::endgroup::"
+          echo "--- Build starting at $(date -u) ---"
+          npm run docs:build 2>&1
+          echo "--- Build finished at $(date -u) ---"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
