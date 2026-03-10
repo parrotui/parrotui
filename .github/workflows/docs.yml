@@ -11,8 +11,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: deploy-docs-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Build VitePress docs
-        run: npx vitepress build docs
+        run: ./node_modules/.bin/vitepress build docs
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
