@@ -37,7 +37,14 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Build VitePress docs
-        run: ./node_modules/.bin/vitepress build docs
+        run: |
+          echo "Node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+          echo "VitePress version: $(./node_modules/.bin/vitepress --version 2>&1 || true)"
+          echo "=== Starting build ==="
+          ./node_modules/.bin/vitepress build docs 2>&1 || { echo "BUILD FAILED with exit code $?"; ls -la docs/.vitepress/dist/ 2>/dev/null || echo "No dist dir"; exit 1; }
+          echo "=== Build succeeded ==="
+          ls -la docs/.vitepress/dist/
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
