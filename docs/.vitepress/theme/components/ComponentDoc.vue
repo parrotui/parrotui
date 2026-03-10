@@ -5,14 +5,19 @@
     </div>
     <div class="component-doc-layout__preview">
       <PhonePreview :title="title">
-        <component :is="demoComponent" />
+        <ClientOnly>
+          <component :is="demoComponent" />
+          <template #fallback>
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:14px;">加载中...</div>
+          </template>
+        </ClientOnly>
       </PhonePreview>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from 'vue'
+import { computed } from 'vue'
 import PhonePreview from './PhonePreview.vue'
 import { demoRegistry } from './demos/index'
 
@@ -26,10 +31,6 @@ const Placeholder = {
 }
 
 const demoComponent = computed(() => {
-  const loader = demoRegistry[props.demo]
-  if (loader) {
-    return defineAsyncComponent(loader)
-  }
-  return Placeholder
+  return demoRegistry[props.demo] || Placeholder
 })
 </script>
