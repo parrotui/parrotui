@@ -33,38 +33,20 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Verify installation
+        run: |
+          echo "Node: $(node -v) | npm: $(npm -v)"
+          echo "Checking vitepress..."
+          npm ls vitepress
+          ls -la node_modules/.bin/vitepress
+          ls -la node_modules/vitepress/dist/node/index.js
+          echo "All checks passed."
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Build VitePress docs
-        run: |
-          echo "Node: $(node -v) | npm: $(npm -v)"
-          echo "CPU: $(nproc) cores | RAM: $(free -h | awk '/Mem:/{print $2}')"
-          echo "MD files: $(find docs -name '*.md' | wc -l)"
-          echo "--- Build start: $(date -u) ---"
-          
-          # 后台监控进程：每30秒输出系统状态，防止GitHub Actions因无输出而超时
-          (while true; do
-            sleep 30
-            echo "[watchdog $(date -u)] CPU: $(top -bn1 | head -3 | tail -1) | MEM: $(free -m | awk '/Mem:/{printf \"%d/%dMB\", $3, $2}')"
-            echo "[watchdog] Top processes: $(ps aux --sort=-%cpu | head -4 | tail -3 | awk '{printf \"%s(%s%% CPU) \", $11, $3}')"
-          done) &
-          WATCHDOG_PID=$!
-          
-          # 限制构建最多5分钟，本地14秒足够
-          timeout 300 ./node_modules/.bin/vitepress build docs || {
-            EXIT_CODE=$?
-            echo "::error::VitePress build failed or timed out (exit=$EXIT_CODE)"
-            echo "--- Process tree at failure ---"
-            ps auxf | head -40
-            echo "--- Node processes ---"
-            ps aux | grep -i node
-            kill $WATCHDOG_PID 2>/dev/null
-            exit 1
-          }
-          
-          kill $WATCHDOG_PID 2>/dev/null
-          echo "--- Build done: $(date -u) ---"
+        run: npm run docs:build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
