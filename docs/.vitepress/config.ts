@@ -1302,7 +1302,7 @@ export default defineConfig({
       { icon: { svg: weiboSvg }, link: 'https://weibo.com/parrotui', target: '_blank' },
     ],
     footer: { message: 'Released under the MIT License.', copyright: 'Copyright © 2026-present Parrot UI Contributors' },
-    search: { provider: 'local' },
+    // search: { provider: 'local' },  // 暂时禁用
   },
   markdown: { lineNumbers: true },
   head: [
