@@ -31,11 +31,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm ci --legacy-peer-deps
-          echo "Installed packages:"
-          ls node_modules/.bin/vitepress && echo "vitepress binary OK" || echo "vitepress binary MISSING"
-          node -e "console.log('vitepress', require('vitepress/package.json').version)"
+        run: npm ci --legacy-peer-deps
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
