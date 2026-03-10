@@ -1,8 +1,10 @@
-// Parrot UI VitePress 自定义主题入口 (测试：基础组件，无demos)
+// Parrot UI VitePress 自定义主题入口 (测试：含 ComponentDoc + demos)
 import DefaultTheme from 'vitepress/theme'
 import './custom.css'
+import './components/demos/demo-shared.css'
 import { onMounted } from 'vue'
 import ParrotLayout from './components/ParrotLayout.vue'
+import ComponentDoc from './components/ComponentDoc.vue'
 import PhonePreview from './components/PhonePreview.vue'
 import PlatformTable from './components/PlatformTable.vue'
 
@@ -28,6 +30,7 @@ export default {
     })
   },
   enhanceApp({ app, router }) {
+    app.component('ComponentDoc', ComponentDoc)
     app.component('PhonePreview', PhonePreview)
     app.component('PlatformTable', PlatformTable)
 
