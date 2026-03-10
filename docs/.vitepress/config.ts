@@ -1235,14 +1235,6 @@ export default defineConfig({
   description: '基于 uni-app X 的跨终端组件库',
   ignoreDeadLinks: true,
   rewrites: { 'zh/:rest*': ':rest*' },
-  vite: {
-    ssr: {
-      noExternal: ['vitepress'],
-    },
-    build: {
-      chunkSizeWarningLimit: 1600,
-    },
-  },
   locales: {
     root: {
       label: '🇨🇳 简体中文',

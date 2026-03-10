@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: deploy-docs-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -38,14 +38,13 @@ jobs:
 
       - name: Build VitePress docs
         run: |
-          echo "::group::Build Info"
           echo "Node: $(node -v) | npm: $(npm -v)"
-          echo "VitePress: $(npx vitepress --version 2>/dev/null || echo 'unknown')"
-          echo "Pages count: $(find docs -name '*.md' | wc -l)"
-          echo "::endgroup::"
-          echo "--- Build starting at $(date -u) ---"
-          npm run docs:build 2>&1
-          echo "--- Build finished at $(date -u) ---"
+          echo "VitePress: $(npx vitepress --version 2>/dev/null || echo unknown)"
+          echo "MD files: $(find docs -name '*.md' | wc -l)"
+          echo "CPU: $(nproc) cores | RAM: $(free -h | awk '/Mem:/{print $2}')"
+          echo "--- Build start: $(date -u) ---"
+          npx vitepress build docs
+          echo "--- Build done: $(date -u) ---"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
